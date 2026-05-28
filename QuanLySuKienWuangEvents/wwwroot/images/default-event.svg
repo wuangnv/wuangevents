@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">WuangEvents placeholder</title>
+  <desc id="desc">Default event banner with a ticket icon</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eef2ff"/>
+      <stop offset="0.55" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#fdf2f8"/>
+    </linearGradient>
+    <linearGradient id="ticket" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#4f46e5"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <circle cx="1050" cy="90" r="180" fill="#c7d2fe" opacity="0.36"/>
+  <circle cx="110" cy="610" r="210" fill="#fbcfe8" opacity="0.32"/>
+  <g transform="translate(468 176)">
+    <path d="M30 0h204c17 0 30 13 30 30v43c-24 0-43 19-43 43s19 43 43 43v43c0 17-13 30-30 30H30c-17 0-30-13-30-30v-43c24 0 43-19 43-43S24 73 0 73V30C0 13 13 0 30 0Z" fill="url(#ticket)"/>
+    <path d="M132 21v190" stroke="#ffffff" stroke-dasharray="10 11" stroke-width="4" opacity="0.76"/>
+    <path d="m78 78 12 25 28 4-20 20 5 28-25-13-25 13 5-28-21-20 29-4Z" fill="#ffffff" opacity="0.94"/>
+    <circle cx="182" cy="84" r="12" fill="#ffffff" opacity="0.94"/>
+    <rect x="161" y="116" width="43" height="10" rx="5" fill="#ffffff" opacity="0.94"/>
+    <rect x="151" y="143" width="63" height="10" rx="5" fill="#ffffff" opacity="0.72"/>
+  </g>
+  <text x="600" y="468" fill="#172033" font-family="Segoe UI, Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle">WuangEvents</text>
+  <text x="600" y="520" fill="#64748b" font-family="Segoe UI, Arial, sans-serif" font-size="25" text-anchor="middle">Event image will be updated soon</text>
+</svg>

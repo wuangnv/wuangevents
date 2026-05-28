@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="AI event cover fallback">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#0F172A"/>
+  <stop offset="0.5" stop-color="#1E293B"/>
+  <stop offset="1" stop-color="#0D9488"/>
+</linearGradient>
+    <radialGradient id="glow" cx="72%" cy="30%" r="58%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".34"/>
+      <stop offset=".45" stop-color="#FFFFFF" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#0B1220" flood-opacity=".34"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="720" fill="url(#glow)"/>
+  <path d="M0 560 C230 460 360 662 620 544 C810 458 920 354 1280 398 L1280 720 L0 720 Z" fill="#2DD4BF" opacity=".10"/>
+  <path d="M124 122 L1156 122 L1156 598 L124 598 Z" fill="none" stroke="#0D9488" stroke-opacity=".32" stroke-width="2"/>
+  <g filter="url(#softShadow)">
+    <rect x="154" y="154" width="972" height="412" rx="22" fill="#0B1220" opacity=".36"/>
+    <text x="190" y="228" fill="#2DD4BF" font-family="Courier New, monospace" font-size="28" font-weight="700" letter-spacing="4">EVENT</text>
+    <text x="190" y="332" fill="#FFFFFF" font-family="Courier New, monospace" font-size="62" font-weight="800">
+      <tspan x="190" dy="0">Workshop Lập Tr&#236;nh AI Thực Chiến: X&#226;y Dựng Portfolio V&#224; Chuẩn Bị Phỏng Vấn</tspan>
+    </text>
+    <text x="190" y="422" fill="#E5E7EB" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="500">
+      <tspan x="190" dy="0">Trang bị kỹ năng lập tr&#236;nh AI thực chiến, ho&#224;n thiện portfolio ấn tượng v&#224; tự tin chinh phục nh&#224; tuyển dụng d&#224;nh ri&#234;ng cho sinh vi...</tspan>
+    </text>
+    <g transform="translate(190 490)">
+      <rect width="214" height="46" rx="23" fill="#FFFFFF" opacity=".16"/>
+      <text x="28" y="31" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" letter-spacing="2">WUANG EVENTS</text>
+    </g>
+  </g>
+</svg>

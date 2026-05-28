@@ -1,0 +1,46 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio / local IDE state
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local app settings and secrets
+secrets.json
+*.secrets.json
+appsettings.Local.json
+appsettings.*.local.json
+
+# Runtime logs and temporary files
+*.log
+*.tmp
+*.temp
+*.cache
+*.pyc
+__pycache__/
+TestResults/
+coverage/
+src/WuangEvents.Web/wwwroot/uploads/*
+!src/WuangEvents.Web/wwwroot/uploads/banners/
+src/WuangEvents.Web/wwwroot/uploads/banners/*
+!src/WuangEvents.Web/wwwroot/uploads/banners/professional/
+!src/WuangEvents.Web/wwwroot/uploads/banners/professional/**
+
+# Local generated artifacts from Codex/manual QA
+artifacts/
+AGENT_HANDOVER.md
+desktop.ini
+
+# Archives
+*.rar
+*.zip
+*.7z
+
+# OS files
+Thumbs.db
+.DS_Store

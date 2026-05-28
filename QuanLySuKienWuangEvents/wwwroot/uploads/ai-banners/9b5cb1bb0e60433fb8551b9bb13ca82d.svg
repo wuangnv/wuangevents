@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="AI event cover fallback">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#020024"/>
+  <stop offset="0.6" stop-color="#1F003C"/>
+  <stop offset="1" stop-color="#5B006B"/>
+</linearGradient>
+    <radialGradient id="glow" cx="72%" cy="30%" r="58%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".34"/>
+      <stop offset=".45" stop-color="#FFFFFF" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#0B1220" flood-opacity=".34"/>
+    </filter>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap');
+      .banner-box {
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        box-sizing: border-box;
+        padding: 45px 50px;
+        color: #ffffff;
+      }
+      .banner-category {
+        font-family: 'Outfit', sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: #F472B6;
+        margin-bottom: 20px;
+      }
+      .banner-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 48px;
+        font-weight: 800;
+        line-height: 1.25;
+        color: #FFFFFF;
+        margin-bottom: 20px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+      }
+      .banner-subtitle {
+        font-size: 22px;
+        font-weight: 400;
+        line-height: 1.6;
+        color: #E2E8F0;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
+      }
+      .banner-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(217, 70, 239, 0.15);
+        border: 1px solid rgba(217, 70, 239, 0.3);
+        padding: 8px 22px;
+        border-radius: 30px;
+        width: fit-content;
+      }
+      .banner-badge-text {
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #D946EF;
+      }
+    </style>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="720" fill="url(#glow)"/>
+  <path d="M0 560 C230 460 360 662 620 544 C810 458 920 354 1280 398 L1280 720 L0 720 Z" fill="#D946EF" opacity=".10"/>
+  <path d="M124 122 L1156 122 L1156 598 L124 598 Z" fill="none" stroke="#A855F7" stroke-opacity=".32" stroke-width="2"/>
+  <g filter="url(#softShadow)">
+    <rect x="154" y="154" width="972" height="412" rx="22" fill="rgba(11, 18, 32, 0.65)" />
+    <foreignObject x="154" y="154" width="972" height="412">
+      <div xmlns="http://www.w3.org/1999/xhtml" class="banner-box">
+        <div>
+          <div class="banner-category">EVENT</div>
+          <div class="banner-title">Đ&#234;m nhạc Acoustic Indie - Những Kẻ Mơ Mộng dưới &#225;nh nến l&#227;ng mạn, tr&#236;nh diễn...</div>
+          <div class="banner-subtitle">Sự kiện sự kiện đặc sắc d&#224;nh ri&#234;ng cho Người y&#234;u nhạc Indie, cặp đ&#244;i, c&#225;c nh&#243;m bạn trẻ th&#237;ch chill v&#224; sống ảo., nhằm mục ti&#234;u tạo...</div>
+        </div>
+        <div class="banner-badge">
+          <span class="banner-badge-text">WUANG EVENTS</span>
+        </div>
+      </div>
+    </foreignObject>
+  </g>
+</svg>
