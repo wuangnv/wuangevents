@@ -1,0 +1,63 @@
+@model NguoiDung
+
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container page-section" style="max-width: 860px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Hồ sơ cá nhân</h1>
+            <p class="text-muted mb-0">Thông tin tài khoản đang đăng nhập.</p>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="card p-4">
+                <h2 class="h5 mb-3">Thông tin cơ bản</h2>
+                <form method="post" asp-action="CapNhatHoSo">
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" value="@Model.Email" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Họ tên</label>
+                        <input class="form-control" name="hoTen" value="@Model.HoTen" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <input class="form-control" name="soDienThoai" value="@Model.SoDienThoai" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Đường dẫn ảnh đại diện</label>
+                        <input class="form-control" name="anhDaiDien" value="@Model.AnhDaiDien" />
+                    </div>
+                    <button class="btn btn-primary" type="submit">Lưu hồ sơ</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card p-4">
+                <h2 class="h5 mb-3">Đổi mật khẩu</h2>
+                <form method="post" asp-action="DoiMatKhau">
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu cũ</label>
+                        <input class="form-control" type="password" name="matKhauCu" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu mới</label>
+                        <input class="form-control" type="password" name="matKhauMoi" minlength="6" required />
+                    </div>
+                    <button class="btn btn-outline-primary" type="submit">Đổi mật khẩu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

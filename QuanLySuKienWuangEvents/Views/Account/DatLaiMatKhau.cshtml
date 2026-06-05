@@ -1,0 +1,23 @@
+﻿@{
+    ViewData["Title"] = "Đặt lại mật khẩu";
+}
+
+<div class="container page-section">
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2>Đặt lại mật khẩu</h2>
+        </div>
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+        <form method="post">
+            <input type="hidden" name="token" value="@ViewBag.Token" />
+            <div class="form-group">
+                <label>Mật khẩu mới</label>
+                <input class="form-control" type="password" name="matKhauMoi" minlength="6" required />
+            </div>
+            <button class="btn btn-primary w-100" type="submit">Lưu mật khẩu mới</button>
+        </form>
+    </div>
+</div>
