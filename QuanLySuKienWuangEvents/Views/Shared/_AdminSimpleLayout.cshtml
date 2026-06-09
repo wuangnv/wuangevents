@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Admin WuangEvents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="portal-body">
+    <div class="portal-shell">
+        <aside class="admin-sidebar">
+            <a class="admin-brand" href="/Admin/Index"><span class="brand-mark"><i class="fas fa-bolt"></i></span><span>Wuang<strong>Admin</strong></span></a>
+            <nav class="admin-nav">
+                <span class="nav-label">Chức năng chính</span>
+                <a class="admin-nav-item" href="/Admin/Index" data-path="/admin/index"><i class="fas fa-chart-line"></i><span>Thống kê hệ thống</span></a>
+                <a class="admin-nav-item" href="/Admin/NguoiDung" data-path="/admin/nguoidung"><i class="fas fa-users"></i><span>Quản lý người dùng</span></a>
+                <a class="admin-nav-item" href="/Admin/DuyetBTCList" data-path="/admin/duyetbtclist"><i class="fas fa-handshake"></i><span>Phê duyệt ban tổ chức</span></a>
+                <a class="admin-nav-item" href="/Admin/SuKien" data-path="/admin/sukien"><i class="fas fa-calendar-check"></i><span>Phê duyệt sự kiện</span></a>
+                <a class="admin-nav-item" href="/Admin/DanhMuc" data-path="/admin/danhmuc"><i class="fas fa-layer-group"></i><span>Quản lý danh mục</span></a>
+                <a class="admin-nav-item" href="/Admin/DonHang" data-path="/admin/donhang"><i class="fas fa-receipt"></i><span>Giám sát giao dịch</span></a>
+
+                <span class="nav-label">Hệ thống</span>
+                <a class="admin-nav-item" href="/Account/DangXuat"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a>
+            </nav>
+        </aside>
+        <div class="admin-main">
+            <header class="admin-header"><div><strong>Trang quản trị</strong><div class="text-muted small">Quản lý toàn bộ hoạt động hệ thống</div></div><div class="account-chip"><i class="fas fa-user-shield"></i><span>@User.Identity?.Name</span></div></header>
+            <main class="admin-content-body">
+                @if (TempData["Message"] != null) { <div class="alert alert-success">@TempData["Message"]</div> }
+                @RenderBody()
+            </main>
+            <footer class="admin-footer"><small>&copy; @DateTime.Now.Year WuangEvents Student MVC</small></footer>
+        </div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const adminPath = window.location.pathname.toLowerCase();
+        document.querySelectorAll('.admin-nav-item[data-path]').forEach(item => {
+            if (adminPath.startsWith(item.dataset.path)) item.classList.add('active');
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

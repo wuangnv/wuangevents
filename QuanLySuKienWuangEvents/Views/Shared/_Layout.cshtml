@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WuangEvents</title>
+    <meta name="description" content="WuangEvents - Nền tảng quản lý sự kiện và bán vé trực tuyến" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <nav class="navbar" id="mainNav">
+        <div class="container">
+            <a href="/" class="navbar-brand">
+                <i class="fas fa-bolt"></i>
+                <span>Wuang<strong>Events</strong></span>
+            </a>
+
+            @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Home" || ViewContext.RouteData.Values["action"]?.ToString() != "Index")
+            {
+                <form class="navbar-search" method="get" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" placeholder="Tìm kiếm sự kiện..." />
+                </form>
+            }
+
+            <div class="navbar-actions" style="display: flex; align-items: center; gap: 0.5rem;">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (!User.IsInRole("Ban tổ chức") && !User.IsInRole("Quản trị viên"))
+                    {
+                        <a href="/Account/YeuCauBanToChuc" class="btn btn-sm btn-outline-success fw-bold" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; border-radius: 8px; display: flex; align-items: center; gap: 4px; text-decoration: none;">
+                            <i class="fas fa-handshake"></i> Trở thành Ban tổ chức
+                        </a>
+                    }
+                    else if (User.IsInRole("Ban tổ chức"))
+                    {
+                        <a href="/Organizer/Index" class="btn btn-sm btn-success fw-bold" style="padding: 0.4rem 0.75rem; font-size: 0.8rem; border-radius: 8px; display: flex; align-items: center; gap: 4px; color: white;">
+                            <i class="fas fa-calendar-days"></i> Quản lý sự kiện
+                        </a>
+                    }
+                    
+                    <div class="navbar-user" id="userDropdown">
+                        <button type="button" class="user-avatar-btn" onclick="toggleUserMenu()">
+                            <img src="/images/default-avatar.svg" alt="Avatar" class="avatar-sm" />
+                            <span class="user-name">@User.Identity.Name</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="userMenu">
+                            @if (User.IsInRole("Quản trị viên"))
+                            {
+                                <a href="/Admin/Index" class="dropdown-item">
+                                    <i class="fas fa-shield-halved"></i> Quản trị hệ thống
+                                </a>
+                            }
+                            @if (User.IsInRole("Ban tổ chức") || User.IsInRole("Quản trị viên"))
+                            {
+                                <a href="/Organizer/Index" class="dropdown-item">
+                                    <i class="fas fa-calendar-days"></i> Quản lý sự kiện
+                                </a>
+                            }
+
+                            <a href="/Booking/DonHangCuaToi" class="dropdown-item">
+                                <i class="fas fa-ticket"></i> Vé của tôi
+                            </a>
+                            <a href="/Account/HoSo" class="dropdown-item">
+                                <i class="fas fa-user"></i> Hồ sơ cá nhân
+                            </a>
+                            <hr class="dropdown-divider" />
+                            <a href="/Account/DangXuat" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                            </a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <a href="/Account/DangKy?laOrganizer=true" class="nav-link text-success fw-bold me-2 d-none d-sm-flex align-items-center" style="font-size: 0.85rem; gap: 4px; text-decoration: none;">
+                        <i class="fas fa-calendar-plus"></i> Tạo sự kiện
+                    </a>
+                    <a href="/Account/DangNhap" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.75rem;">Đăng nhập</a>
+                    <a href="/Account/DangKy" class="btn btn-primary" style="font-size: 0.85rem; padding: 0.4rem 0.75rem;">Đăng ký</a>
+                }
+            </div>
+
+            <button class="navbar-toggle" type="button" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <form class="mobile-search" method="get" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-search"></i>
+                <input type="text" name="q" placeholder="Tìm kiếm sự kiện..." />
+            </form>
+            <a href="/" class="mobile-menu-item"><i class="fas fa-house"></i> Trang chủ</a>
+            <a href="/Home/Index" class="mobile-menu-item"><i class="fas fa-compass"></i> Khám phá sự kiện</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                @if (User.IsInRole("Quản trị viên"))
+                {
+                    <a href="/Admin/Index" class="mobile-menu-item"><i class="fas fa-shield-halved"></i> Quản trị hệ thống</a>
+                }
+                @if (User.IsInRole("Ban tổ chức") || User.IsInRole("Quản trị viên"))
+                {
+                    <a href="/Organizer/Index" class="mobile-menu-item"><i class="fas fa-calendar-days"></i> Quản lý sự kiện</a>
+                }
+
+                    <a href="/Booking/DonHangCuaToi" class="mobile-menu-item"><i class="fas fa-ticket"></i> Vé của tôi</a>
+                <a href="/Account/HoSo" class="mobile-menu-item"><i class="fas fa-user"></i> Hồ sơ cá nhân</a>
+                <a href="/Account/DangXuat" class="mobile-menu-item text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+            }
+            else
+            {
+                <a href="/Account/DangNhap" class="mobile-menu-item"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a>
+                <a href="/Account/DangKy" class="mobile-menu-item"><i class="fas fa-user-plus"></i> Đăng ký</a>
+            }
+        </div>
+    </div>
+
+    <main class="main-content">
+        @if (TempData["Message"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-info">
+                    <i class="fas fa-circle-info"></i>
+                    @TempData["Message"]
+                </div>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col brand">
+                    <a href="/" class="footer-brand">
+                        <i class="fas fa-bolt text-primary"></i>
+                        <span>Wuang<strong>Events</strong></span>
+                    </a>
+                    <p class="mt-3 text-muted">Nền tảng quản lý sự kiện và đặt vé trực tuyến.</p>
+                    <div class="social-links mt-4">
+                        <a href="javascript:void(0)"><i class="fab fa-facebook-f"></i></a>
+                        <a href="javascript:void(0)"><i class="fab fa-instagram"></i></a>
+                        <a href="javascript:void(0)"><i class="fab fa-youtube"></i></a>
+                        <a href="javascript:void(0)"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Khách hàng</h4>
+                    <ul>
+                        <li><a href="/">Trang chủ</a></li>
+                        <li><a href="/Home/Index">Tìm sự kiện</a></li>
+                        <li><a href="/Booking/DonHangCuaToi">Đơn của tôi</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Ban tổ chức</h4>
+                    <ul>
+                        <li><a href="/Account/DangKy">Đăng ký organizer</a></li>
+                        <li><a href="/Organizer/Index">Dashboard</a></li>
+                        <li><a href="/Organizer/TaoMoiSuKien">Tạo sự kiện</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Quản trị</h4>
+                    <ul>
+                        <li><a href="/Admin/Index">Dashboard admin</a></li>
+                        <li><a href="/Admin/SuKien">Duyệt sự kiện</a></li>
+                        <li><a href="/Admin/DanhMuc">Danh mục</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; @DateTime.Now.Year WuangEvents.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        }
+
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu) {
+                mobileMenu.classList.toggle('show');
+            }
+        }
+
+        window.addEventListener('click', function (event) {
+            const userDropdown = document.getElementById('userDropdown');
+            const userMenu = document.getElementById('userMenu');
+            if (userDropdown && userMenu && !userDropdown.contains(event.target)) {
+                userMenu.classList.remove('show');
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

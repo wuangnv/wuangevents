@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Organizer WuangEvents</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/portal.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="portal-body">
+    <style>
+        .active-event-card {
+            background: #1e1e2d;
+            border: 1px solid #2d2d3f;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+        }
+        .active-event-card .card-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: #a855f7;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .active-event-card .card-name {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #f3f4f6;
+        }
+        .org-nav-item {
+            transition: all 0.15s ease;
+            border-left: 3px solid transparent;
+        }
+        .org-nav-item:hover {
+            background: rgba(168, 85, 247, 0.08);
+            color: #a855f7 !important;
+        }
+        .org-nav-item.active {
+            background: rgba(168, 85, 247, 0.15) !important;
+            color: #a855f7 !important;
+            font-weight: 600;
+            border-left: 3px solid #a855f7;
+        }
+    </style>
+    <div class="portal-shell">
+        <aside class="org-sidebar">
+            <a class="org-brand" href="/Organizer/Index"><span class="brand-mark"><i class="fas fa-calendar-days"></i></span><span>Wuang<strong>Organizer</strong></span></a>
+            <nav class="org-nav">
+                @if (ViewBag.ActiveEventId != null)
+                {
+                    <a class="btn btn-sm btn-outline-light mb-3 text-start w-100 py-2 fw-semibold" href="/Organizer/SuKien" style="border-radius: 8px;">
+                        <i class="fas fa-arrow-left me-1"></i> Đổi sự kiện khác
+                    </a>
+                    
+                    <div class="active-event-card">
+                        <div class="card-label">Đang quản lý</div>
+                        <div class="card-name text-truncate" title="@ViewBag.ActiveEventName">@ViewBag.ActiveEventName</div>
+                    </div>
+                    
+                    <span class="nav-label">Tính năng sự kiện</span>
+                    <a class="org-nav-item" href="/Organizer/ChiTietSuKien/@ViewBag.ActiveEventId"><i class="fas fa-info-circle"></i><span>Thông tin chung</span></a>
+                    <a class="org-nav-item" href="/Organizer/ChinhSuaSuKien/@ViewBag.ActiveEventId"><i class="fas fa-pen"></i><span>Sửa thông tin</span></a>
+                    <a class="org-nav-item" href="/Organizer/LoaiVe?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-ticket-simple"></i><span>Cấu hình loại vé</span></a>
+                    <a class="org-nav-item" href="/Organizer/SoDoChoNgoi?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-chair"></i><span>Sơ đồ chỗ ngồi</span></a>
+                    <a class="org-nav-item" href="/Organizer/MaGiamGia?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-tags"></i><span>Mã giảm giá</span></a>
+                    <a class="org-nav-item" href="/Organizer/QuanLyStaff?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-user-check"></i><span>Phân công soát vé</span></a>
+                    <a class="org-nav-item" href="/Organizer/DonHang?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-receipt"></i><span>Đơn hàng đặt vé</span></a>
+                    <a class="org-nav-item" href="/Organizer/KhachThamDu?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-users"></i><span>Khách tham dự</span></a>
+                    <a class="org-nav-item" href="/Organizer/BaoCao?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-chart-line"></i><span>Báo cáo doanh thu</span></a>
+                    <a class="org-nav-item" href="/Organizer/CheckIn?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-qrcode"></i><span>Cổng soát vé check-in</span></a>
+                }
+                else
+                {
+                    <span class="nav-label">Chức năng chính</span>
+                    <a class="org-nav-item" href="/Organizer/Index"><i class="fas fa-chart-simple"></i><span>Thống kê hoạt động</span></a>
+                    <a class="org-nav-item" href="/Organizer/SuKien"><i class="fas fa-calendar-days"></i><span>Sự kiện của tôi</span></a>
+                    <a class="org-nav-item" href="/Organizer/NhanVienStaff"><i class="fas fa-user-gear"></i><span>Quản lý nhân sự soát vé</span></a>
+                }
+
+                <span class="nav-label">Tài khoản</span>
+                <a class="org-nav-item" href="/Account/HoSo"><i class="fas fa-user"></i><span>Hồ sơ cá nhân</span></a>
+                <a class="org-nav-item" href="/"><i class="fas fa-house"></i><span>Trang chủ</span></a>
+                <a class="org-nav-item" href="/Account/DangXuat"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a>
+            </nav>
+        </aside>
+        <div class="org-main">
+            <header class="org-header"><div><strong>Trang ban tổ chức</strong><div class="text-muted small">Tạo và vận hành sự kiện của bạn</div></div><div class="account-chip"><i class="fas fa-user"></i><span>@User.Identity?.Name</span></div></header>
+            <main class="org-content-body">
+                @if (TempData["Message"] != null) { <div class="alert alert-success">@TempData["Message"]</div> }
+                @RenderBody()
+            </main>
+            <footer class="org-footer"><small>&copy; @DateTime.Now.Year WuangEvents Student MVC</small></footer>
+        </div>
+    </div>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const orgPath = window.location.pathname.toLowerCase();
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        document.querySelectorAll('.org-nav-item').forEach(item => {
+            const itemUrl = new URL(item.href, window.location.origin);
+            const itemPath = itemUrl.pathname.toLowerCase();
+            
+            // Check if pathname matches
+            if (orgPath === itemPath) {
+                // If the link has suKienId parameter, make sure it matches the current request suKienId parameter
+                if (itemUrl.searchParams.has('suKienId')) {
+                    if (urlParams.get('suKienId') === itemUrl.searchParams.get('suKienId')) {
+                        item.classList.add('active');
+                    }
+                } else {
+                    item.classList.add('active');
+                }
+            } else if (orgPath.startsWith(itemPath) && itemPath !== '/organizer' && itemPath !== '/') {
+                // Handle routes like /Organizer/ChiTietSuKien/guid or /Organizer/ChinhSuaSuKien/guid
+                if (!itemUrl.searchParams.has('suKienId')) {
+                    item.classList.add('active');
+                }
+            }
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
