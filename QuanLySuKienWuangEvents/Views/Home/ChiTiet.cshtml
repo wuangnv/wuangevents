@@ -1,0 +1,392 @@
+@* ============================================================
+   VIEW: Chi tiết sự kiện (ChiTiet)
+   Model nhận vào: SuKien (Đối tượng sự kiện cần hiển thị)
+   Giải thích:
+     - @model SuKien khai báo view này dùng dữ liệu của 1 sự kiện duy nhất
+     - ViewBag.LoaiVes chứa danh sách các loại vé của sự kiện này (được controller lấy ra)
+   ============================================================ *@
+@using System.Security.Claims
+@model SuKien
+
+@{
+    ViewData["Title"] = Model.TenSuKien;
+    // Ép kiểu ViewBag sang danh sách loại vé, nếu rỗng thì khởi tạo List mới
+    var loaiVes = ViewBag.LoaiVes as List<LoaiVe> ?? new List<LoaiVe>();
+
+    var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    bool isOrganizerOfThisEvent = !string.IsNullOrEmpty(userIdString) && Guid.Parse(userIdString) == Model.NguoiToChucId;
+}
+
+@* Phần Header ảnh bìa mờ ảo *@
+<div style="width: 100%; height: 380px; position: relative; overflow: hidden; background: linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed); border-bottom: 2px solid var(--border-accent);">
+    <div style="position: absolute; inset: 0; background: url('@(string.IsNullOrWhiteSpace(Model.AnhBia) ? "/images/default-event.svg" : Model.AnhBia)') no-repeat center center / cover; filter: blur(25px) opacity(0.2);"></div >
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(76,29,149,0.3) 0%, rgba(109,40,217,0.6) 100%);"></div>
+    <div class="container" style="position: relative; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 2;">
+        <img src="@(string.IsNullOrWhiteSpace(Model.AnhBia) ? "/images/default-event.svg" : Model.AnhBia)" alt="@Model.TenSuKien"
+             style="max-height: 320px; width: auto; max-width: 90%; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); object-fit: contain; border: 2px solid rgba(255,255,255,0.2);"
+             onerror="this.onerror=null;this.src='/images/default-event.svg';" />
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row">
+        @* CỘT TRÁI: Nội dung chi tiết sự kiện *@
+        <div class="col-lg-8 mb-4">
+            <div class="mb-4">
+                <span class="badge mb-2 text-uppercase" style="background: var(--primary-soft); color: var(--primary-dark); border: 1px solid var(--border-accent); padding: 0.5rem 1rem; border-radius: 8px; font-weight: 700;">
+                    Sự kiện
+                </span>
+                <h1 class="mb-3 font-heading" style="font-size: 2.5rem; font-weight: 800; line-height: 1.2;">
+                    @Model.TenSuKien
+                </h1>
+
+                <div class="d-flex flex-wrap gap-4 py-3 border-bottom small text-muted">
+                    <div><i class="fas fa-calendar text-primary me-2"></i> @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</div>
+                    <div><i class="fas fa-location-dot text-danger me-2"></i> @(Model.LoaiSuKien == 1 ? "Trực tuyến" : Model.ThanhPhoDiaDiem ?? "Trực tiếp")</div>
+                </div>
+            </div>
+
+            @* Chi tiết sự kiện *@
+            <div class="card p-4 mb-4">
+                <h3 class="h4 mb-3 text-primary" style="font-weight: 700;">
+                    <i class="fas fa-info-circle me-2"></i> Chi tiết sự kiện
+                </h3>
+                <p class="text-muted">@Model.MoTaNgan</p>
+                <div class="event-details-content" style="font-size: 1.05rem; line-height: 1.8;">
+                    @* Render nội dung HTML mô tả chi tiết bằng lệnh Html.Raw *@
+                    @Html.Raw(Model.MoTaChiTiet)
+                </div>
+            </div>
+
+            @* Địa điểm tổ chức *@
+            <div class="card p-4 mb-4">
+                <h3 class="h4 mb-3 text-primary" style="font-weight: 700;">
+                    <i class="fas fa-map-marker-alt me-2"></i> Địa điểm tổ chức
+                </h3>
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 46px; height: 46px; background: var(--primary-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); border: 1px solid var(--border-accent);">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 m-0" style="font-weight: 700;">@(Model.LoaiSuKien == 1 ? "Trực tuyến" : Model.TenDiaDiem ?? "Địa điểm trực tiếp")</h4>
+                        <span class="text-muted small">
+                            @(Model.LoaiSuKien == 1 
+                                ? (!string.IsNullOrEmpty(Model.LinkOnline) ? Model.LinkOnline : "Đường dẫn trực tuyến sẽ được gửi cho bạn khi mua vé.") 
+                                : $"{Model.DiaChiDiaDiem}, {Model.QuanHuyenDiaDiem}, {Model.ThanhPhoDiaDiem}")
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            @* Lịch trình & Đồng bộ (Giao diện Lịch) *@
+            <div class="card p-4 mb-4">
+                <h3 class="h4 mb-4 text-primary" style="font-weight: 700;">
+                    <i class="far fa-calendar-alt me-2"></i> Lịch sự kiện
+                </h3>
+                
+                <div class="row g-4">
+                    <!-- Cột 1: Calendar Sheet Icon & Thời gian -->
+                    <div class="col-md-6 border-end">
+                        <div class="d-flex align-items-center gap-4 mb-4">
+                            <!-- Tờ lịch -->
+                            @{
+                                var startDay = Model.NgayBatDau;
+                                string dayName = startDay.DayOfWeek switch {
+                                    DayOfWeek.Sunday => "Chủ Nhật",
+                                    DayOfWeek.Monday => "Thứ Hai",
+                                    DayOfWeek.Tuesday => "Thứ Ba",
+                                    DayOfWeek.Wednesday => "Thứ Tư",
+                                    DayOfWeek.Thursday => "Thứ Năm",
+                                    DayOfWeek.Friday => "Thứ Sáu",
+                                    DayOfWeek.Saturday => "Thứ Bảy",
+                                    _ => ""
+                                };
+                            }
+                            <div class="calendar-sheet text-center" style="width: 100px; border: 2px solid var(--border-accent); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(124,58,237,0.12); background:#fff; flex-shrink:0;">
+                                <div class="bg-primary text-white py-1.5 fw-bold text-uppercase" style="font-size: 0.78rem; letter-spacing: 1px;">
+                                    T. @startDay.Month
+                                </div>
+                                <div class="py-2 font-heading" style="font-size: 2rem; font-weight: 800; color: #1a1a2e; line-height: 1.1;">
+                                    @startDay.Day
+                                </div>
+                                <div class="pb-1.5 text-muted small fw-bold" style="font-size: 0.72rem;">
+                                    @dayName
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="h5 mb-1" style="font-weight: 700; color: #1a1a2e;">Thời gian diễn ra</h4>
+                                <span class="text-muted small">
+                                    <i class="far fa-clock text-primary me-1"></i> Bắt đầu: @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm") <br />
+                                    <i class="far fa-circle-xmark text-danger me-1"></i> Kết thúc: @Model.NgayKetThuc.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            @{
+                                var format = "yyyyMMddTHHmmssZ";
+                                var startUtc = DateTime.SpecifyKind(Model.NgayBatDau, DateTimeKind.Utc).ToString(format);
+                                var endUtc = DateTime.SpecifyKind(Model.NgayKetThuc, DateTimeKind.Utc).ToString(format);
+                                var gTitle = Uri.EscapeDataString(Model.TenSuKien);
+                                var gDesc = Uri.EscapeDataString(Model.MoTaNgan ?? "");
+                                var gLoc = Uri.EscapeDataString(Model.LoaiSuKien == 1 ? "Trực tuyến: " + (Model.LinkOnline ?? "") : $"{Model.TenDiaDiem}, {Model.DiaChiDiaDiem}, {Model.ThanhPhoDiaDiem}");
+                                var googleCalendarLink = $"https://calendar.google.com/calendar/render?action=TEMPLATE&text={gTitle}&dates={startUtc}/{endUtc}&details={gDesc}&location={gLoc}";
+                            }
+                            <a href="@googleCalendarLink" target="_blank" class="btn btn-outline-primary w-100 py-2.5 fw-bold" style="border-radius: 10px; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                                <i class="fab fa-google"></i> Thêm vào Google Calendar
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Month Grid View -->
+                    <div class="col-md-6 d-flex justify-content-center align-items-center">
+                        @{
+                            var firstDayOfMonth = new DateTime(startDay.Year, startDay.Month, 1);
+                            int daysInMonth = DateTime.DaysInMonth(startDay.Year, startDay.Month);
+                            int startOffset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7; // Monday-based
+                        }
+                        <div class="w-100" style="max-width: 280px;">
+                            <div class="text-center fw-bold text-uppercase mb-2.5 small text-muted" style="letter-spacing: 0.5px; font-size: 0.78rem;">
+                                <i class="far fa-calendar-days me-1.5"></i>Tháng @startDay.Month / @startDay.Year
+                            </div>
+                            <div class="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: 0.8rem; font-weight: 500;">
+                                <div class="fw-bold text-primary small py-1">T2</div>
+                                <div class="fw-bold text-primary small py-1">T3</div>
+                                <div class="fw-bold text-primary small py-1">T4</div>
+                                <div class="fw-bold text-primary small py-1">T5</div>
+                                <div class="fw-bold text-primary small py-1">T6</div>
+                                <div class="fw-bold text-primary small py-1">T7</div>
+                                <div class="fw-bold text-danger small py-1">CN</div>
+                                
+                                @for (int j = 0; j < startOffset; j++)
+                                {
+                                    <div class="py-1" style="opacity: 0.15;">•</div>
+                                }
+                                @for (int day = 1; day <= daysInMonth; day++)
+                                {
+                                    bool isEventDay = day == startDay.Day;
+                                    <div class="py-1" style="@(isEventDay ? "background: var(--primary); color: #fff; font-weight: bold; border-radius: 50%; box-shadow: 0 0 10px rgba(124,58,237,0.6); width: 28px; height: 28px; line-height: 28px; margin: auto;" : "width: 28px; height: 28px; line-height: 28px; margin: auto; color:#555;")">
+                                        @day
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* CỘT PHẢI: Mua vé & Thời gian *@
+        <div class="col-lg-4">
+            <div class="card p-4 mb-4 text-center" style="border: 1px solid var(--border-accent); box-shadow: 0 4px 16px rgba(124,58,237,0.1);">
+                <h5 class="text-uppercase text-muted small mb-3" style="letter-spacing: 1.5px;">Sự kiện diễn ra lúc</h5>
+                <div class="fw-bold" style="font-size: 1.45rem; color: var(--primary);">
+                    @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm")
+                </div>
+            </div>
+
+            <div class="card p-4 mb-4" style="position: sticky; top: 100px;">
+                <h3 class="h4 mb-3" style="font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">
+                    <i class="fas fa-ticket-alt me-2 text-primary"></i> Thông tin vé
+                </h3>
+
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="far fa-clock text-primary me-1"></i>
+                        <span><strong>Bắt đầu:</strong> @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="far fa-calendar-times text-danger me-1"></i>
+                        <span><strong>Kết thúc:</strong> @Model.NgayKetThuc.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                </div>
+
+                @if (Model.TrangThai != 3 || DateTime.UtcNow > Model.NgayKetThuc)
+                {
+                        <div class="text-center py-4">
+                            <div class="mb-3" style="font-size: 2.5rem;">
+                                @if (DateTime.UtcNow > Model.NgayKetThuc)
+                                {
+                                    <i class="fas fa-flag-checkered text-secondary"></i>
+                                }
+                                else if (Model.TrangThai == 2)
+                                {
+                                    <i class="fas fa-pause-circle text-warning animate-pulse"></i>
+                                }
+                                else if (Model.TrangThai == 6)
+                                {
+                                    <i class="fas fa-times-circle text-danger"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-exclamation-circle text-muted"></i>
+                                }
+                            </div>
+                            @if (DateTime.UtcNow > Model.NgayKetThuc)
+                            {
+                                <h5 class="fw-bold text-secondary mb-2">Sự kiện đã kết thúc</h5>
+                                <p class="text-muted small mb-0">Sự kiện này đã kết thúc thời gian diễn ra và không còn mở bán vé.</p>
+                            }
+                            else if (Model.TrangThai == 2)
+                            {
+                                <h5 class="fw-bold text-warning mb-2">Tạm dừng bán vé</h5>
+                                <p class="text-muted small mb-0">Ban tổ chức đang tạm thời dừng bán vé cho sự kiện này. Vui lòng quay lại sau.</p>
+                            }
+                            else if (Model.TrangThai == 6)
+                            {
+                                <h5 class="fw-bold text-danger mb-2">Sự kiện đã bị hủy</h5>
+                                <p class="text-muted small mb-0">Sự kiện này đã bị hủy bỏ bởi ban tổ chức hoặc ban quản trị.</p>
+                            }
+                            else
+                            {
+                                <h5 class="fw-bold text-muted mb-2">Sự kiện chưa mở bán</h5>
+                                <p class="text-muted small mb-0">Sự kiện hiện đang ở trạng thái chuẩn bị (Nháp/Chờ duyệt).</p>
+                            }
+                        </div>
+                    }
+                    else if (loaiVes.Count == 0)
+                    {
+                        <p class="text-center text-muted small py-3">Sự kiện chưa có loại vé công khai.</p>
+                    }
+                    else if (isOrganizerOfThisEvent)
+                    {
+                        <div class="alert alert-warning mb-0 text-center" style="border-radius: 10px; border: 1.5px dashed #f59e0b; background: #fffbeb;">
+                            <i class="fas fa-exclamation-triangle fs-4 mb-2 d-block text-warning animate-pulse"></i>
+                            <h6 class="fw-bold mb-1" style="color: #b45309;">Bạn là nhà tổ chức sự kiện</h6>
+                            <p class="small text-muted mb-0">Không thể đặt vé cho sự kiện do chính bạn tạo ra.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <form method="post" action="/Booking/DatVe" id="bookingForm">
+                            <input type="hidden" name="suKienId" value="@Model.Id" />
+                            
+                            <div class="ticket-select-list mb-3" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                @for (int i = 0; i < loaiVes.Count; i++)
+                                {
+                                    var ve = loaiVes[i];
+                                    var conLai = ve.SoLuongTong - ve.SoLuongDaBan - ve.SoLuongGiuCho;
+                                    var isHetVe = conLai <= 0;
+                                    <div class="ticket-option-card p-3 @(isHetVe ? "opacity-50" : "")" onclick="@(isHetVe ? "" : $"selectTicket({ve.Id}, {ve.GioiHanMoiDon}, {conLai})")" id="ticket-card-@ve.Id" style="border: 2px solid var(--border-color); border-radius: 12px; cursor: @(isHetVe ? "not-allowed" : "pointer"); transition: all 0.2s; background: var(--bg-card);">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="ms-1">
+                                                    <div class="fw-bold text-dark" style="font-size: 0.92rem; line-height: 1.2;">@ve.TenLoaiVe</div>
+                                                    <div class="text-muted small mt-1" style="font-size: 0.78rem;">
+                                                        @if (isHetVe)
+                                                        {
+                                                            <span class="text-danger fw-bold">Hết vé</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span>Còn lại: <span class="text-primary fw-bold">@conLai</span> vé</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex align-items-center gap-3 ms-auto ms-sm-0">
+                                                <div class="text-end">
+                                                    <div style="color: var(--primary); font-weight: 800; font-size: 0.95rem;">@(ve.GiaBan > 0 ? ve.GiaBan.ToString("N0") + "đ" : "Miễn phí")</div>
+                                                    <div class="text-muted" style="font-size: 0.72rem;">Tối đa: @ve.GioiHanMoiDon vé</div>
+                                                </div>
+                                                
+                                                @if (!isHetVe)
+                                                {
+                                                    @* Bộ chọn số lượng riêng biệt cho loại vé này *@
+                                                    <div class="d-flex align-items-center gap-1 bg-light p-1 rounded" style="border: 1px solid #e5e7eb;" onclick="event.stopPropagation();">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary p-0 d-flex align-items-center justify-content-center" onclick="changeQtyForTicket(@ve.Id, -1)" style="width: 24px; height: 24px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; line-height: 1;">-</button>
+                                                        <input type="number" name="veChon[@ve.Id]" id="qty-input-@ve.Id" value="0" min="0" max="@Math.Min(ve.GioiHanMoiDon, conLai)" readonly style="width: 28px; text-align: center; border: none; background: transparent; font-weight: bold; font-size: 0.9rem; color: #111; padding: 0;" />
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary p-0 d-flex align-items-center justify-content-center" onclick="changeQtyForTicket(@ve.Id, 1)" style="width: 24px; height: 24px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; line-height: 1;">+</button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+ 
+                            <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold text-uppercase" style="border-radius: 10px; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(124,58,237,0.25); transition: all 0.2s;">
+                                <i class="fas fa-shopping-cart me-1.5"></i> Mua vé ngay
+                            </button>
+                        </form>
+                    }
+                </div>
+ 
+                <div class="mt-4 pt-3 border-top">
+                    <h5 class="text-muted small mb-2 text-uppercase fw-bold">Chia sẻ sự kiện</h5>
+                    <div class="d-flex gap-2">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=@(Uri.EscapeDataString(Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path))" target="_blank" class="btn btn-outline flex-fill py-2">
+                            <i class="fab fa-facebook-f me-1"></i> Facebook
+                        </a>
+                        <button type="button" onclick="copyEventLink()" class="btn btn-outline flex-fill py-2">
+                            <i class="fas fa-link me-1"></i> Copy link
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<script>
+    function selectTicket(id, limit, stock) {
+        const qtyInp = document.getElementById('qty-input-' + id);
+        if (!qtyInp) return;
+        if (parseInt(qtyInp.value) === 0) {
+            qtyInp.value = 1;
+            updateCardStyle(id, 1);
+        }
+    }
+ 
+    function updateCardStyle(id, qty) {
+        const card = document.getElementById('ticket-card-' + id);
+        if (!card) return;
+        if (qty > 0) {
+            card.style.borderColor = 'var(--primary)';
+            card.style.background = 'rgba(124,58,237,0.04)';
+        } else {
+            card.style.borderColor = 'var(--border-color)';
+            card.style.background = 'var(--bg-card)';
+        }
+    }
+    
+    function changeQtyForTicket(id, val) {
+        const qtyInp = document.getElementById('qty-input-' + id);
+        if (!qtyInp) return;
+        
+        let current = parseInt(qtyInp.value) + val;
+        let min = parseInt(qtyInp.min) || 0;
+        let max = parseInt(qtyInp.max) || 10;
+        
+        if (current < min) current = min;
+        if (current > max) current = max;
+        qtyInp.value = current;
+        
+        updateCardStyle(id, current);
+    }
+ 
+    function copyEventLink() {
+        navigator.clipboard.writeText(window.location.href);
+        alert("Đã sao chép liên kết sự kiện.");
+    }
+ 
+    // Kiểm tra trước khi gửi form đặt vé
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('bookingForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                let total = 0;
+                document.querySelectorAll('input[name^="veChon"]').forEach(inp => {
+                    total += parseInt(inp.value) || 0;
+                });
+                if (total === 0) {
+                    e.preventDefault();
+                    alert("Vui lòng chọn số lượng cho ít nhất một loại vé.");
+                }
+            });
+        }
+    });
+</script>
+

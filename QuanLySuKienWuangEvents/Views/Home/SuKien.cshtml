@@ -1,0 +1,192 @@
+@model List<SuKien>
+
+@{
+    ViewData["Title"] = "Khám phá sự kiện";
+    var danhMucs = ViewBag.DanhMucs as List<DanhMuc> ?? new List<DanhMuc>();
+    var selectedCity = ViewBag.SelectedCity as string;
+    var selectedDanhMucId = ViewBag.DanhMucId as int?;
+    var keywords = ViewBag.TuKhoa as string;
+}
+
+<div class="container my-5" style="min-height: 700px;">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Khám phá sự kiện</li>
+        </ol>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="mb-5">
+        <h1 class="font-heading display-6 fw-bold" style="color: #1a1a2e;">
+            Danh sách sự kiện
+        </h1>
+        <p class="text-muted">Tìm kiếm và khám phá các sự kiện giải trí, giáo dục, âm nhạc hàng đầu.</p>
+    </div>
+
+    <div class="row">
+        <!-- BỘ LỌC BÊN TRÁI -->
+        <div class="col-lg-3 mb-4">
+            <div class="card p-4 border-0" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); background: #fff; position: sticky; top: 90px;">
+                <h3 class="h5 fw-bold mb-4" style="color: #1a1a2e; border-bottom: 2px solid #f3f4f6; padding-bottom: 12px;">
+                    <i class="fas fa-filter text-primary me-2"></i>Bộ lọc tìm kiếm
+                </h3>
+
+                <form method="get" action="/Home/SuKien" id="filterForm">
+                    <!-- Tìm theo từ khóa -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Từ khóa</label>
+                        <div class="input-group" style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; background: #f9fafb;">
+                            <span class="input-group-text border-0 bg-transparent text-muted"><i class="fas fa-search"></i></span>
+                            <input type="text" name="q" value="@keywords" class="form-control border-0 bg-transparent py-2.5 shadow-none" placeholder="Tìm tên sự kiện..." />
+                        </div>
+                    </div>
+
+                    <!-- Lọc theo Tỉnh/Thành phố -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Tỉnh/Thành phố</label>
+                        <select name="thanhPho" class="form-select" style="border-radius: 10px; padding: 10px 14px; border-color: #e5e7eb; background-color: #f9fafb; font-size: 0.9rem;" onchange="this.form.submit()">
+                            <option value="">Tất cả tỉnh thành</option>
+                            @if (ViewBag.Cities != null)
+                            {
+                                foreach (var city in ViewBag.Cities)
+                                {
+                                    <option value="@city" selected="@(selectedCity == city ? "selected" : null)">@city</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Lọc theo Danh mục -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px; display: block; margin-bottom: 10px;">Danh mục</label>
+                        <input type="hidden" name="danhMucId" id="selectedDanhMucId" value="@selectedDanhMucId" />
+                        <div class="d-flex flex-column gap-1">
+                            <a href="javascript:void(0)" onclick="setCategory('')" class="category-filter-item @(selectedDanhMucId == null ? "active" : "")">
+                                <i class="fas fa-layer-group me-2 text-primary"></i> Tất cả danh mục
+                            </a>
+                            @foreach (var item in danhMucs)
+                            {
+                                <a href="javascript:void(0)" onclick="setCategory('@item.Id')" class="category-filter-item @(selectedDanhMucId == item.Id ? "active" : "")">
+                                    @if (!string.IsNullOrWhiteSpace(item.Icon) && item.Icon.StartsWith("fa"))
+                                    {
+                                        <i class="@item.Icon me-2 text-primary"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-tag me-2 text-primary"></i>
+                                    }
+                                    <span>@item.TenDanhMuc</span>
+                                </a>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Nút áp dụng & Xóa bộ lọc -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2.5 fw-bold" style="border-radius: 10px;">
+                            <i class="fas fa-check me-2"></i>Áp dụng
+                        </button>
+                        <a href="/Home/SuKien" class="btn btn-light py-2.5 fw-bold text-muted" style="border-radius: 10px; border: 1px solid #e5e7eb;">
+                            <i class="fas fa-undo me-2"></i>Thiết lập lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH SỰ KIỆN BÊN PHẢI -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <span class="text-muted small">Tìm thấy <strong>@Model.Count</strong> sự kiện phù hợp</span>
+            </div>
+
+            @if (Model.Count == 0)
+            {
+                <div class="card border-0 py-5 text-center" style="border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); background: #fff;">
+                    <div class="my-4 text-muted" style="font-size: 4rem;">
+                        <i class="far fa-calendar-times"></i>
+                    </div>
+                    <h3 class="h5 fw-bold text-dark">Không tìm thấy sự kiện nào</h3>
+                    <p class="text-muted mx-auto mb-4" style="max-width: 400px;">Thử thay đổi bộ lọc, tìm kiếm bằng từ khóa khác hoặc xóa bớt tiêu chí lọc.</p>
+                    <a href="/Home/SuKien" class="btn btn-primary px-4 py-2 mx-auto fw-bold" style="border-radius: 10px; width: fit-content;">
+                        Xem tất cả sự kiện
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4 row-cols-md-2 row-cols-1">
+                    @foreach (var item in Model)
+                    {
+                        <div class="col animate-hover-up">
+                            <div class="card h-100 rounded overflow-hidden border-0" style="box-shadow: 0 4px 20px rgba(0,0,0,0.06); background: #fff;">
+                                <div class="position-relative overflow-hidden" style="height: 180px;">
+                                    <img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.src='/images/default-event.svg';" />
+                                </div>
+
+                                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <span class="text-primary small fw-bold text-uppercase d-block mb-2">
+                                            <i class="far fa-calendar-alt me-1.5"></i> @item.NgayBatDau.ToString("dd/MM/yyyy - HH:mm")
+                                        </span>
+                                        <h3 class="h6 card-title fw-bold text-truncate-2 mb-3" style="font-size: 1.05rem; line-height: 1.4; color: #1a1a2e; min-height: 2.8rem;">
+                                            @item.TenSuKien
+                                        </h3>
+                                        <div class="d-flex align-items-center gap-2 text-muted small mb-4">
+                                            <i class="fas fa-map-marker-alt text-danger"></i>
+                                            <span class="text-truncate" style="max-width: 250px;" title="@(item.LoaiSuKien == 1 ? "Trực tuyến" : $"{item.TenDiaDiem}, {item.ThanhPhoDiaDiem}")">
+                                                @(item.LoaiSuKien == 1 ? "Trực tuyến" : (!string.IsNullOrEmpty(item.ThanhPhoDiaDiem) ? $"{item.TenDiaDiem} ({item.ThanhPhoDiaDiem})" : item.TenDiaDiem ?? "Trực tiếp"))
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                                        <span class="text-success small fw-bold"><i class="fas fa-circle-check me-1"></i>Đang bán vé</span>
+                                        <a href="/Home/ChiTiet/@item.Slug" class="btn btn-primary px-4 py-2 rounded fw-bold small"><i class="fas fa-ticket me-1.5"></i>Mua vé ngay</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+.category-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #4b5563;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    background: transparent;
+}
+.category-filter-item:hover {
+    background: #f3f4f6;
+    color: var(--primary);
+}
+.category-filter-item.active {
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+    font-weight: 700;
+    border: 1px solid var(--border-accent);
+}
+.cf-icon {
+    font-size: 1.1rem;
+}
+</style>
+
+<script>
+function setCategory(id) {
+    document.getElementById('selectedDanhMucId').value = id;
+    document.getElementById('filterForm').submit();
+}
+</script>
