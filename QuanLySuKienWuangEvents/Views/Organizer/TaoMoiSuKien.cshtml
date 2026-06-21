@@ -1,0 +1,812 @@
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Tạo sự kiện";
+    var danhMucs = ViewBag.DanhMucs as List<DanhMuc> ?? new();
+}
+
+<style>
+    /* Stepper Styling */
+    .stepper-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        position: relative;
+        padding: 0 1rem;
+    }
+    .stepper-container::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 50px;
+        right: 50px;
+        height: 3px;
+        background: #e2e8f0;
+        z-index: 1;
+    }
+    .stepper-progress {
+        position: absolute;
+        top: 20px;
+        left: 50px;
+        height: 3px;
+        background: #7c3aed;
+        z-index: 2;
+        transition: width 0.4s ease;
+        width: 0%;
+    }
+    .step-item {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 50%;
+    }
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 3px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .step-item.active .step-circle {
+        border-color: #7c3aed;
+        color: #7c3aed;
+        background: #f5f3ff;
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.15);
+    }
+    .step-item.completed .step-circle {
+        border-color: #7c3aed;
+        background: #7c3aed;
+        color: #ffffff;
+    }
+    .step-title {
+        margin-top: 0.6rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-align: center;
+        transition: color 0.3s ease;
+    }
+    .step-item.active .step-title,
+    .step-item.completed .step-title {
+        color: #1e1b4b;
+        font-weight: 700;
+    }
+
+    /* Step content and transitions */
+    .step-content {
+        display: none;
+    }
+    .step-content.active {
+        display: block;
+        animation: fadeIn 0.4s ease-in-out;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* General Form elements */
+    .portal-card {
+        background: #ffffff;
+        border: 1px solid #ede9fe;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.05);
+        margin-bottom: 2rem;
+    }
+    .portal-card-header {
+        border-bottom: 1px solid #f5f3ff;
+        padding: 1.25rem 1.5rem;
+        background: #faf8ff;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    .portal-card-header h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #7c3aed;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .portal-card-body {
+        padding: 1.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.4rem;
+        font-size: 0.9rem;
+    }
+    .form-control, .form-select {
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+        outline: none;
+    }
+
+    /* Switch type buttons */
+    .btn-group-toggle .btn {
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #64748b;
+        transition: all 0.2s ease;
+    }
+    .btn-group-toggle .btn.active {
+        background: #7c3aed;
+        color: #ffffff;
+        border-color: #7c3aed;
+        box-shadow: 0 4px 6px -1px rgba(124, 58, 237, 0.2);
+    }
+
+    /* Preview box style */
+    .preview-box {
+        aspect-ratio: 16/9;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-weight: 600;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 1rem;
+        transition: all 0.2s ease;
+    }
+    .preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .preview-thumbnail {
+        width: 120px;
+        height: 120px;
+        border-radius: 8px;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        overflow: hidden;
+        position: relative;
+    }
+    .preview-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Tickets Dynamic List */
+    .ticket-card {
+        background: #fafafa;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        position: relative;
+        transition: border-color 0.2s ease;
+    }
+    .ticket-card:hover {
+        border-color: #c084fc;
+    }
+    .remove-ticket-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: #ef4444;
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+        transition: transform 0.2s ease;
+    }
+    .remove-ticket-btn:hover {
+        transform: scale(1.15);
+    }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div class="portal-page-title">
+        <span class="portal-kicker"><i class="fas fa-plus"></i> Sự kiện mới</span>
+        <h1>Tạo sự kiện </h1>
+    </div>
+    <a class="btn btn-outline-secondary" href="/Organizer/SuKien">
+        <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+    </a>
+</div>
+
+<!-- Stepper Navigation -->
+<div class="stepper-container">
+    <div class="stepper-progress" id="stepperProgress"></div>
+    <div class="step-item active" id="stepIndicator-1">
+        <div class="step-circle">1</div>
+        <div class="step-title">Thông tin sự kiện</div>
+    </div>
+    <div class="step-item" id="stepIndicator-2">
+        <div class="step-circle">2</div>
+        <div class="step-title">Thời gian & Loại vé</div>
+    </div>
+</div>
+
+<form method="post" action="/Organizer/TaoMoiSuKien" id="wizardForm" enctype="multipart/form-data">
+    <!-- Validations -->
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <!-- ================= STEP 1 ================= -->
+    <div class="step-content active" id="stepPanel-1">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Info Section -->
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <h2><i class="fas fa-info-circle"></i> Thông tin cơ bản</h2>
+                    </div>
+                    <div class="portal-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tên sự kiện <span class="text-danger">*</span></label>
+                            <input class="form-control" name="tenSuKien" id="tenSuKien" placeholder="Ví dụ: Đại nhạc hội Mùa Hè 2026" required />
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                <select class="form-select" name="danhMucId" required>
+                                    @foreach (var item in danhMucs)
+                                    {
+                                        <option value="@item.Id">@item.TenDanhMuc</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Hình thức sự kiện <span class="text-danger">*</span></label>
+                                <div class="btn-group w-100 btn-group-toggle" role="group">
+                                    <button type="button" class="btn active w-50" id="btnOffline" onclick="setEventType(0)">Offline</button>
+                                    <button type="button" class="btn w-50" id="btnOnline" onclick="setEventType(1)">Online</button>
+                                </div>
+                                <input type="hidden" name="loaiSuKien" id="loaiSuKien" value="0" />
+                            </div>
+                        </div>
+
+                        <!-- Offline Fields -->
+                        <div id="offlineSection" class="p-3 bg-light rounded border mb-3">
+                            <h3 class="h6 font-weight-bold text-dark mb-3"><i class="fas fa-map-marker-alt text-primary me-1"></i>Địa điểm tổ chức</h3>
+                            <div class="mb-3">
+                                <label class="form-label">Tên địa điểm <span class="text-danger">*</span></label>
+                                <input class="form-control" name="tenDiaDiem" id="tenDiaDiem" placeholder="Ví dụ: Hội trường A, Nhà văn hóa..." />
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="tinhThanh" id="tinhThanh" onchange="updateDistricts()">
+                                        <option value="">Chọn Tỉnh / Thành phố</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Quận / Huyện <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="quanHuyenSelect" onchange="updateWards()">
+                                        <option value="">Chọn Quận / Huyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="phuongXaSelect" onchange="combineAddress()">
+                                        <option value="">Chọn Phường / Xã</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="quanHuyenPhuongXa" id="quanHuyenPhuongXa" />
+                            </div>
+                            <div>
+                                <label class="form-label">Số nhà, tên đường <span class="text-danger">*</span></label>
+                                <input class="form-control" name="soNhaDuong" id="soNhaDuong" placeholder="Ví dụ: 123 Nguyễn Văn Cừ" />
+                            </div>
+                        </div>
+
+                        <!-- Online Fields -->
+                        <div id="onlineSection" class="p-3 bg-light rounded border mb-3" style="display: none;">
+                            <h3 class="h6 font-weight-bold text-dark mb-3"><i class="fas fa-video text-success me-1"></i>Đường dẫn trực tuyến</h3>
+                            <div>
+                                <label class="form-label">Link Zoom/Google Meet/Livestream <span class="text-danger">*</span></label>
+                                <input class="form-control" name="linkOnline" id="linkOnline" placeholder="https://zoom.us/j/..." />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả ngắn sự kiện</label>
+                            <textarea class="form-control" name="moTaNgan" rows="2" placeholder="Tóm tắt ngắn gọn trong 1 - 2 câu để hiển thị ngoài trang chủ..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả chi tiết</label>
+                            <textarea class="form-control" name="moTaChiTiet" rows="6" placeholder="Giới thiệu chương trình, diễn giả, trải nghiệm, điều khoản & điều kiện của sự kiện..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Organizer Section -->
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <h2><i class="fas fa-user-tie"></i> Ban tổ chức sự kiện</h2>
+                    </div>
+                    <div class="portal-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tên nhà tổ chức <span class="text-danger">*</span></label>
+                            <input class="form-control" name="tenToChuc" placeholder="Ví dụ: Công ty sự kiện WuangCorp" required />
+                        </div>
+                        <div>
+                            <label class="form-label">Thông tin chi tiết về nhà tổ chức</label>
+                            <textarea class="form-control" name="moTaToChuc" rows="3" placeholder="Đơn vị tổ chức các hoạt động nghệ thuật, công nghệ dành cho học sinh sinh viên..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Visuals Section -->
+                <div class="portal-card">
+                    <div class="portal-card-header">
+                        <h2><i class="fas fa-images"></i> Thiết kế / Ảnh sự kiện</h2>
+                    </div>
+                    <div class="portal-card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">Tải ảnh bìa / Banner sự kiện (16:9)</label>
+                            <div class="preview-box mb-2" id="bannerPreviewContainer" style="overflow: hidden; border-radius: 8px; border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; height: 180px; background: #fafafa;">
+                                <span class="text-muted small">Chưa tải ảnh lên</span>
+                            </div>
+                            <input type="file" name="fileAnhBia" id="fileAnhBiaInput" class="form-control mb-2" accept="image/*" onchange="previewUploadImage(this, 'bannerPreviewContainer')" />
+                            <input class="form-control" name="anhBia" id="anhBiaInput" oninput="previewImage('anhBiaInput', 'bannerPreviewContainer')" placeholder="Hoặc nhập liên kết URL ảnh bìa trực tiếp" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">Tải ảnh nhỏ / Thumbnail (1:1)</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="preview-thumbnail" id="thumbnailPreviewContainer" style="width: 80px; height: 80px; overflow: hidden; border-radius: 8px; border: 2px dashed var(--border-color); display: flex; align-items: center; justify-content: center; background: #fafafa; flex-shrink: 0;">
+                                    <span class="text-muted small" style="font-size: 10px;">1:1</span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <input type="file" name="fileAnhThumbnail" id="fileAnhThumbnailInput" class="form-control mb-2" accept="image/*" onchange="previewUploadImage(this, 'thumbnailPreviewContainer')" />
+                                    <input class="form-control" name="anhThumbnail" id="anhThumbnailInput" oninput="previewImage('anhThumbnailInput', 'thumbnailPreviewContainer')" placeholder="Hoặc nhập liên kết URL ảnh đại diện" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-primary px-4 py-2" onclick="nextStep(2)">Tiếp tục <i class="fas fa-arrow-right ms-1"></i></button>
+        </div>
+    </div>
+
+    <!-- ================= STEP 2 ================= -->
+    <div class="step-content" id="stepPanel-2">
+        <div class="portal-card">
+            <div class="portal-card-header">
+                <h2><i class="fas fa-clock"></i> Cài đặt Thời gian</h2>
+            </div>
+            <div class="portal-card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Thời gian bắt đầu sự kiện <span class="text-danger">*</span></label>
+                        <input class="form-control" type="datetime-local" name="ngayBatDau" id="ngayBatDau" onchange="onStartDateChange()" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Thời gian kết thúc sự kiện <span class="text-danger">*</span></label>
+                        <input class="form-control" type="datetime-local" name="ngayKetThuc" id="ngayKetThuc" required />
+                        <span class="text-muted small d-block mt-1"><i class="fas fa-circle-info text-primary me-1"></i>Sự kiện có thể diễn ra trong vài tiếng cùng ngày.</span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Thời gian bắt đầu check-in (Tùy chọn)</label>
+                        <input class="form-control" type="datetime-local" name="batDauCheckIn" id="batDauCheckIn" />
+                        <span class="text-muted small">Mặc định là thời điểm sự kiện bắt đầu nếu bỏ trống.</span>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Thời gian kết thúc check-in (Tùy chọn)</label>
+                        <input class="form-control" type="datetime-local" name="ketThucCheckIn" id="ketThucCheckIn" />
+                        <span class="text-muted small">Mặc định là thời điểm sự kiện kết thúc nếu bỏ trống.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="portal-card">
+            <div class="portal-card-header d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-ticket-alt"></i> Phân loại vé bán</h2>
+                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTicketRow()"><i class="fas fa-plus me-1"></i>Thêm loại vé</button>
+            </div>
+            <div class="portal-card-body" id="ticketRowsContainer">
+                <!-- Initial default ticket type -->
+                <div class="ticket-card" id="ticket-row-0">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Tên loại vé <span class="text-danger">*</span></label>
+                            <input class="form-control" name="tenLoaiVe" placeholder="Vé thường, Vé VIP..." required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Giá vé (VND) <span class="text-danger">*</span></label>
+                            <input class="form-control" type="number" name="giaVe" min="0" value="0" placeholder="0 = Miễn phí" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Số lượng tổng <span class="text-danger">*</span></label>
+                            <input class="form-control" type="number" name="soLuongVe" min="1" value="100" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Giới hạn mỗi đơn <span class="text-danger">*</span></label>
+                            <input class="form-control" type="number" name="gioiHanMoiDon" min="1" value="10" required />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2" onclick="prevStep(1)"><i class="fas fa-arrow-left me-1"></i> Quay lại</button>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-outline-secondary px-4 py-2" name="submitAction" value="draft">
+                    <i class="fas fa-floppy-disk me-1"></i> Lưu bản nháp
+                </button>
+                <button type="submit" class="btn btn-success px-4 py-2" name="submitAction" value="submit" onclick="return validationFinal()">
+                    <i class="fas fa-paper-plane me-1"></i> Tạo và gửi duyệt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= STEP 3 (Redundant / Hidden) ================= -->
+    <div class="step-content" id="stepPanel-3" style="display: none !important;">
+        <input type="hidden" name="tinNhanXacNhan" value="Cảm ơn bạn đã mua vé." />
+    </div>
+</form>
+
+<script>
+    // Load Vietnam provinces dynamically from provinces.open-api.vn
+    let vietnamDivisions = [];
+
+    document.addEventListener("DOMContentLoaded", async function() {
+        const citySelect = document.getElementById("tinhThanh");
+        try {
+            const response = await fetch("https://provinces.open-api.vn/api/?depth=2");
+            vietnamDivisions = await response.json();
+            
+            vietnamDivisions.forEach(province => {
+                const opt = document.createElement("option");
+                let cleanName = province.name.replace(/^(Tỉnh|Thành phố)\s+/i, '');
+                opt.value = cleanName;
+                opt.dataset.code = province.code;
+                opt.textContent = province.name;
+                citySelect.appendChild(opt);
+            });
+        } catch (e) {
+            console.error("Lỗi khi tải danh sách tỉnh thành: ", e);
+            const fallback = ["Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Bình Dương", "Đồng Nai", "Khánh Hòa", "Lâm Đồng", "Thừa Thiên Huế"];
+            fallback.forEach(city => {
+                const opt = document.createElement("option");
+                opt.value = city;
+                opt.textContent = city;
+                citySelect.appendChild(opt);
+            });
+        }
+    });
+
+    function updateDistricts() {
+        const citySelect = document.getElementById("tinhThanh");
+        const districtSelect = document.getElementById("quanHuyenSelect");
+        const wardSelect = document.getElementById("phuongXaSelect");
+        const selectedCity = citySelect.value;
+        const selectedOpt = citySelect.options[citySelect.selectedIndex];
+        const provinceCode = selectedOpt ? selectedOpt.dataset.code : null;
+
+        districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+        document.getElementById("quanHuyenPhuongXa").value = "";
+
+        if (provinceCode && vietnamDivisions.length > 0) {
+            const provinceObj = vietnamDivisions.find(p => p.code == provinceCode);
+            if (provinceObj && provinceObj.districts) {
+                provinceObj.districts.forEach(dist => {
+                    const opt = document.createElement("option");
+                    opt.value = dist.name;
+                    opt.dataset.code = dist.code;
+                    opt.textContent = dist.name;
+                    districtSelect.appendChild(opt);
+                });
+            }
+        } else {
+            const fallbackDistricts = {
+                "Hồ Chí Minh": ["Quận 1", "Quận 3", "Quận 5", "Quận 10", "Quận Bình Thạnh", "Thành phố Thủ Đức"],
+                "Hà Nội": ["Quận Hoàn Kiếm", "Quận Ba Đình", "Quận Cầu Giấy", "Quận Đống Đa", "Quận Hai Bà Trưng"],
+                "Đà Nẵng": ["Quận Hải Châu", "Quận Thanh Khê", "Quận Sơn Trà", "Quận Ngũ Hành Sơn"]
+            };
+            const list = fallbackDistricts[selectedCity] || [];
+            list.forEach(dist => {
+                const opt = document.createElement("option");
+                opt.value = dist;
+                opt.textContent = dist;
+                districtSelect.appendChild(opt);
+            });
+        }
+    }
+
+    async function updateWards() {
+        const districtSelect = document.getElementById("quanHuyenSelect");
+        const wardSelect = document.getElementById("phuongXaSelect");
+        const selectedOpt = districtSelect.options[districtSelect.selectedIndex];
+        const districtCode = selectedOpt ? selectedOpt.dataset.code : null;
+
+        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+        document.getElementById("quanHuyenPhuongXa").value = "";
+
+        if (districtCode) {
+            try {
+                const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                const data = await response.json();
+                if (data && data.wards) {
+                    data.wards.forEach(ward => {
+                        const opt = document.createElement("option");
+                        opt.value = ward.name;
+                        opt.textContent = ward.name;
+                        wardSelect.appendChild(opt);
+                    });
+                }
+            } catch (e) {
+                console.error("Lỗi khi tải danh sách phường xã: ", e);
+            }
+        }
+        
+        if (wardSelect.children.length <= 1) {
+            const opt = document.createElement("option");
+            opt.value = "Phường trung tâm";
+            opt.textContent = "Phường trung tâm";
+            wardSelect.appendChild(opt);
+        }
+        combineAddress();
+    }
+
+    function combineAddress() {
+        const districtSelect = document.getElementById("quanHuyenSelect");
+        const wardSelect = document.getElementById("phuongXaSelect");
+        const hiddenInput = document.getElementById("quanHuyenPhuongXa");
+        
+        if (wardSelect.value && districtSelect.value) {
+            hiddenInput.value = `${wardSelect.value}, ${districtSelect.value}`;
+        } else {
+            hiddenInput.value = "";
+        }
+    }
+
+    // Toggle event type between Offline (0) and Online (1)
+    function setEventType(type) {
+        document.getElementById("loaiSuKien").value = type;
+        const btnOffline = document.getElementById("btnOffline");
+        const btnOnline = document.getElementById("btnOnline");
+        const offlineSec = document.getElementById("offlineSection");
+        const onlineSec = document.getElementById("onlineSection");
+
+        if (type === 0) {
+            btnOffline.classList.add("active");
+            btnOnline.classList.remove("active");
+            offlineSec.style.display = "block";
+            onlineSec.style.display = "none";
+            document.getElementById("tenDiaDiem").setAttribute("required", "required");
+            document.getElementById("tinhThanh").setAttribute("required", "required");
+            document.getElementById("quanHuyenSelect").setAttribute("required", "required");
+            document.getElementById("phuongXaSelect").setAttribute("required", "required");
+            document.getElementById("soNhaDuong").setAttribute("required", "required");
+            document.getElementById("linkOnline").removeAttribute("required");
+        } else {
+            btnOffline.classList.remove("active");
+            btnOnline.classList.add("active");
+            offlineSec.style.display = "none";
+            onlineSec.style.display = "block";
+            document.getElementById("tenDiaDiem").removeAttribute("required");
+            document.getElementById("tinhThanh").removeAttribute("required");
+            document.getElementById("quanHuyenSelect").removeAttribute("required");
+            document.getElementById("phuongXaSelect").removeAttribute("required");
+            document.getElementById("soNhaDuong").removeAttribute("required");
+            document.getElementById("linkOnline").setAttribute("required", "required");
+        }
+    }
+
+    // Image URL Previewer
+    function previewImage(inputId, previewId) {
+        const url = document.getElementById(inputId).value;
+        const container = document.getElementById(previewId);
+        if (url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/"))) {
+            container.innerHTML = `<img src="${url}" alt="Preview" onerror="this.src=''; this.parentNode.innerHTML='<span>Đường dẫn ảnh lỗi</span>';" style="max-width:100%; max-height:100%; object-fit:cover;" />`;
+        } else {
+            container.innerHTML = `<span>Xem trước</span>`;
+        }
+    }
+
+    // Image Upload Previewer
+    function previewUploadImage(input, previewId) {
+        const container = document.getElementById(previewId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                container.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width:100%; max-height:100%; object-fit:cover;" />`;
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            container.innerHTML = `<span>Chưa tải ảnh lên</span>`;
+        }
+    }
+
+    // Dynamic Ticket categories adding/deleting
+    let ticketIndex = 1;
+    function addTicketRow() {
+        const container = document.getElementById("ticketRowsContainer");
+        const card = document.createElement("div");
+        card.className = "ticket-card";
+        card.id = `ticket-row-${ticketIndex}`;
+        card.innerHTML = `
+            <button type="button" class="remove-ticket-btn" onclick="removeTicketRow(${ticketIndex})"><i class="fas fa-trash-alt"></i></button>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Tên loại vé <span class="text-danger">*</span></label>
+                    <input class="form-control" name="tenLoaiVe" placeholder="Vé thường, Vé VIP..." required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Giá vé (VND) <span class="text-danger">*</span></label>
+                    <input class="form-control" type="number" name="giaVe" min="0" value="0" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Số lượng tổng <span class="text-danger">*</span></label>
+                    <input class="form-control" type="number" name="soLuongVe" min="1" value="100" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Giới hạn mỗi đơn <span class="text-danger">*</span></label>
+                    <input class="form-control" type="number" name="gioiHanMoiDon" min="1" value="10" required />
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+        ticketIndex++;
+    }
+
+    function removeTicketRow(idx) {
+        const row = document.getElementById(`ticket-row-${idx}`);
+        if (row) row.remove();
+    }
+
+    // Toggle business model label for VAT invoice
+    function toggleVatLayout() {
+        const mode = document.getElementById("loaiHinhVat").value;
+        const nameLabel = document.getElementById("vatNameLabel");
+        const hoTenInput = document.getElementById("hoTenVat");
+
+        if (mode === "1") {
+            nameLabel.innerHTML = 'Tên doanh nghiệp / Công ty đăng ký <span class="text-danger">*</span>';
+            hoTenInput.placeholder = "Ví dụ: Công ty Cổ phần WuangCorp";
+        } else {
+            nameLabel.innerHTML = 'Họ tên cá nhân đại diện <span class="text-danger">*</span>';
+            hoTenInput.placeholder = "Nhập họ tên người đại diện";
+        }
+    }
+
+    // Step Control Logic
+    let currentStepNum = 1;
+
+    function nextStep(step) {
+        // Validate current step
+        if (!validateStep(currentStepNum)) return;
+
+        // Hide current
+        document.getElementById(`stepPanel-${currentStepNum}`).classList.remove("active");
+        document.getElementById(`stepIndicator-${currentStepNum}`).classList.remove("active");
+        document.getElementById(`stepIndicator-${currentStepNum}`).classList.add("completed");
+
+        // Show next
+        document.getElementById(`stepPanel-${step}`).classList.add("active");
+        document.getElementById(`stepIndicator-${step}`).classList.add("active");
+
+        currentStepNum = step;
+        updateProgress();
+    }
+
+    function prevStep(step) {
+        // Hide current
+        document.getElementById(`stepPanel-${currentStepNum}`).classList.remove("active");
+        document.getElementById(`stepIndicator-${currentStepNum}`).classList.remove("active");
+
+        // Show prev
+        document.getElementById(`stepPanel-${step}`).classList.add("active");
+        document.getElementById(`stepIndicator-${step}`).classList.remove("completed");
+        document.getElementById(`stepIndicator-${step}`).classList.add("active");
+
+        currentStepNum = step;
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const progress = document.getElementById("stepperProgress");
+        const percentage = currentStepNum === 2 ? 100 : 0;
+        progress.style.width = `${percentage}%`;
+    }
+
+    function validateStep(step) {
+        const panel = document.getElementById(`stepPanel-${step}`);
+        const inputs = panel.querySelectorAll("[required]");
+        let valid = true;
+
+        inputs.forEach(input => {
+            // Check if element is visible and empty
+            if (input.offsetParent !== null && !input.value.trim()) {
+                input.classList.add("is-invalid");
+                valid = false;
+            } else {
+                input.classList.remove("is-invalid");
+            }
+        });
+
+        if (!valid) {
+            alert("Vui lòng điền đầy đủ các thông tin bắt buộc (*) trước khi tiếp tục.");
+        }
+        return valid;
+    }
+
+    function validationFinal() {
+        // Double check all step validations
+        for (let i of [1, 2]) {
+            if (!validateStep(i)) {
+                if (i !== currentStepNum) {
+                    prevStep(1);
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function onStartDateChange() {
+        const startInput = document.getElementById("ngayBatDau");
+        const endInput = document.getElementById("ngayKetThuc");
+        
+        if (startInput.value) {
+            // Set min attribute for endInput to match startInput value
+            endInput.min = startInput.value;
+            
+            // If end time is empty or before start time, automatically set it to start time + 2 hours
+            if (!endInput.value || new Date(endInput.value) <= new Date(startInput.value)) {
+                const startDate = new Date(startInput.value);
+                const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000); // add 2 hours
+                
+                // Format back to yyyy-MM-ddTHH:mm in local time
+                const tzOffset = endDate.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(endDate.getTime() - tzOffset)).toISOString().slice(0, 16);
+                endInput.value = localISOTime;
+            }
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const startInput = document.getElementById("ngayBatDau");
+        const endInput = document.getElementById("ngayKetThuc");
+        if (startInput && startInput.value) {
+            endInput.min = startInput.value;
+        }
+    });
+
+    // Set initial values
+    setEventType(0);
+</script>

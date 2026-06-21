@@ -1,0 +1,86 @@
+﻿@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Bảng điều khiển";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div class="portal-page-title">
+        <span class="portal-kicker"><i class="fas fa-calendar-days"></i> Ban tổ chức</span>
+        <h1>Bảng điều khiển ban tổ chức</h1>
+        <p>Theo dõi số liệu cơ bản và mở nhanh các màn tạo, quản lý sự kiện.</p>
+    </div>
+    <div class="portal-actions">
+        <a class="btn btn-outline-success" href="/Organizer/SuKien">
+            <i class="fas fa-list-check me-1"></i> Sự kiện của tôi
+        </a>
+        <a class="btn btn-success" href="/Organizer/TaoMoiSuKien">
+            <i class="fas fa-plus me-1"></i> Tạo sự kiện
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Sự kiện của tôi</div>
+                <p class="stat-number">@ViewBag.SoSuKien</p>
+            </div>
+            <span class="stat-icon"><i class="fas fa-calendar-days"></i></span>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Đơn hàng</div>
+                <p class="stat-number">@ViewBag.SoDonHang</p>
+            </div>
+            <span class="stat-icon"><i class="fas fa-receipt"></i></span>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Doanh thu</div>
+                <p class="stat-number">@ViewBag.DoanhThu.ToString("N0")</p>
+            </div>
+            <span class="stat-icon"><i class="fas fa-coins"></i></span>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="portal-card h-100">
+            <div class="portal-card-header">
+                <h2>Việc cần làm</h2>
+            </div>
+            <div class="portal-card-body simple-list">
+                <a href="/Organizer/TaoMoiSuKien">
+                    <span><i class="fas fa-plus me-2 text-success"></i>Tạo sự kiện mới</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="/Organizer/SuKien">
+                    <span><i class="fas fa-list-check me-2 text-success"></i>Xem sự kiện đã tạo</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <a href="/">
+                    <span><i class="fas fa-house me-2 text-success"></i>Quay lại trang chủ</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="portal-card h-100">
+            <div class="portal-card-header">
+                <h2>Trạng thái sự kiện</h2>
+            </div>
+            <div class="portal-card-body">
+                <p class="mb-2"><span class="status-pill status-pending">Chờ duyệt</span> sau khi Ban tổ chức tạo sự kiện.</p>
+                <p class="mb-2"><span class="status-pill status-live">Đang bán</span> sau khi Quản trị viên duyệt.</p>
+                <p class="mb-0"><span class="status-pill status-rejected">Từ chối</span> nếu Quản trị viên không chấp nhận.</p>
+            </div>
+        </div>
+    </div>
+</div>

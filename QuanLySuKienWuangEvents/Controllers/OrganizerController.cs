@@ -1,0 +1,2375 @@
+﻿// ORGANIZER CONTROLLER — Phân hệ Ban Tổ Chức
+// Chức năng chính:
+//   1. Dashboard: Xem nhanh số lượng sự kiện, đơn hàng, doanh thu
+//   2. Quản lý sự kiện: Tạo mới, chỉnh sửa, dừng bán vé, mở lại, hủy, sao chép
+//   3. Quản lý loại vé: Thêm, sửa, bật/tắt bán vé
+//   4. Quản lý mã giảm giá: Thêm, sửa, xóa mã voucher
+//   5. Quản lý đơn hàng & Khách tham dự: Xem danh sách, chi tiết đơn, xuất danh sách ra CSV
+//   6. Check-in: Danh sách soát vé, quét mã QR check-in
+//   7. Báo cáo: Xem doanh thu chi tiết theo loại vé, xuất báo cáo ra CSV
+//   8. Sơ đồ chỗ ngồi: Thiết lập sơ đồ theo mẫu (Cinema, Theater, Music, Simple, Custom), khóa/mở ghế, xóa sơ đồ
+//   9. Hồ sơ: Cập nhật thông tin Ban Tổ Chức
+//
+// Quyền truy cập: Chỉ tài khoản có vai trò "Organizer" hoặc "Admin" mới có quyền truy cập
+
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Dapper;
+using QuanLySuKienWuangEvents.Models;
+
+namespace QuanLySuKienWuangEvents.Controllers;
+
+[Authorize(Roles = "Ban tổ chức,Quản trị viên")] // Yêu cầu đăng nhập với quyền Nhà tổ chức hoặc Admin
+[Route("Organizer/[action]/{id?}")]    // Đường dẫn mẫu: /Organizer/SuKien, /Organizer/TaoMoiSuKien, ...
+public class OrganizerController : Controller
+{
+    // 1. DASHBOARD & THỐNG KÊ
+
+    // TRANG CHỦ DASHBOARD NHÀ TỔ CHỨC
+    // URL: GET /Organizer/Index
+    public async Task<IActionResult> Index()
+    {
+        var organizerId = LayIdNguoiDangNhap();
+
+        // Thống kê 1: Tổng số sự kiện đã tạo
+        string sqlSoSuKien = @"
+            SELECT COUNT(*)
+            FROM SuKien
+            WHERE NguoiToChucId = @organizerId
+        ";
+        ViewBag.SoSuKien = await Db.LayGiaTri<int>(sqlSoSuKien, new { organizerId });
+
+        // Thống kê 2: Tổng số đơn đặt vé từ khách hàng
+        string sqlSoDonHang = @"
+            SELECT COUNT(*)
+            FROM DonHang d
+            JOIN SuKien s ON s.Id = d.SuKienId
+            WHERE s.NguoiToChucId = @organizerId
+        ";
+        ViewBag.SoDonHang = await Db.LayGiaTri<int>(sqlSoDonHang, new { organizerId });
+
+        // Thống kê 3: Tổng doanh thu từ các đơn hàng đã thanh toán thành công (TrangThai = 1)
+        string sqlDoanhThu = @"
+            SELECT ISNULL(SUM(d.TongThanhToan), 0)
+            FROM DonHang d
+            JOIN SuKien s ON s.Id = d.SuKienId
+            WHERE s.NguoiToChucId = @organizerId
+              AND d.TrangThai = 1
+        ";
+        ViewBag.DoanhThu = await Db.LayGiaTri<decimal>(sqlDoanhThu, new { organizerId });
+
+        return View();
+    }
+
+    // 2. QUẢN LÝ SỰ KIỆN
+
+    // DANH SÁCH SỰ KIỆN CỦA TÔI
+    // URL: GET /Organizer/SuKien
+    public async Task<IActionResult> SuKien()
+    {
+        var organizerId = LayIdNguoiDangNhap();
+
+        // Lấy danh sách sự kiện kèm theo thống kê doanh thu và vé đã bán của từng sự kiện
+        string sql = @"
+            SELECT s.*,
+                   (SELECT COUNT(*) FROM ChiTietDonHang c JOIN DonHang d ON d.Id = c.DonHangId WHERE d.SuKienId = s.Id AND d.TrangThai = 1) AS VeDaBan,
+                   (SELECT ISNULL(SUM(d.TongThanhToan), 0) FROM DonHang d WHERE d.SuKienId = s.Id AND d.TrangThai = 1) AS DoanhThu,
+                   (SELECT ISNULL(SUM(SoLuongTong), 0) FROM LoaiVe WHERE SuKienId = s.Id) AS TongVe
+            FROM SuKien s
+            WHERE s.NguoiToChucId = @organizerId
+            ORDER BY s.NgayTao DESC
+        ";
+        var list = await Db.LayDanhSach<SuKien>(sql, new { organizerId });
+        return View(list);
+    }
+
+    // XEM CHI TIẾT SỰ KIỆN
+    // URL: GET /Organizer/ChiTietSuKien/{id}
+    public async Task<IActionResult> ChiTietSuKien(Guid id)
+    {
+        if (!await LaSuKienCuaToi(id)) return NotFound();
+
+        string sql = "SELECT * FROM SuKien WHERE Id = @id";
+        var suKien = await Db.LayDonLe<SuKien>(sql, new { id });
+        if (suKien == null) return NotFound();
+
+        if (suKien.DanhMucId > 0)
+        {
+            ViewBag.TenDanhMuc = await Db.LayGiaTri<string>("SELECT TenDanhMuc FROM DanhMuc WHERE Id = @id", new { id = suKien.DanhMucId });
+        }
+
+        // Lấy thống kê vé & doanh thu
+        string sqlStats = @"
+            SELECT 
+                (SELECT COUNT(*) FROM ChiTietDonHang c JOIN DonHang d ON d.Id = c.DonHangId WHERE d.SuKienId = @id AND d.TrangThai = 1) AS VeDaBan,
+                (SELECT ISNULL(SUM(d.TongThanhToan), 0) FROM DonHang d WHERE d.SuKienId = @id AND d.TrangThai = 1) AS DoanhThu,
+                (SELECT ISNULL(SUM(SoLuongTong), 0) FROM LoaiVe WHERE SuKienId = @id) AS TongVe
+        ";
+        var stats = await Db.LayDonLe<dynamic>(sqlStats, new { id });
+        ViewBag.VeDaBan = stats?.VeDaBan ?? 0;
+        ViewBag.DoanhThu = stats?.DoanhThu ?? 0;
+        ViewBag.TongVe = stats?.TongVe ?? 0;
+
+        return View(suKien);
+    }
+
+    // CẬP NHẬT NHANH GIỜ SOÁT VÉ (không cần vào form sửa sự kiện)
+    // URL: POST /Organizer/CapNhatGioCheckIn
+    [HttpPost]
+    public async Task<IActionResult> CapNhatGioCheckIn(
+        Guid id,
+        DateTime? batDauCheckIn,
+        DateTime? ketThucCheckIn)
+    {
+        if (!await LaSuKienCuaToi(id))
+            return NotFound();
+
+        var organizerId = LayIdNguoiDangNhap();
+        string sql = @"
+            UPDATE SuKien
+            SET BatDauCheckIn  = @batDauCheckIn,
+                KetThucCheckIn = @ketThucCheckIn,
+                NgayCapNhat    = GETUTCDATE()
+            WHERE Id = @id AND NguoiToChucId = @organizerId
+        ";
+
+        await Db.ThucThi(sql, new { id, batDauCheckIn, ketThucCheckIn, organizerId });
+
+        TempData["Message"] = "Đã cập nhật khung giờ soát vé thành công!";
+        return RedirectToAction("ChiTietSuKien", new { id });
+    }
+
+    // Hiển thị form tạo mới sự kiện
+    [HttpGet]
+    public async Task<IActionResult> TaoMoiSuKien()
+    {
+        await NapDuLieuChoForm();
+        return View();
+    }
+
+    // Xử lý tạo mới sự kiện
+    [HttpPost]
+    public async Task<IActionResult> TaoMoiSuKien(
+        string tenSuKien,
+        int danhMucId,
+        byte loaiSuKien, // 0: Offline (Trực tiếp), 1: Online (Trực tuyến)
+        string? linkOnline,
+        string? anhBia,
+        string? anhThumbnail,
+        string? moTaNgan,
+        string? moTaChiTiet,
+        string? tenToChuc,
+        string? moTaToChuc,
+        
+        string? tenDiaDiem,
+        string? tinhThanh,
+        string? quanHuyenPhuongXa,
+        string? soNhaDuong,
+
+        DateTime ngayBatDau,
+        DateTime ngayKetThuc,
+        string[] tenLoaiVe,
+        decimal[] giaVe,
+        int[] soLuongVe,
+        int[] gioiHanMoiDon,
+        
+        DateTime? batDauCheckIn,
+        DateTime? ketThucCheckIn,
+        IFormFile? fileAnhBia,
+
+        string submitAction = "submit")
+    {
+        // Xử lý tệp hình ảnh tải lên nếu có
+        if (fileAnhBia != null && fileAnhBia.Length > 0)
+        {
+            try
+            {
+                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsDir))
+                {
+                    Directory.CreateDirectory(uploadsDir);
+                }
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(fileAnhBia.FileName);
+                var filePath = Path.Combine(uploadsDir, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await fileAnhBia.CopyToAsync(stream);
+                }
+                anhBia = "/uploads/" + fileName;
+                anhThumbnail = "/uploads/" + fileName;
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Lỗi tải ảnh lên: " + ex.Message);
+            }
+        }
+        else if (string.IsNullOrWhiteSpace(anhBia))
+        {
+            anhBia = "/images/default-event.svg";
+            anhThumbnail = "/images/default-event.svg";
+        }
+
+        // Kiểm tra hợp lệ dữ liệu cơ bản
+        if (ngayKetThuc < ngayBatDau)
+        {
+            ModelState.AddModelError("", "Ngày kết thúc sự kiện phải lớn hơn ngày bắt đầu.");
+        }
+        if (tenLoaiVe == null || tenLoaiVe.Length == 0)
+        {
+            ModelState.AddModelError("", "Bạn phải tạo ít nhất 1 loại vé.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await NapDuLieuChoForm();
+            return View();
+        }
+
+        var suKienId = Guid.NewGuid();
+        string slug  = TaoSlug(tenSuKien) + "-" + DateTime.Now.ToString("yyMMddHHmmss");
+        var organizerId = LayIdNguoiDangNhap();
+        
+        // submitAction: "draft" là bản nháp (TrangThai = 0), ngược lại là gửi duyệt (TrangThai = 1)
+        int trangThai = (submitAction == "draft") ? 0 : 1;
+
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            // Thêm thông tin sự kiện kèm địa điểm trực tiếp vào bảng SuKien
+            string sqlInsertSuKien = @"
+                INSERT INTO SuKien
+                    (Id, NguoiToChucId, DanhMucId, TenSuKien, Slug,
+                     MoTaNgan, MoTaChiTiet, AnhBia, AnhThumbnail, NgayBatDau, NgayKetThuc,
+                     LoaiSuKien, LinkOnline,
+                     CoSoDoChoNgoi, TrangThai, HienThiCongKhai, NgayTao,
+                     BatDauCheckIn, KetThucCheckIn,
+                     TenDiaDiem, DiaChiDiaDiem, ThanhPhoDiaDiem, QuanHuyenDiaDiem, SucChuaDiaDiem)
+                VALUES
+                    (@id, @nguoiToChucId, @danhMucId, @tenSuKien, @slug,
+                     @moTaNgan, @moTaChiTiet, @anhBia, @anhThumbnail, @ngayBatDau, @ngayKetThuc,
+                     @loaiSuKien, @linkOnline,
+                     0, @trangThai, 1, GETUTCDATE(),
+                     @batDauCheckIn, @ketThucCheckIn,
+                     @tenDiaDiem, @diaChiDiaDiem, @thanhPhoDiaDiem, @quanHuyenDiaDiem, @sucChuaDiaDiem)
+            ";
+
+            int tongSoGhe = 0;
+            if (soLuongVe != null)
+            {
+                foreach (var sl in soLuongVe) 
+                    tongSoGhe += sl;
+            }
+
+            await connection.ExecuteAsync(sqlInsertSuKien, new
+            {
+                id            = suKienId,
+                nguoiToChucId = organizerId,
+                danhMucId,
+                tenSuKien     = tenSuKien.Trim(),
+                slug,
+                moTaNgan,
+                moTaChiTiet,
+                anhBia,
+                anhThumbnail,
+                ngayBatDau,
+                ngayKetThuc,
+                loaiSuKien,
+                linkOnline,
+                trangThai,
+                batDauCheckIn,
+                ketThucCheckIn,
+                // Gán trực tiếp dữ liệu địa điểm
+                tenDiaDiem       = (loaiSuKien == 0) ? tenDiaDiem?.Trim() : null,
+                diaChiDiaDiem    = (loaiSuKien == 0) ? soNhaDuong?.Trim() : null,
+                thanhPhoDiaDiem  = (loaiSuKien == 0) ? tinhThanh?.Trim() : null,
+                quanHuyenDiaDiem = (loaiSuKien == 0) ? quanHuyenPhuongXa?.Trim() : null,
+                sucChuaDiaDiem   = (loaiSuKien == 0) ? ((tongSoGhe > 0) ? tongSoGhe : 100) : (int?)null
+            }, transaction);
+
+            // Thêm các loại vé đã nhập
+            if (tenLoaiVe != null && giaVe != null && soLuongVe != null && gioiHanMoiDon != null)
+            {
+                for (int i = 0; i < tenLoaiVe.Length; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(tenLoaiVe[i])) continue;
+                    if (i >= giaVe.Length || i >= soLuongVe.Length || i >= gioiHanMoiDon.Length) continue;
+
+                    string sqlInsertLoaiVe = @"
+                        INSERT INTO LoaiVe
+                            (SuKienId, TenLoaiVe, GiaBan, SoLuongTong, GioiHanMoiDon,
+                             NgayBatDauBan, NgayKetThucBan, ThuTuHienThi, TrangThai)
+                        VALUES
+                            (@suKienId, @tenLoaiVe, @giaVe, @soLuongVe, @gioiHan,
+                             GETUTCDATE(), @ngayKetThuc, @thuTu, 1)
+                    ";
+
+                    await connection.ExecuteAsync(sqlInsertLoaiVe, new
+                    {
+                        suKienId    = suKienId,
+                        tenLoaiVe   = tenLoaiVe[i].Trim(),
+                        giaVe       = giaVe[i],
+                        soLuongVe   = soLuongVe[i],
+                        gioiHan     = gioiHanMoiDon[i],
+                        ngayKetThuc,
+                        thuTu       = i
+                    }, transaction);
+                }
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+
+        TempData["Message"] = (trangThai == 0) ? "Đã lưu bản nháp sự kiện." : "Đã tạo sự kiện thành công và gửi duyệt.";
+        return RedirectToAction("SuKien");
+    }
+
+    // Hiển thị form chỉnh sửa sự kiện
+    [HttpGet]
+    public async Task<IActionResult> ChinhSuaSuKien(Guid id)
+    {
+        var suKien = await LaySuKienCuaToi(id);
+        if (suKien == null) return NotFound();
+
+        await NapDuLieuChoForm();
+        ViewBag.LoaiVes = await LayDanhSachLoaiVe(id);
+        ViewBag.SoDonHang = await Db.LayGiaTri<int>(
+            "SELECT COUNT(1) FROM DonHang WHERE SuKienId = @suKienId", 
+            new { suKienId = id }
+        );
+        ViewBag.Profile = await Db.LayDonLe<NguoiDung>(
+            "SELECT Id, TenNganHang, SoTaiKhoan, ChuTaiKhoan FROM NguoiDung WHERE Id = @id", 
+            new { id = LayIdNguoiDangNhap() }
+        );
+
+        return View(suKien);
+    }
+
+    // Xử lý chỉnh sửa sự kiện
+    [HttpPost]
+    public async Task<IActionResult> ChinhSuaSuKien(
+        Guid id,
+        string tenSuKien,
+        int danhMucId,
+        byte loaiSuKien, // 0: Offline, 1: Online
+        string? linkOnline,
+        string? anhBia,
+        string? anhThumbnail,
+        string? moTaNgan,
+        string? moTaChiTiet,
+        string? tenToChuc,
+        string? moTaToChuc,
+        
+        string? tenDiaDiem,
+        string? tinhThanh,
+        string? quanHuyenPhuongXa,
+        string? soNhaDuong,
+
+        DateTime ngayBatDau,
+        DateTime ngayKetThuc,
+        string[] tenLoaiVe,
+        decimal[] giaVe,
+        int[] soLuongVe,
+        int[] gioiHanMoiDon,
+
+        DateTime? batDauCheckIn,
+        DateTime? ketThucCheckIn,
+        string? tinNhanXacNhan, // Giữ lại tham số để không gãy route, nhưng sẽ không lưu vào CSDL
+        
+        IFormFile? fileAnhBia,
+
+        string submitAction = "submit")
+    {
+        // Xử lý tệp hình ảnh tải lên nếu có
+        if (fileAnhBia != null && fileAnhBia.Length > 0)
+        {
+            try
+            {
+                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsDir))
+                {
+                    Directory.CreateDirectory(uploadsDir);
+                }
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(fileAnhBia.FileName);
+                var filePath = Path.Combine(uploadsDir, fileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await fileAnhBia.CopyToAsync(stream);
+                }
+                anhBia = "/uploads/" + fileName;
+                anhThumbnail = "/uploads/" + fileName;
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Lỗi tải ảnh lên: " + ex.Message;
+                return RedirectToAction("ChinhSuaSuKien", new { id });
+            }
+        }
+
+        if (ngayKetThuc <= ngayBatDau)
+        {
+            TempData["Error"] = "Ngày kết thúc phải diễn ra sau ngày bắt đầu.";
+            return RedirectToAction("ChinhSuaSuKien", new { id });
+        }
+
+        var organizerId = LayIdNguoiDangNhap();
+        int trangThai   = (submitAction == "draft") ? 0 : 1;
+
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            // Kiểm tra sự kiện này có đúng của người đăng nhập không
+            var checkSql = @"
+                SELECT COUNT(1)
+                FROM SuKien
+                WHERE Id = @id
+                  AND NguoiToChucId = @organizerId
+            ";
+            int count = await connection.ExecuteScalarAsync<int>(checkSql, new { id, organizerId }, transaction);
+            if (count == 0) return NotFound();
+
+            int tongSoGhe = 0;
+            if (soLuongVe != null)
+            {
+                foreach (var sl in soLuongVe) tongSoGhe += sl;
+            }
+
+            // Cập nhật thông tin sự kiện chính kèm địa điểm trực tiếp (bỏ NgayDongBanVe, TinNhanXacNhan)
+            string sqlUpdateSuKien = @"
+                UPDATE SuKien
+                SET TenSuKien        = @tenSuKien,
+                    DanhMucId        = @danhMucId,
+                    MoTaNgan         = @moTaNgan,
+                    MoTaChiTiet      = @moTaChiTiet,
+                    AnhBia           = @anhBia,
+                    AnhThumbnail     = @anhThumbnail,
+                    NgayBatDau       = @ngayBatDau,
+                    NgayKetThuc      = @ngayKetThuc,
+                    LoaiSuKien       = @loaiSuKien,
+                    LinkOnline       = @linkOnline,
+                    TrangThai        = @trangThai,
+                    LyDoTuChoi       = NULL,
+                    NgayCapNhat      = GETUTCDATE(),
+                    BatDauCheckIn    = @batDauCheckIn,
+                    KetThucCheckIn   = @ketThucCheckIn,
+                    TenDiaDiem       = @tenDiaDiem,
+                    DiaChiDiaDiem    = @diaChiDiaDiem,
+                    ThanhPhoDiaDiem  = @thanhPhoDiaDiem,
+                    QuanHuyenDiaDiem = @quanHuyenDiaDiem,
+                    SucChuaDiaDiem   = @sucChuaDiaDiem
+                WHERE Id            = @id
+                  AND NguoiToChucId = @organizerId
+                  AND TrangThai    IN (0, 1, 2, 7)
+            ";
+
+            await connection.ExecuteAsync(sqlUpdateSuKien, new
+            {
+                id,
+                organizerId,
+                tenSuKien = tenSuKien.Trim(),
+                danhMucId,
+                moTaNgan,
+                moTaChiTiet,
+                anhBia,
+                anhThumbnail,
+                ngayBatDau,
+                ngayKetThuc,
+                loaiSuKien,
+                linkOnline,
+                trangThai,
+                batDauCheckIn,
+                ketThucCheckIn,
+                // Gán trực tiếp dữ liệu địa điểm
+                tenDiaDiem       = (loaiSuKien == 0) ? tenDiaDiem?.Trim() : null,
+                diaChiDiaDiem    = (loaiSuKien == 0) ? soNhaDuong?.Trim() : null,
+                thanhPhoDiaDiem  = (loaiSuKien == 0) ? tinhThanh?.Trim() : null,
+                quanHuyenDiaDiem = (loaiSuKien == 0) ? quanHuyenPhuongXa?.Trim() : null,
+                sucChuaDiaDiem   = (loaiSuKien == 0) ? ((tongSoGhe > 0) ? tongSoGhe : 100) : (int?)null
+            }, transaction);
+
+            // Cập nhật lại danh sách loại vé (Chỉ thực hiện khi CHƯA có đơn hàng đăng ký để tránh mất mát dữ liệu vé đã bán)
+            int soDonHang = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(1) FROM DonHang WHERE SuKienId = @id", 
+                new { id }, 
+                transaction
+            );
+
+            if (soDonHang == 0)
+            {
+                await connection.ExecuteAsync("DELETE FROM LoaiVe WHERE SuKienId = @suKienId", new { suKienId = id }, transaction);
+
+                if (tenLoaiVe != null && giaVe != null && soLuongVe != null && gioiHanMoiDon != null)
+                {
+                    for (int i = 0; i < tenLoaiVe.Length; i++)
+                    {
+                        if (string.IsNullOrWhiteSpace(tenLoaiVe[i])) continue;
+                        if (i >= giaVe.Length || i >= soLuongVe.Length || i >= gioiHanMoiDon.Length) continue;
+
+                        string sqlInsertLoaiVe = @"
+                            INSERT INTO LoaiVe
+                                (SuKienId, TenLoaiVe, GiaBan, SoLuongTong, GioiHanMoiDon,
+                                 NgayBatDauBan, NgayKetThucBan, ThuTuHienThi, TrangThai)
+                            VALUES
+                                (@suKienId, @tenLoaiVe, @giaVe, @soLuongVe, @gioiHan,
+                                 GETUTCDATE(), @ngayKetThuc, @thuTu, 1)
+                        ";
+
+                        await connection.ExecuteAsync(sqlInsertLoaiVe, new
+                        {
+                            suKienId  = id,
+                            tenLoaiVe = tenLoaiVe[i].Trim(),
+                            giaVe     = giaVe[i],
+                            soLuongVe = soLuongVe[i],
+                            gioiHan   = gioiHanMoiDon[i],
+                            ngayKetThuc,
+                            thuTu     = i
+                        }, transaction);
+                    }
+                }
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+
+        TempData["Message"] = (trangThai == 0) ? "Đã lưu bản nháp." : "Đã gửi lại yêu cầu duyệt sự kiện.";
+        return RedirectToAction("SuKien");
+    }
+
+    // Dừng bán vé sự kiện (Trạng thái = 2)
+    [HttpPost]
+    public async Task<IActionResult> DungBanVeSuKien(Guid id)
+    {
+        var suKien = await LaySuKienCuaToi(id);
+        if (suKien == null) return NotFound();
+
+        if (suKien.TrangThai != 3)
+        {
+            TempData["Error"] = "Chỉ có thể dừng bán vé khi sự kiện đang mở bán.";
+            return RedirectToAction("SuKien");
+        }
+
+        await DoiTrangThaiSuKien(id, 2, "Đã dừng bán vé sự kiện thành công.");
+        return RedirectToAction("SuKien");
+    }
+
+    // Mở bán lại sự kiện (Trạng thái = 3)
+    [HttpPost]
+    public async Task<IActionResult> MoBanVeSuKienLai(Guid id)
+    {
+        var suKien = await LaySuKienCuaToi(id);
+        if (suKien == null) return NotFound();
+
+        if (suKien.TrangThai != 2)
+        {
+            TempData["Error"] = "Chỉ có thể mở bán lại khi sự kiện đang tạm dừng bán vé.";
+            return RedirectToAction("SuKien");
+        }
+
+        await DoiTrangThaiSuKien(id, 3, "Sự kiện đã được mở bán vé trở lại.");
+        return RedirectToAction("SuKien");
+    }
+
+    // Hủy sự kiện (Trạng thái = 6)
+    [HttpPost]
+    public async Task<IActionResult> HuySuKien(Guid id)
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            string sqlCancelSuKien = @"
+                UPDATE SuKien
+                SET TrangThai   = 6,
+                    NgayCapNhat = GETUTCDATE()
+                WHERE Id            = @id
+                  AND NguoiToChucId = @organizerId
+            ";
+            int affected = await connection.ExecuteAsync(sqlCancelSuKien, new { id, organizerId }, transaction);
+            if (affected > 0)
+            {
+                // Reset SoLuongGiuCho của các loại vé đi kèm
+                string sqlResetGiuCho = @"
+                    UPDATE LoaiVe
+                    SET SoLuongGiuCho = 0
+                    WHERE SuKienId = @id
+                ";
+                await connection.ExecuteAsync(sqlResetGiuCho, new { id }, transaction);
+
+                // Giải phóng các ghế đang bị giữ ở trạng thái Chờ thanh toán (TrangThai = 2 -> 0)
+                string sqlReleaseSeats = @"
+                    UPDATE ChoNgoi
+                    SET TrangThai = 0
+                    WHERE TrangThai = 2
+                      AND HangGheId IN (
+                          SELECT h.Id 
+                          FROM HangGhe h 
+                          JOIN KhuVuc k ON h.KhuVucId = k.Id
+                          JOIN SoDoChoNgoi sdn ON k.SoDoChoNgoiId = sdn.Id
+                          WHERE sdn.SuKienId = @id
+                      )
+                ";
+                await connection.ExecuteAsync(sqlReleaseSeats, new { id }, transaction);
+            }
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+
+        TempData["Message"] = "Đã hủy sự kiện thành công.";
+        return RedirectToAction("SuKien");
+    }
+
+    // Sao chép sự kiện thành một bản nháp mới
+    [HttpPost]
+    public async Task<IActionResult> SaoChepSuKien(Guid id)
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        var newId       = Guid.NewGuid();
+        string suffix   = DateTime.Now.ToString("yyMMddHHmmss");
+
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+
+        try
+        {
+            // Nhân bản sự kiện (ngày bắt đầu và kết thúc tự động cộng thêm 30 ngày)
+            string sqlCopySuKien = @"
+                INSERT INTO SuKien
+                    (Id, NguoiToChucId, DanhMucId, TenSuKien, Slug,
+                     MoTaNgan, MoTaChiTiet, AnhBia, NgayBatDau, NgayKetThuc,
+                     LoaiSuKien, LinkOnline,
+                     CoSoDoChoNgoi, TrangThai, HienThiCongKhai, NgayTao,
+                     TenDiaDiem, DiaChiDiaDiem, ThanhPhoDiaDiem, QuanHuyenDiaDiem, SucChuaDiaDiem)
+                SELECT @newId, NguoiToChucId, DanhMucId,
+                       N'Bản sao - ' + TenSuKien, Slug + '-' + @suffix,
+                       MoTaNgan, MoTaChiTiet, AnhBia, DATEADD(day, 30, NgayBatDau),
+                       DATEADD(day, 30, NgayKetThuc),
+                       LoaiSuKien, LinkOnline, 0, 0, 1, GETUTCDATE(),
+                       TenDiaDiem, DiaChiDiaDiem, ThanhPhoDiaDiem, QuanHuyenDiaDiem, SucChuaDiaDiem
+                FROM SuKien
+                WHERE Id            = @id
+                  AND NguoiToChucId = @organizerId
+            ";
+
+            int rows = await connection.ExecuteAsync(sqlCopySuKien, new { newId, suffix, id, organizerId }, transaction);
+            if (rows == 0) return NotFound();
+
+            // Nhân bản các loại vé đi kèm (bỏ GiaGoc)
+            string sqlCopyLoaiVe = @"
+                INSERT INTO LoaiVe
+                    (SuKienId, TenLoaiVe, MoTa, GiaBan, SoLuongTong,
+                     GioiHanMoiDon, NgayBatDauBan, NgayKetThucBan,
+                     ThuTuHienThi, MauSac, TrangThai)
+                SELECT @newId, TenLoaiVe, MoTa, GiaBan, SoLuongTong,
+                       GioiHanMoiDon, GETUTCDATE(), DATEADD(day, 30, NgayKetThucBan),
+                       ThuTuHienThi, MauSac, TrangThai
+                FROM LoaiVe
+                WHERE SuKienId = @id
+            ";
+
+            await connection.ExecuteAsync(sqlCopyLoaiVe, new { newId, id }, transaction);
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+
+        TempData["Message"] = "Đã nhân bản sự kiện thành công! Bạn đang ở chế độ chỉnh sửa bản sao.";
+        return RedirectToAction("ChinhSuaSuKien", new { id = newId });
+    }
+
+    // 3. QUẢN LÝ LOẠI VÉ
+
+    // Hiển thị danh sách loại vé của một sự kiện
+    public async Task<IActionResult> LoaiVe(Guid? suKienId)
+    {
+        if (suKienId == null)
+        {
+            // Lấy sự kiện mới nhất để hiển thị nếu không truyền Id
+            var organizerId = LayIdNguoiDangNhap();
+            var latestId = await Db.LayGiaTri<Guid?>(
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+            
+            if (latestId == null)
+            {
+                TempData["Error"] = "Vui lòng tạo sự kiện trước.";
+                return RedirectToAction("SuKien");
+            }
+            suKienId = latestId;
+        }
+
+        var sId = suKienId.Value;
+        if (!await LaSuKienCuaToi(sId)) return NotFound();
+
+        string sql = @"
+            SELECT *
+            FROM LoaiVe
+            WHERE SuKienId = @suKienId
+            ORDER BY ThuTuHienThi, Id
+        ";
+        var list = await Db.LayDanhSach<LoaiVe>(sql, new { suKienId = sId });
+
+        ViewBag.SuKiens   = await LaySuKienCuaToiDropdown();
+        ViewBag.SuKienId  = sId;
+        ViewBag.TenSuKien = await LayTenSuKien(sId);
+        var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @id", new { id = sId });
+        ViewBag.TrangThaiSuKien = sk != null ? (int)sk.TrangThai : 0;
+        ViewBag.NgayKetThucSuKien = sk?.NgayKetThuc;
+        return View(list);
+    }
+
+    // Thêm loại vé mới cho sự kiện
+    [HttpPost]
+    public async Task<IActionResult> TaoMoiLoaiVe(
+        Guid suKienId,
+        string tenLoaiVe,
+        string? moTa,
+        decimal giaBan,
+        int soLuongTong,
+        int gioiHanMoiDon,
+        DateTime? ngayBatDauBan,
+        DateTime? ngayKetThucBan,
+        string? mauSac)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return NotFound();
+
+        if (await LaSuKienTamDungHoacHuy(suKienId))
+        {
+            TempData["Error"] = "Không thể thêm loại vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("LoaiVe", new { suKienId });
+        }
+        
+        if (giaBan < 0 || soLuongTong <= 0 || gioiHanMoiDon <= 0)
+        {
+            TempData["Error"] = "Thông số vé (giá, số lượng) không hợp lệ.";
+            return RedirectToAction("LoaiVe", new { suKienId });
+        }
+
+        string sql = @"
+            INSERT INTO LoaiVe
+                (SuKienId, TenLoaiVe, MoTa, GiaBan, SoLuongTong,
+                 GioiHanMoiDon, NgayBatDauBan, NgayKetThucBan,
+                 ThuTuHienThi, MauSac, TrangThai)
+            VALUES
+                (@suKienId, @tenLoaiVe, @moTa, @giaBan, @soLuongTong,
+                 @gioiHanMoiDon, @ngayBatDauBan, @ngayKetThucBan,
+                 99, @mauSac, 1)
+        ";
+
+        await Db.ThucThi(sql, new
+        {
+            suKienId,
+            tenLoaiVe = tenLoaiVe.Trim(),
+            moTa,
+            giaBan,
+            soLuongTong,
+            gioiHanMoiDon,
+            ngayBatDauBan,
+            ngayKetThucBan,
+            mauSac
+        });
+
+        TempData["Message"] = "Đã thêm loại vé mới.";
+        return RedirectToAction("LoaiVe", new { suKienId });
+    }
+
+    // Form chỉnh sửa loại vé
+    [HttpGet]
+    public async Task<IActionResult> ChinhSuaLoaiVe(int id)
+    {
+        var loaiVe = await Db.LayDonLe<LoaiVe>("SELECT * FROM LoaiVe WHERE Id = @id", new { id });
+        if (loaiVe == null) return NotFound();
+        if (!await LaSuKienCuaToi(loaiVe.SuKienId)) return Forbid();
+
+        if (await LaSuKienTamDungHoacHuy(loaiVe.SuKienId))
+        {
+            TempData["Error"] = "Không thể chỉnh sửa cấu hình vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("LoaiVe", new { suKienId = loaiVe.SuKienId });
+        }
+
+        return View(loaiVe);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChinhSuaLoaiVe(LoaiVe model)
+    {
+        var original = await Db.LayDonLe<LoaiVe>("SELECT * FROM LoaiVe WHERE Id = @id", new { id = model.Id });
+        if (original == null) return NotFound();
+        if (!await LaSuKienCuaToi(original.SuKienId)) return Forbid();
+
+        if (await LaSuKienTamDungHoacHuy(original.SuKienId))
+        {
+            TempData["Error"] = "Không thể chỉnh sửa cấu hình vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("LoaiVe", new { suKienId = original.SuKienId });
+        }
+
+        // Phải đảm bảo số lượng vé tổng lớn hơn hoặc bằng số lượng vé thực tế đã bán
+        string sql = @"
+            UPDATE lv
+            SET TenLoaiVe      = @tenLoaiVe,
+                MoTa           = @moTa,
+                GiaBan         = @giaBan,
+                SoLuongTong    = @soLuongTong,
+                GioiHanMoiDon  = @gioiHanMoiDon,
+                NgayBatDauBan  = @ngayBatDauBan,
+                NgayKetThucBan = @ngayKetThucBan,
+                MauSac         = @mauSac
+            FROM LoaiVe lv
+            JOIN SuKien s ON s.Id = lv.SuKienId
+            WHERE lv.Id           = @id
+              AND s.NguoiToChucId = @organizerId
+              AND @soLuongTong   >= lv.SoLuongDaBan
+        ";
+
+        await Db.ThucThi(sql, new
+        {
+            id            = model.Id,
+            organizerId   = LayIdNguoiDangNhap(),
+            tenLoaiVe     = model.TenLoaiVe.Trim(),
+            moTa          = model.MoTa,
+            giaBan        = model.GiaBan,
+            soLuongTong   = model.SoLuongTong,
+            gioiHanMoiDon = model.GioiHanMoiDon,
+            ngayBatDauBan = model.NgayBatDauBan,
+            ngayKetThucBan= model.NgayKetThucBan,
+            mauSac        = model.MauSac
+        });
+
+        TempData["Message"] = "Đã cập nhật loại vé.";
+        return RedirectToAction("LoaiVe", new { suKienId = model.SuKienId });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> BatTatLoaiVe(int id, Guid suKienId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return Forbid();
+
+        if (await LaSuKienTamDungHoacHuy(suKienId))
+        {
+            TempData["Error"] = "Không thể bật/tắt bán vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("LoaiVe", new { suKienId });
+        }
+
+        string sql = @"
+            UPDATE lv
+            SET TrangThai = CASE WHEN lv.TrangThai = 1 THEN 0 ELSE 1 END
+            FROM LoaiVe lv
+            JOIN SuKien s ON s.Id = lv.SuKienId
+            WHERE lv.Id           = @id
+              AND s.NguoiToChucId = @organizerId
+        ";
+        await Db.ThucThi(sql, new { id, organizerId = LayIdNguoiDangNhap() });
+        return RedirectToAction("LoaiVe", new { suKienId });
+    }
+
+    // 4. QUẢN LÝ MÃ GIẢM GIÁ (VOUCHER)
+
+    // Hiển thị danh sách mã giảm giá
+    public async Task<IActionResult> MaGiamGia(Guid? suKienId)
+    {
+        var events = await LaySuKienCuaToiDropdown();
+        if (suKienId == null)
+        {
+            var organizerId = LayIdNguoiDangNhap();
+            var latestId = await Db.LayGiaTri<Guid?>(
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+            
+            if (latestId == null)
+            {
+                TempData["Error"] = "Vui lòng tạo sự kiện trước.";
+                return RedirectToAction("SuKien");
+            }
+            suKienId = latestId;
+        }
+
+        var sId = suKienId.Value;
+        if (!events.ContainsKey(sId)) return NotFound();
+
+        string sql = @"
+            SELECT mg.*
+            FROM MaGiamGia mg
+            JOIN SuKien s ON s.Id = mg.SuKienId
+            WHERE s.NguoiToChucId = @organizerId
+              AND mg.SuKienId = @suKienId
+            ORDER BY mg.NgayTao DESC
+        ";
+
+        var list = await Db.LayDanhSach<MaGiamGia>(sql, new
+        { 
+            organizerId = LayIdNguoiDangNhap(), 
+            suKienId = sId 
+        });
+
+        ViewBag.SuKiens  = events;
+        ViewBag.SuKienId = sId;
+        var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @id", new { id = sId });
+        ViewBag.TrangThaiSuKien = sk != null ? (int)sk.TrangThai : 0;
+        ViewBag.NgayKetThucSuKien = sk?.NgayKetThuc;
+        return View(list);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> TaoMoiMaGiamGia(MaGiamGia model)
+    {
+        var events = await LaySuKienCuaToiDropdown();
+        if (!events.ContainsKey(model.SuKienId)) return NotFound();
+
+        if (await LaSuKienTamDungHoacHuy(model.SuKienId))
+        {
+            TempData["Error"] = "Không thể tạo mã giảm giá khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+        }
+
+        if (model.NgayBatDau >= model.NgayKetThuc)
+        {
+            TempData["Error"] = "Ngày bắt đầu khuyến mãi phải trước ngày kết thúc.";
+            return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+        }
+
+        if (model.LoaiGiamGia == 0 && (model.GiaTri <= 0 || model.GiaTri > 100))
+        {
+            TempData["Error"] = "Giá trị giảm theo phần trăm phải nằm trong khoảng từ 1% đến 100%.";
+            return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+        }
+
+        if (model.GiaTri <= 0 || model.SoLuongTong <= 0 || model.DonToiThieu < 0 || (model.GiamToiDa.HasValue && model.GiamToiDa.Value < 0))
+        {
+            TempData["Error"] = "Các thông số giá trị, số lượng, hoặc mức giảm tối thiểu không hợp lệ.";
+            return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+        }
+
+        string sql = @"
+            INSERT INTO MaGiamGia
+                (SuKienId, MaCode, MoTa, LoaiGiamGia, GiaTri, GiamToiDa,
+                 DonToiThieu, SoLuongTong, NgayBatDau,
+                 NgayKetThuc, TrangThai, NgayTao)
+            VALUES
+                (@SuKienId, @MaCode, @MoTa, @LoaiGiamGia, @GiaTri, @GiamToiDa,
+                 @DonToiThieu, @SoLuongTong, @NgayBatDau,
+                 @NgayKetThuc, 1, GETUTCDATE())
+        ";
+
+        model.MaCode = model.MaCode.Trim().ToUpperInvariant(); // Viết hoa toàn bộ code voucher
+
+        try
+        {
+            await Db.ThucThi(sql, model);
+            TempData["Message"] = "Đã tạo mã giảm giá mới.";
+        }
+        catch
+        {
+            TempData["Error"] = "Lỗi: Mã code này đã tồn tại trên hệ thống.";
+        }
+        return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+    }
+
+    // Form sửa mã giảm giá
+    [HttpGet]
+    public async Task<IActionResult> ChinhSuaMaGiamGia(int id)
+    {
+        var model = await LayMaGiamGia(id);
+        return (model == null) ? NotFound() : View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChinhSuaMaGiamGia(MaGiamGia model)
+    {
+        var original = await LayMaGiamGia(model.Id);
+        if (original == null) return NotFound();
+
+        if (await LaSuKienTamDungHoacHuy(original.SuKienId))
+        {
+            TempData["Error"] = "Không thể chỉnh sửa mã giảm giá khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("MaGiamGia", new { suKienId = original.SuKienId });
+        }
+
+        if (model.NgayBatDau >= model.NgayKetThuc)
+        {
+            TempData["Error"] = "Ngày bắt đầu khuyến mãi phải trước ngày kết thúc.";
+            return RedirectToAction("ChinhSuaMaGiamGia", new { id = model.Id });
+        }
+
+        if (model.LoaiGiamGia == 0 && (model.GiaTri <= 0 || model.GiaTri > 100))
+        {
+            TempData["Error"] = "Giá trị giảm theo phần trăm phải nằm trong khoảng từ 1% đến 100%.";
+            return RedirectToAction("ChinhSuaMaGiamGia", new { id = model.Id });
+        }
+
+        if (model.GiaTri <= 0 || model.SoLuongTong <= 0 || model.DonToiThieu < 0 || (model.GiamToiDa.HasValue && model.GiamToiDa.Value < 0))
+        {
+            TempData["Error"] = "Các thông số cấu hình mã giảm giá không hợp lệ.";
+            return RedirectToAction("ChinhSuaMaGiamGia", new { id = model.Id });
+        }
+
+        string sql = @"
+            UPDATE mg
+            SET MaCode           = @MaCode,
+                MoTa             = @MoTa,
+                LoaiGiamGia      = @LoaiGiamGia,
+                GiaTri           = @GiaTri,
+                GiamToiDa        = @GiamToiDa,
+                DonToiThieu      = @DonToiThieu,
+                SoLuongTong      = @SoLuongTong,
+                NgayBatDau       = @NgayBatDau,
+                NgayKetThuc      = @NgayKetThuc,
+                TrangThai        = @TrangThai
+            FROM MaGiamGia mg
+            JOIN SuKien s ON s.Id = mg.SuKienId
+            WHERE mg.Id           = @Id
+              AND s.NguoiToChucId = @organizerId
+              AND @SoLuongTong   >= mg.SoLuongDaDung
+        ";
+
+        model.MaCode = model.MaCode.Trim().ToUpperInvariant();
+
+        await Db.ThucThi(sql, new
+        {
+            model.Id,
+            model.MaCode,
+            model.MoTa,
+            model.LoaiGiamGia,
+            model.GiaTri,
+            model.GiamToiDa,
+            model.DonToiThieu,
+            model.SoLuongTong,
+            model.NgayBatDau,
+            model.NgayKetThuc,
+            model.TrangThai,
+            organizerId = LayIdNguoiDangNhap()
+        });
+
+        TempData["Message"] = "Đã cập nhật mã giảm giá.";
+        return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> XoaMaGiamGia(int id)
+    {
+        var model = await LayMaGiamGia(id);
+        if (model == null) return NotFound();
+
+        if (await LaSuKienTamDungHoacHuy(model.SuKienId))
+        {
+            TempData["Error"] = "Không thể xóa mã giảm giá khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+        }
+
+        string sql = @"
+            DELETE FROM MaGiamGia
+            WHERE Id             = @id
+              AND SoLuongDaDung  = 0
+        ";
+        int soDong = await Db.ThucThi(sql, new { id });
+        
+        if (soDong > 0)
+        {
+            TempData["Message"] = "Đã xóa mã giảm giá thành công.";
+        }
+        else
+        {
+            TempData["Error"] = "Không thể xóa vì mã này đã có người sử dụng. Hãy chuyển trạng thái hoạt động sang Tắt.";
+        }
+        return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
+    }
+
+    // 5. QUẢN LÝ ĐƠN ĐẶT VÉ & KHÁCH THAM DỰ
+
+    // Danh sách đơn hàng
+    public async Task<IActionResult> DonHang(Guid? suKienId, byte? trangThai, string? search)
+    {
+        string sql = @"
+            SELECT d.*
+            FROM DonHang d
+            JOIN SuKien s ON s.Id = d.SuKienId
+            WHERE s.NguoiToChucId = @organizerId
+              AND (@suKienId IS NULL OR d.SuKienId = @suKienId)
+              AND (@trangThai IS NULL OR d.TrangThai = @trangThai)
+              AND (@search = '' OR d.MaDonHang    LIKE '%' + @search + '%'
+                               OR d.EmailNguoiMua LIKE '%' + @search + '%'
+                               OR d.HoTenNguoiMua LIKE '%' + @search + '%')
+            ORDER BY d.NgayTao DESC
+        ";
+
+        var list = await Db.LayDanhSach<DonHang>(sql, new
+        { 
+            organizerId = LayIdNguoiDangNhap(),
+            suKienId,
+            trangThai,
+            search      = search?.Trim() ?? ""
+        });
+
+        ViewBag.SuKiens   = await LaySuKienCuaToiDropdown();
+        ViewBag.SuKienId  = suKienId;
+        ViewBag.TrangThai = trangThai;
+        ViewBag.Search    = search;
+        return View(list);
+    }
+
+    // Xem chi tiết đơn hàng
+    public async Task<IActionResult> ChiTietDonHang(Guid id)
+    {
+        string sql = @"
+            SELECT d.*
+            FROM DonHang d
+            JOIN SuKien s ON s.Id = d.SuKienId
+            WHERE d.Id           = @id
+              AND s.NguoiToChucId = @organizerId
+        ";
+        var donHang = await Db.LayDonLe<DonHang>(sql, new { id, organizerId = LayIdNguoiDangNhap() });
+        if (donHang == null) return NotFound();
+
+        string sqlChiTiet = @"
+            SELECT ct.*, lv.TenLoaiVe, cn.SoGhe
+            FROM ChiTietDonHang ct
+            LEFT JOIN LoaiVe lv ON lv.Id = ct.LoaiVeId
+            LEFT JOIN ChoNgoi cn ON cn.Id = ct.ChoNgoiId
+            WHERE ct.DonHangId = @id
+        ";
+        ViewBag.ChiTiet   = await Db.LayDanhSach<ChiTietDonHang>(sqlChiTiet, new { id });
+        ViewBag.TenSuKien = await LayTenSuKien(donHang.SuKienId);
+        ViewBag.ActiveEventId = donHang.SuKienId;
+        ViewBag.ActiveEventName = ViewBag.TenSuKien;
+        return View(donHang);
+    }
+
+    // Hủy đơn hàng (phần XacNhanThanhToan thủ công đã được loại bỏ — chỉ dùng VNPAY/MoMo/ZaloPay)
+
+    // Hủy đơn hàng
+
+    [HttpPost]
+    public async Task<IActionResult> HuyDonHang(Guid id)
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+        
+        try
+        {
+            // 1. Kiểm tra đơn hàng thuộc sự kiện của organizer này và ở trạng thái Chờ thanh toán
+            string sqlCheck = @"
+                SELECT d.*
+                FROM DonHang d
+                JOIN SuKien s ON s.Id = d.SuKienId
+                WHERE d.Id = @id AND s.NguoiToChucId = @organizerId AND d.TrangThai = 0
+            ";
+            var donHang = await connection.QueryFirstOrDefaultAsync<dynamic>(sqlCheck, new { id, organizerId }, transaction);
+            if (donHang == null)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Không tìm thấy đơn hàng chờ thanh toán phù hợp.";
+                return RedirectToAction("DonHang");
+            }
+
+            // 2. Giải phóng các ghế đã giữ (nếu có)
+            string sqlLayGheDaGiu = "SELECT ChoNgoiId FROM ChiTietDonHang WHERE DonHangId = @id AND ChoNgoiId IS NOT NULL";
+            var danhSachGheId = (await connection.QueryAsync<int>(sqlLayGheDaGiu, new { id }, transaction)).ToList();
+
+            if (danhSachGheId.Count > 0)
+            {
+                string sqlReleaseSeats = @"
+                    UPDATE ChoNgoi
+                    SET TrangThai = 0
+                    WHERE Id IN @danhSachGheId
+                ";
+                await connection.ExecuteAsync(sqlReleaseSeats, new { danhSachGheId }, transaction);
+            }
+
+            // 3. Đánh dấu đơn hàng là Đã hủy (TrangThai = 2)
+            string sqlCancel = @"
+                UPDATE DonHang
+                SET TrangThai = 2,
+                    NgayCapNhat = GETUTCDATE()
+                WHERE Id = @id
+            ";
+            await connection.ExecuteAsync(sqlCancel, new { id }, transaction);
+
+            // Giảm số lượng giữ chỗ của các loại vé trong đơn
+            string sqlThongKeVeHuy = @"
+                SELECT LoaiVeId, COUNT(*) AS SoLuong
+                FROM ChiTietDonHang
+                WHERE DonHangId = @id
+                GROUP BY LoaiVeId
+            ";
+            var listVeHuy = await connection.QueryAsync<dynamic>(sqlThongKeVeHuy, new { id }, transaction);
+            foreach (var item in listVeHuy)
+            {
+                int lvId = item.LoaiVeId;
+                int qty = item.SoLuong;
+                await connection.ExecuteAsync(@"
+                    UPDATE LoaiVe
+                    SET SoLuongGiuCho = CASE WHEN SoLuongGiuCho >= @qty THEN SoLuongGiuCho - @qty ELSE 0 END
+                    WHERE Id = @lvId", new { qty, lvId }, transaction);
+            }
+ 
+            await transaction.CommitAsync();
+            TempData["Message"] = "Đã hủy đơn hàng thành công.";
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Lỗi khi hủy đơn hàng: " + ex.Message;
+        }
+
+        return RedirectToAction("ChiTietDonHang", new { id });
+    }
+
+    // Danh sách người tham dự (chỉ lấy từ đơn hàng đã thanh toán TrangThai = 1)
+    public async Task<IActionResult> KhachThamDu(Guid suKienId, string? search)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return NotFound();
+
+        string sql = @"
+            SELECT ct.*, lv.TenLoaiVe
+            FROM ChiTietDonHang ct
+            JOIN DonHang d ON d.Id = ct.DonHangId
+            LEFT JOIN LoaiVe lv ON lv.Id = ct.LoaiVeId
+            WHERE d.SuKienId = @suKienId
+              AND d.TrangThai = 1
+              AND (@search = '' OR ct.TenNguoiThamDu   LIKE '%' + @search + '%'
+                               OR ct.EmailNguoiThamDu LIKE '%' + @search + '%')
+            ORDER BY ct.TenNguoiThamDu
+        ";
+
+        var list = await Db.LayDanhSach<ChiTietDonHang>(sql, new { suKienId, search = search?.Trim() ?? "" });
+
+        ViewBag.SuKienId  = suKienId;
+        ViewBag.TenSuKien = await LayTenSuKien(suKienId);
+        ViewBag.Search    = search;
+        return View(list);
+    }
+
+    // Xuất danh sách khách tham dự ra file CSV
+    public async Task<IActionResult> XuatKhachThamDuCsv(Guid suKienId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return NotFound();
+
+        string sql = @"
+            SELECT ct.TenNguoiThamDu,
+                   ct.EmailNguoiThamDu,
+                   lv.TenLoaiVe,
+                   ISNULL(ct.MaVe, '')            AS MaVe,
+                   ISNULL(ct.TrangThaiCheckin, 0) AS TrangThaiCheckin
+            FROM ChiTietDonHang ct
+            JOIN DonHang d ON d.Id = ct.DonHangId
+            JOIN LoaiVe lv ON lv.Id = ct.LoaiVeId
+            WHERE d.SuKienId = @suKienId
+              AND d.TrangThai = 1
+            ORDER BY ct.TenNguoiThamDu
+        ";
+
+        var rawList = await Db.LayDanhSach<dynamic>(sql, new { suKienId });
+
+        var csv = new StringBuilder();
+        csv.AppendLine("Ten nguoi tham du,Email,Loai ve,Ma ve,Trang thai");
+        foreach (var row in rawList)
+        {
+            string ten       = (row.TenNguoiThamDu ?? "").Replace(",", " ");
+            string email     = row.EmailNguoiThamDu ?? "";
+            string loaiVe    = (row.TenLoaiVe ?? "").Replace(",", " ");
+            string maVe      = row.MaVe;
+            string trangThai = (row.TrangThaiCheckin == 1) ? "Da check-in" : "Chua check-in";
+            csv.AppendLine($"{ten},{email},{loaiVe},{maVe},{trangThai}");
+        }
+
+        byte[] bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+        return File(bytes, "text/csv", $"khach-tham-du-{suKienId}.csv");
+    }
+
+    // 6. QUÉT VÉ SOÁT VÉ (CHECK-IN)
+
+    // Danh sách check-in
+    public async Task<IActionResult> CheckIn(Guid? suKienId, string? search, byte? trangThai)
+    {
+        if (suKienId == null)
+        {
+            var organizerId = LayIdNguoiDangNhap();
+            var latestId = await Db.LayGiaTri<Guid?>(
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+            
+            if (latestId == null)
+            {
+                TempData["Error"] = "Vui lòng tạo sự kiện trước.";
+                return RedirectToAction("SuKien");
+            }
+            suKienId = latestId;
+        }
+
+        var sId = suKienId.Value;
+        if (!await LaSuKienCuaToi(sId)) return Forbid();
+
+        string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @sId";
+        var sk = await Db.LayDonLe<dynamic>(sqlSuKien, new { sId });
+        if (sk != null)
+        {
+            ViewBag.BatDauCheckIn = (DateTime?)sk.BatDauCheckIn;
+            ViewBag.KetThucCheckIn = (DateTime?)sk.KetThucCheckIn;
+            ViewBag.NgayBatDau = (DateTime)sk.NgayBatDau;
+            ViewBag.NgayKetThuc = (DateTime)sk.NgayKetThuc;
+            ViewBag.TrangThaiSuKien = (int)sk.TrangThai;
+        }
+
+        string sql = @"
+            SELECT ct.*,
+                   lv.TenLoaiVe
+            FROM ChiTietDonHang ct
+            JOIN DonHang d ON d.Id = ct.DonHangId
+            LEFT JOIN LoaiVe lv ON lv.Id = ct.LoaiVeId
+            WHERE d.SuKienId = @suKienId
+              AND d.TrangThai = 1
+              AND (@trangThai IS NULL OR ct.TrangThaiCheckin = @trangThai)
+              AND (@search = '' OR ct.MaVe            LIKE '%' + @search + '%'
+                               OR ct.TenNguoiThamDu   LIKE '%' + @search + '%'
+                               OR ct.EmailNguoiThamDu LIKE '%' + @search + '%')
+            ORDER BY ct.TrangThaiCheckin, ct.TenNguoiThamDu
+        ";
+
+        var list = await Db.LayDanhSach<ChiTietDonHang>(sql, new
+        { 
+            suKienId  = sId, 
+            trangThai, 
+            search    = search?.Trim() ?? "" 
+        });
+
+        ViewBag.SuKienId  = sId;
+        ViewBag.TenSuKien = await LayTenSuKien(sId);
+        ViewBag.Search    = search;
+        ViewBag.TrangThai = trangThai;
+        ViewBag.DaCheckin = list.Count(x => x.TrangThaiCheckin == 1);
+        return View(list);
+    }
+
+    // Xử lý Check-in bằng cách quét QR Code hoặc gõ tay mã vé
+    [HttpPost]
+    public async Task<IActionResult> QuetVeCheckIn(Guid suKienId, string code)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return Forbid();
+
+        string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @suKienId";
+        var skInfo = await Db.LayDonLe<dynamic>(sqlSuKien, new { suKienId });
+        if (skInfo == null) return NotFound();
+
+        if (skInfo.TrangThai == 2 || skInfo.TrangThai == 6)
+        {
+            TempData["Error"] = "Cảnh báo: Sự kiện đang tạm dừng hoặc đã bị hủy, không thể thực hiện check-in.";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
+
+        // Quy đổi thời gian hiện tại sang giờ Việt Nam (UTC+7)
+        DateTime now = DateTime.UtcNow.AddHours(7);
+        
+        // Thiết lập mốc check-in thông minh (Smart Default): BĐ trước 1 tiếng, KT bằng giờ kết thúc sự kiện
+        DateTime batDauCheckIn = skInfo.BatDauCheckIn ?? ((DateTime)skInfo.NgayBatDau).AddHours(-1);
+        DateTime ketThucCheckIn = skInfo.KetThucCheckIn ?? skInfo.NgayKetThuc;
+
+        if (now < batDauCheckIn)
+        {
+            TempData["Error"] = $"Cảnh báo: Chưa đến thời gian cho phép check-in. Thời gian check-in bắt đầu từ: {batDauCheckIn.ToString("dd/MM/yyyy HH:mm")}";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
+
+        if (now > ketThucCheckIn)
+        {
+            TempData["Error"] = $"Cảnh báo: Thời gian soát vé của sự kiện này đã kết thúc (Hạn chót soát vé: {ketThucCheckIn.ToString("dd/MM/yyyy HH:mm")}).";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
+
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+
+        // Tìm vé khớp với mã vé hoặc mã QR trong sự kiện này (Yêu cầu đơn hàng đã thanh toán TrangThai = 1)
+        string sqlSearch = @"
+            SELECT TOP 1 ct.Id,
+                         ct.TrangThaiCheckin,
+                         ct.TenNguoiThamDu
+            FROM ChiTietDonHang ct
+            JOIN DonHang d ON d.Id = ct.DonHangId
+            WHERE d.SuKienId = @suKienId
+              AND d.TrangThai = 1
+              AND (ct.MaVe = @code OR ct.MaQRCode = @code)
+        ";
+
+        var ticket = await connection.QueryFirstOrDefaultAsync<dynamic>(sqlSearch, new { suKienId, code = code.Trim() }, transaction);
+
+        if (ticket == null)
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Lỗi: Không tìm thấy vé hợp lệ hoặc đơn hàng chưa được thanh toán thành công.";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
+
+        int  ticketId = ticket.Id;
+        byte trangThaiCheckin = ticket.TrangThaiCheckin;
+        var  nguoiCheckinId    = LayIdNguoiDangNhap();
+
+        // Kiểm tra xem vé đã được dùng hoặc bị hủy chưa
+        if (trangThaiCheckin == 1)
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = $"Cảnh báo: Vé của khách '{ticket.TenNguoiThamDu}' đã check-in từ trước!";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
+        else if (trangThaiCheckin == 2)
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = $"Cảnh báo: Vé của khách '{ticket.TenNguoiThamDu}' đã bị hủy bỏ, không hợp lệ!";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
+
+        // Cập nhật trạng thái check-in (TrangThaiCheckin = 1, ghi nhận thời gian và người soát vé)
+        string sqlUpdate = @"
+            UPDATE ChiTietDonHang
+            SET TrangThaiCheckin = 1,
+                NgayCheckin      = GETUTCDATE(),
+                NguoiCheckinId   = @nguoiCheckinId
+            WHERE Id               = @ticketId
+              AND TrangThaiCheckin = 0
+        ";
+
+        int soDong = await connection.ExecuteAsync(sqlUpdate, new { ticketId, nguoiCheckinId }, transaction);
+        if (soDong == 0)
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Có lỗi xảy ra. Vé đã soát trên thiết bị khác.";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
+
+        await transaction.CommitAsync();
+        TempData["Message"] = "Check-in thành công!";
+        return RedirectToAction("CheckIn", new { suKienId });
+    }
+
+    // 6.5. QUẢN LÝ NHÂN VIÊN SOÁX VÉ (STAFF)
+
+    // Hiển thị danh sách nhân viên soát vé của sự kiện
+    // Hiển thị danh sách nhân viên soát vé của sự kiện (Phân công soát vé)
+    public async Task<IActionResult> QuanLyStaff(Guid? suKienId)
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        var events = await LaySuKienCuaToiDropdown();
+
+        if (suKienId == null)
+        {
+            var latestId = await Db.LayGiaTri<Guid?>(
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+            
+            if (latestId == null)
+            {
+                TempData["Error"] = "Vui lòng tạo sự kiện trước.";
+                return RedirectToAction("SuKien");
+            }
+            suKienId = latestId;
+        }
+
+        var sId = suKienId.Value;
+        if (!await LaSuKienCuaToi(sId)) return Forbid();
+
+        string sql = @"
+            SELECT nv.*,
+                   nd.HoTen AS HoTenNV,
+                   nd.Email AS EmailNV
+            FROM NhanVienSuKien nv
+            JOIN NguoiDung nd ON nd.Id = nv.NguoiDungId
+            WHERE nv.SuKienId = @suKienId
+            ORDER BY nv.NgayThem DESC
+        ";
+
+        var list = await Db.LayDanhSach<NhanVienSuKien>(sql, new { suKienId = sId });
+
+        // Lấy danh sách nhân viên Staff do BTC này quản lý/tạo ra để phân công
+        string sqlStaff = "SELECT * FROM NguoiDung WHERE VaiTro = 2 AND NguoiTaoId = @organizerId ORDER BY HoTen";
+        ViewBag.CreatedStaff = await Db.LayDanhSach<NguoiDung>(sqlStaff, new { organizerId });
+
+        ViewBag.SuKiens = events;
+        ViewBag.SuKienId = sId;
+        ViewBag.TenSuKien = await LayTenSuKien(sId);
+        var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @id", new { id = sId });
+        ViewBag.TrangThaiSuKien = sk != null ? (int)sk.TrangThai : 0;
+        ViewBag.NgayKetThucSuKien = sk?.NgayKetThuc;
+        return View(list);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ThemStaff(Guid suKienId, Guid nguoiDungId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return Forbid();
+
+        if (await LaSuKienTamDungHoacHuy(suKienId))
+        {
+            TempData["Error"] = "Không thể phân công nhân viên khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("QuanLyStaff", new { suKienId });
+        }
+
+        // Kiểm tra xem tài khoản này có thuộc quyền quản lý của BTC này không
+        string sqlCheckOwner = "SELECT COUNT(1) FROM NguoiDung WHERE Id = @nguoiDungId AND NguoiTaoId = @organizerId";
+        var organizerId = LayIdNguoiDangNhap();
+        int isMyStaff = await Db.LayGiaTri<int>(sqlCheckOwner, new { nguoiDungId, organizerId });
+        if (isMyStaff == 0)
+        {
+            TempData["Error"] = "Lỗi: Không tìm thấy nhân sự này trong danh sách quản lý của bạn.";
+            return RedirectToAction("QuanLyStaff", new { suKienId });
+        }
+
+        // Kiểm tra xem đã được phân công chưa
+        string sqlCheckStaff = "SELECT COUNT(1) FROM NhanVienSuKien WHERE NguoiDungId = @nguoiDungId AND SuKienId = @suKienId";
+        int alreadyStaff = await Db.LayGiaTri<int>(sqlCheckStaff, new { nguoiDungId, suKienId });
+        if (alreadyStaff > 0)
+        {
+            TempData["Error"] = "Nhân viên này đã được phân công vào sự kiện này từ trước.";
+            return RedirectToAction("QuanLyStaff", new { suKienId });
+        }
+
+        // Phân công
+        string sqlInsert = @"
+            INSERT INTO NhanVienSuKien (NguoiDungId, SuKienId, NgayThem)
+            VALUES (@nguoiDungId, @suKienId, GETUTCDATE())
+        ";
+        await Db.ThucThi(sqlInsert, new { nguoiDungId, suKienId });
+        TempData["Message"] = "Phân công nhân viên soát vé thành công!";
+        return RedirectToAction("QuanLyStaff", new { suKienId });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> XoaStaff(int id, Guid suKienId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return Forbid();
+
+        if (await LaSuKienTamDungHoacHuy(suKienId))
+        {
+            TempData["Error"] = "Không thể gỡ nhân viên khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("QuanLyStaff", new { suKienId });
+        }
+
+        string sql = "DELETE FROM NhanVienSuKien WHERE Id = @id AND SuKienId = @suKienId";
+        await Db.ThucThi(sql, new { id, suKienId });
+
+        TempData["Message"] = "Đã gỡ nhân viên soát vé khỏi sự kiện.";
+        return RedirectToAction("QuanLyStaff", new { suKienId });
+    }
+
+    // 6.6. QUẢN LÝ TÀI KHOẢN NHÂN VIÊN (STAFF ACCOUNTS)
+
+    // Hiển thị danh sách tài khoản Staff do BTC này tạo ra
+    public async Task<IActionResult> NhanVienStaff()
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        string sql = @"
+            SELECT * 
+            FROM NguoiDung 
+            WHERE VaiTro = 2 AND NguoiTaoId = @organizerId 
+            ORDER BY HoTen
+        ";
+        var list = await Db.LayDanhSach<NguoiDung>(sql, new { organizerId });
+        return View(list);
+    }
+
+    // Thêm (tạo mới) tài khoản Staff
+    [HttpPost]
+    public async Task<IActionResult> TaoNhanVienStaff(string hoTen, string email, string matKhau)
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        if (string.IsNullOrWhiteSpace(hoTen) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(matKhau))
+        {
+            TempData["Error"] = "Vui lòng điền đầy đủ các thông tin bắt buộc.";
+            return RedirectToAction("NhanVienStaff");
+        }
+
+        string sqlCheckEmail = "SELECT COUNT(1) FROM NguoiDung WHERE Email = @email";
+        int exists = await Db.LayGiaTri<int>(sqlCheckEmail, new { email = email.Trim() });
+        if (exists > 0)
+        {
+            TempData["Error"] = "Email này đã được sử dụng trên hệ thống.";
+            return RedirectToAction("NhanVienStaff");
+        }
+
+        string sqlInsert = @"
+            INSERT INTO NguoiDung (Id, Email, MatKhauHash, HoTen, VaiTro, TrangThai, EmailXacNhan, NguoiTaoId, NgayTao)
+            VALUES (@id, @email, @hash, @hoTen, 2, 1, 1, @organizerId, GETUTCDATE())
+        ";
+        await Db.ThucThi(sqlInsert, new
+        {
+            id = Guid.NewGuid(),
+            email = email.Trim(),
+            hash = BCrypt.Net.BCrypt.HashPassword(matKhau.Trim()),
+            hoTen = hoTen.Trim(),
+            organizerId
+        });
+
+        TempData["Message"] = "Đã tạo tài khoản nhân viên thành công.";
+        return RedirectToAction("NhanVienStaff");
+    }
+
+    // Sửa thông tin tài khoản Staff
+    [HttpPost]
+    public async Task<IActionResult> SuaNhanVienStaff(Guid id, string hoTen, string? matKhau)
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        if (string.IsNullOrWhiteSpace(hoTen))
+        {
+            TempData["Error"] = "Vui lòng điền đầy đủ họ tên.";
+            return RedirectToAction("NhanVienStaff");
+        }
+
+        // Kiểm tra xem tài khoản này có thuộc quyền quản lý của BTC này không
+        string sqlCheckOwner = "SELECT COUNT(1) FROM NguoiDung WHERE Id = @id AND NguoiTaoId = @organizerId";
+        int isMyStaff = await Db.LayGiaTri<int>(sqlCheckOwner, new { id, organizerId });
+        if (isMyStaff == 0) return Forbid();
+
+        if (string.IsNullOrWhiteSpace(matKhau))
+        {
+            // Sửa không đổi mật khẩu
+            string sqlUpdate = "UPDATE NguoiDung SET HoTen = @hoTen, NgayCapNhat = GETUTCDATE() WHERE Id = @id";
+            await Db.ThucThi(sqlUpdate, new { id, hoTen = hoTen.Trim() });
+        }
+        else
+        {
+            // Sửa có đổi mật khẩu
+            string sqlUpdate = "UPDATE NguoiDung SET HoTen = @hoTen, MatKhauHash = @hash, NgayCapNhat = GETUTCDATE() WHERE Id = @id";
+            await Db.ThucThi(sqlUpdate, new 
+            { 
+                id, 
+                hoTen = hoTen.Trim(),
+                hash = BCrypt.Net.BCrypt.HashPassword(matKhau.Trim())
+            });
+        }
+
+        TempData["Message"] = "Đã cập nhật thông tin nhân viên.";
+        return RedirectToAction("NhanVienStaff");
+    }
+
+    // Xóa tài khoản Staff
+    [HttpPost]
+    public async Task<IActionResult> XoaNhanVienStaff(Guid id)
+    {
+        var organizerId = LayIdNguoiDangNhap();
+        // Kiểm tra xem tài khoản này có thuộc quyền quản lý của BTC này không
+        string sqlCheckOwner = "SELECT COUNT(1) FROM NguoiDung WHERE Id = @id AND NguoiTaoId = @organizerId";
+        int isMyStaff = await Db.LayGiaTri<int>(sqlCheckOwner, new { id, organizerId });
+        if (isMyStaff == 0) return Forbid();
+
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            // Xóa liên kết phân công trước
+            await connection.ExecuteAsync("DELETE FROM NhanVienSuKien WHERE NguoiDungId = @id", new { id }, transaction);
+            // Xóa tài khoản người dùng
+            await connection.ExecuteAsync("DELETE FROM NguoiDung WHERE Id = @id", new { id }, transaction);
+
+            await transaction.CommitAsync();
+            TempData["Message"] = "Đã xóa tài khoản nhân viên.";
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            TempData["Error"] = "Có lỗi xảy ra khi xóa: " + ex.Message;
+        }
+
+        return RedirectToAction("NhanVienStaff");
+    }
+
+    // 7. THỐNG KÊ DOANH THU & LIÊN LẠC (BÁO CÁO)
+
+    // Hiển thị báo cáo doanh thu theo sự kiện
+    public async Task<IActionResult> BaoCao(Guid? suKienId)
+    {
+        if (suKienId == null)
+        {
+            var organizerId = LayIdNguoiDangNhap();
+            var latestId = await Db.LayGiaTri<Guid?>(
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+            
+            if (latestId == null)
+            {
+                TempData["Error"] = "Vui lòng tạo sự kiện trước.";
+                return RedirectToAction("SuKien");
+            }
+            suKienId = latestId;
+        }
+
+        var sId = suKienId.Value;
+        if (!await LaSuKienCuaToi(sId)) return NotFound();
+
+        ViewBag.SuKienId  = sId;
+        ViewBag.TenSuKien = await Db.LayGiaTri<string>("SELECT TenSuKien FROM SuKien WHERE Id = @id", new { id = sId });
+        
+        // Thống kê tổng số đơn hàng đã hoàn tất
+        ViewBag.SoDon = await Db.LayGiaTri<int>(
+            "SELECT COUNT(*) FROM DonHang WHERE SuKienId = @id AND TrangThai = 1", new { id = sId }
+        );
+        
+        // Thống kê tổng tiền thanh toán thực tế
+        ViewBag.DoanhThu = await Db.LayGiaTri<decimal>(
+            "SELECT ISNULL(SUM(TongThanhToan), 0) FROM DonHang WHERE SuKienId = @id AND TrangThai = 1", new { id = sId }
+        );
+        
+        // Thống kê số tiền được giảm bởi voucher
+        ViewBag.TienGiam = await Db.LayGiaTri<decimal>(
+            "SELECT ISNULL(SUM(TienGiamGia), 0) FROM DonHang WHERE SuKienId = @id AND TrangThai = 1", new { id = sId }
+        );
+        
+        // Thống kê số lượng vé đã xuất ra
+        ViewBag.SoVe = await Db.LayGiaTri<int>(
+            "SELECT COUNT(*) FROM ChiTietDonHang ct JOIN DonHang d ON d.Id = ct.DonHangId WHERE d.SuKienId = @id AND d.TrangThai = 1", new { id = sId }
+        );
+        
+        // Thống kê số lượng vé đã quét check-in
+        ViewBag.DaCheckin = await Db.LayGiaTri<int>(
+            "SELECT COUNT(*) FROM ChiTietDonHang ct JOIN DonHang d ON d.Id = ct.DonHangId WHERE d.SuKienId = @id AND ct.TrangThaiCheckin = 1", new { id = sId }
+        );
+
+        // Hiển thị thống kê chi tiết của từng loại vé thuộc sự kiện này
+        var listLoaiVe = await Db.LayDanhSach<LoaiVe>(
+            "SELECT * FROM LoaiVe WHERE SuKienId = @id ORDER BY ThuTuHienThi", new { id = sId });
+            
+        return View(listLoaiVe);
+    }
+
+    // Xuất báo cáo doanh thu vé ra CSV
+    public async Task<IActionResult> XuatBaoCaoCsv(Guid suKienId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return NotFound();
+
+        string sql = @"
+            SELECT TenLoaiVe,
+                   GiaBan,
+                   SoLuongTong,
+                   SoLuongDaBan
+            FROM LoaiVe
+            WHERE SuKienId = @id
+        ";
+        var rawList = await Db.LayDanhSach<dynamic>(sql, new { id = suKienId });
+
+        var csv = new StringBuilder("Loai ve,Gia ban,Tong ve,Da ban,Ty le lap day\r\n");
+        foreach (var row in rawList)
+        {
+            string  tenLoaiVe = row.TenLoaiVe;
+            decimal giaBan    = row.GiaBan;
+            int     tong      = row.SoLuongTong;
+            int     daBan     = row.SoLuongDaBan;
+            decimal tyLe      = (tong == 0) ? 0 : daBan * 100m / tong;
+
+            csv.AppendLine($"{tenLoaiVe.Replace(',', ' ')},{giaBan},{tong},{daBan},{tyLe:N1}%");
+        }
+
+        byte[] bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
+        return File(bytes, "text/csv", $"bao-cao-{suKienId}.csv");
+    }
+
+    // Trang soạn tin nhắn gửi thông báo cho khách hàng đã mua vé
+    public async Task<IActionResult> LienLac(Guid? suKienId)
+    {
+        if (suKienId == null)
+        {
+            var organizerId = LayIdNguoiDangNhap();
+            var latestId = await Db.LayGiaTri<Guid?>(
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+            
+            if (latestId == null)
+            {
+                TempData["Error"] = "Vui lòng tạo sự kiện trước.";
+                return RedirectToAction("SuKien");
+            }
+            suKienId = latestId;
+        }
+
+        var sId = suKienId.Value;
+        if (!await LaSuKienCuaToi(sId)) return NotFound();
+
+        ViewBag.TenSuKien = await Db.LayGiaTri<string>("SELECT TenSuKien FROM SuKien WHERE Id = @id", new { id = sId });
+        
+        // Đếm số người mua duy nhất (để hiển thị số người sẽ nhận được tin nhắn)
+        ViewBag.SoNguoiNhan = await Db.LayGiaTri<int>(
+            "SELECT COUNT(DISTINCT NguoiMuaId) FROM DonHang WHERE SuKienId = @id AND TrangThai = 1", new { id = sId }
+        );
+
+        ViewBag.SuKienId = sId;
+        return View();
+    }
+
+    // Gửi thông báo hệ thống hàng loạt cho người mua vé của sự kiện này
+    [HttpPost]
+    public async Task<IActionResult> GuiThongBao(Guid suKienId, string tieuDe, string noiDung)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return NotFound();
+        
+        // Thêm thông báo mới cho mỗi người dùng từng thanh toán vé thành công
+        string sql = @"
+            INSERT INTO ThongBao
+                (NguoiNhanId, TieuDe, NoiDung, LoaiThongBao, DuongDan, DaDoc, NgayTao)
+            SELECT DISTINCT
+                   d.NguoiMuaId,
+                   @tieuDe,
+                   @noiDung,
+                   3,
+                   @duongDan,
+                   0,
+                   GETUTCDATE()
+            FROM DonHang d
+            WHERE d.SuKienId = @suKienId
+              AND d.TrangThai = 1
+        ";
+
+        int soLuongGui = await Db.ThucThi(sql, new
+        {
+            tieuDe   = tieuDe.Trim(),
+            noiDung  = noiDung.Trim(),
+            duongDan = "/Home/ChiTiet/" + suKienId,
+            suKienId
+        });
+
+        TempData["Message"] = $"Đã gửi thông báo thành công tới {soLuongGui} khách hàng.";
+        return RedirectToAction("LienLac", new { suKienId });
+    }
+
+    // 8. THIẾT LẬP SƠ ĐỒ CHỖ NGỒI (SEAT MAP EDITOR)
+
+    // Trang cấu hình sơ đồ ghế
+    public async Task<IActionResult> SoDoChoNgoi(Guid? suKienId)
+    {
+        if (suKienId == null)
+        {
+            var organizerId = LayIdNguoiDangNhap();
+            var latestId = await Db.LayGiaTri<Guid?>(
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+            
+            if (latestId == null)
+            {
+                TempData["Error"] = "Vui lòng tạo sự kiện trước.";
+                return RedirectToAction("SuKien");
+            }
+            suKienId = latestId;
+        }
+
+        var sId = suKienId.Value;
+        if (!await LaSuKienCuaToi(sId)) return NotFound();
+
+        ViewBag.SuKiens   = await LaySuKienCuaToiDropdown();
+        ViewBag.SuKienId  = sId;
+        ViewBag.TenSuKien = await LayTenSuKien(sId);
+        ViewBag.LoaiVes   = await LayLoaiVeList(sId);
+        ViewBag.Ghe       = new List<ChoNgoi>();
+        ViewBag.Hang      = new Dictionary<int, string>();
+        var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @id", new { id = sId });
+        ViewBag.TrangThaiSuKien = sk != null ? (int)sk.TrangThai : 0;
+        ViewBag.NgayKetThucSuKien = sk?.NgayKetThuc;
+
+        var model = await Db.LayDonLe<SoDoChoNgoi>(
+            "SELECT * FROM SoDoChoNgoi WHERE SuKienId = @id", new { id = sId }
+        );
+        if (model == null) return View(new SoDoChoNgoi { SuKienId = sId });
+
+        var seats = new List<ChoNgoi>();
+        var rows  = new Dictionary<int, string>();
+
+        string sqlSeats = @"
+            SELECT g.*,
+                   h.TenHang
+            FROM ChoNgoi g
+            JOIN HangGhe h ON h.Id = g.HangGheId
+            JOIN KhuVuc  k ON k.Id = h.KhuVucId
+            WHERE k.SoDoChoNgoiId = @id
+            ORDER BY h.ThuTu, g.Id
+        ";
+
+        var rawSeats = await Db.LayDanhSach<dynamic>(sqlSeats, new { id = model.Id });
+        foreach (var seat in rawSeats)
+        {
+            seats.Add(new ChoNgoi
+            {
+                Id        = seat.Id,
+                HangGheId = seat.HangGheId,
+                SoGhe     = seat.SoGhe,
+                ViTriX    = seat.ViTriX,
+                ViTriY    = seat.ViTriY,
+                TrangThai = seat.TrangThai
+            });
+            int hId      = seat.HangGheId;
+            string tHang = seat.TenHang;
+            rows[hId]    = tHang;
+        }
+
+        ViewBag.Ghe  = seats;
+        ViewBag.Hang = rows;
+        return View(model);
+    }
+
+    // Xử lý Thiết lập sơ đồ theo mẫu
+    [HttpPost]
+    public async Task<IActionResult> TaoSoDo(
+        Guid suKienId, 
+        string tenSoDo, 
+        string loaiSoDo, // "cinema", "theater", "music", "simple", "custom", "none" (ghế ngẫu nhiên)
+        int? simpleLoaiVeId, 
+        int? simpleSoHang, 
+        int? simpleSoGheMoiHang,
+        List<string>? zoneTen,
+        List<int>? zoneLoaiVeId,
+        List<int>? zoneSoHang,
+        List<int>? zoneSoGheMoiHang,
+        List<string>? zoneMauSac,
+        int? cinemaVipLoaiVeId,
+        int? cinemaNormalLoaiVeId,
+        int? theaterVipLoaiVeId,
+        int? theaterNormalLoaiVeId,
+        int? musicVipLoaiVeId,
+        int? musicNormalLoaiVeId
+    )
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return Forbid();
+
+        if (await LaSuKienTamDungHoacHuy(suKienId))
+        {
+            TempData["Error"] = "Không thể cấu hình sơ đồ ghế khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("SoDoChoNgoi", new { suKienId });
+        }
+
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            // Bước 1: Xóa sơ đồ cũ triệt để (Xóa ghế -> Xóa hàng -> Xóa khu vực -> Xóa sơ đồ)
+            var currentSoDoId = await connection.ExecuteScalarAsync<int?>(
+                "SELECT Id FROM SoDoChoNgoi WHERE SuKienId = @id", new { id = suKienId }, transaction);
+            if (currentSoDoId.HasValue)
+            {
+                var sId = currentSoDoId.Value;
+                await connection.ExecuteAsync("DELETE FROM ChoNgoi WHERE HangGheId IN (SELECT h.Id FROM HangGhe h JOIN KhuVuc k ON h.KhuVucId = k.Id WHERE k.SoDoChoNgoiId = @sId)", new { sId }, transaction);
+                await connection.ExecuteAsync("DELETE FROM HangGhe WHERE KhuVucId IN (SELECT Id FROM KhuVuc WHERE SoDoChoNgoiId = @sId)", new { sId }, transaction);
+                await connection.ExecuteAsync("DELETE FROM KhuVuc WHERE SoDoChoNgoiId = @sId", new { sId }, transaction);
+                await connection.ExecuteAsync("DELETE FROM SoDoChoNgoi WHERE Id = @sId", new { sId }, transaction);
+            }
+
+            // Nếu người dùng chọn "none" (Không sử dụng sơ đồ ghế -> Xếp ngẫu nhiên)
+            if (loaiSoDo == "none")
+            {
+                await connection.ExecuteAsync("UPDATE SuKien SET CoSoDoChoNgoi = 0 WHERE Id = @id", new { id = suKienId }, transaction);
+                await transaction.CommitAsync();
+                TempData["Message"] = "Đã cấu hình sự kiện không sử dụng sơ đồ ghế. Vé sẽ được sắp xếp ngẫu nhiên khi thanh toán.";
+                return RedirectToAction("SoDoChoNgoi", new { suKienId });
+            }
+
+            // Bước 2: Tạo sơ đồ chỗ ngồi mới
+            var mapId = await connection.QuerySingleAsync<int>(@"
+                INSERT INTO SoDoChoNgoi
+                    (SuKienId, TenSoDo, NgayTao)
+                OUTPUT INSERTED.Id
+                VALUES
+                    (@suKienId, @tenSoDo, GETUTCDATE())
+            ", new
+            {
+                suKienId,
+                tenSoDo = string.IsNullOrEmpty(tenSoDo) ? "Sơ đồ ghế mặc định" : tenSoDo.Trim()
+            }, transaction);
+
+            var zones = new List<ZoneDefinition>();
+
+            // Bước 3: Định nghĩa các khu vực ghế dựa vào loại sơ đồ mẫu được chọn
+            if (loaiSoDo == "cinema")
+            {
+                zones.Add(new ZoneDefinition { Ten = "Standard Area", LoaiVeId = cinemaNormalLoaiVeId ?? 0, SoHang = 4, SoGheMoiHang = 12, MauSac = "#0d6efd" });
+                zones.Add(new ZoneDefinition { Ten = "VIP Area", LoaiVeId = cinemaVipLoaiVeId ?? 0, SoHang = 4, SoGheMoiHang = 14, MauSac = "#ffc107" });
+            }
+            else if (loaiSoDo == "theater")
+            {
+                zones.Add(new ZoneDefinition { Ten = "VIP Front Row", LoaiVeId = theaterVipLoaiVeId ?? 0, SoHang = 3, SoGheMoiHang = 10, MauSac = "#dc3545" });
+                zones.Add(new ZoneDefinition { Ten = "Standard Seats", LoaiVeId = theaterNormalLoaiVeId ?? 0, SoHang = 7, SoGheMoiHang = 12, MauSac = "#198754" });
+            }
+            else if (loaiSoDo == "music")
+            {
+                zones.Add(new ZoneDefinition { Ten = "VIP Fanzone", LoaiVeId = musicVipLoaiVeId ?? 0, SoHang = 4, SoGheMoiHang = 8, MauSac = "#6f42c1" });
+                zones.Add(new ZoneDefinition { Ten = "Standard Standing", LoaiVeId = musicNormalLoaiVeId ?? 0, SoHang = 8, SoGheMoiHang = 14, MauSac = "#0dcaf0" });
+            }
+            else if (loaiSoDo == "simple")
+            {
+                zones.Add(new ZoneDefinition { Ten = "Khu vực chính", LoaiVeId = simpleLoaiVeId ?? 0, SoHang = simpleSoHang ?? 5, SoGheMoiHang = simpleSoGheMoiHang ?? 10, MauSac = "#198754" });
+            }
+            else if (loaiSoDo == "custom" && zoneTen != null && zoneLoaiVeId != null && zoneSoHang != null && zoneSoGheMoiHang != null)
+            {
+                // Custom: Tạo sơ đồ tự định nghĩa thủ công
+                for (int i = 0; i < zoneTen.Count; i++)
+                {
+                    if (string.IsNullOrWhiteSpace(zoneTen[i])) continue;
+                    zones.Add(new ZoneDefinition
+                    {
+                        Ten          = zoneTen[i].Trim(),
+                        LoaiVeId     = zoneLoaiVeId[i],
+                        SoHang       = zoneSoHang[i],
+                        SoGheMoiHang = zoneSoGheMoiHang[i],
+                        MauSac       = (zoneMauSac != null && zoneMauSac.Count > i && !string.IsNullOrEmpty(zoneMauSac[i])) ? zoneMauSac[i] : "#198754"
+                    });
+                }
+            }
+
+            int currentOverallRow = 0;
+            int orderCounter      = 1;
+
+            // Bước 4: Tạo dữ liệu vật lý các ghế vào database
+            foreach (var z in zones)
+            {
+                if (z.LoaiVeId <= 0) continue;
+                
+                var zoneId = await connection.QuerySingleAsync<int>(@"
+                    INSERT INTO KhuVuc
+                        (SoDoChoNgoiId, LoaiVeId, TenKhuVuc, MauSac, ThuTu)
+                    OUTPUT INSERTED.Id
+                    VALUES
+                        (@mapId, @loaiVeId, @ten, @mau, @order)
+                ", new
+                {
+                    mapId,
+                    loaiVeId = z.LoaiVeId,
+                    ten      = z.Ten,
+                    mau      = z.MauSac,
+                    order    = orderCounter++
+                }, transaction);
+
+                for (int r = 0; r < z.SoHang; r++)
+                {
+                    // Đặt tên hàng (A, B, C, D...)
+                    char rowChar = (char)('A' + (currentOverallRow % 26));
+                    string rowName = rowChar.ToString();
+                    if (currentOverallRow >= 26)
+                    {
+                        rowName = ((char)('A' + ((currentOverallRow - 26) % 26))).ToString() + "2";
+                    }
+                    currentOverallRow++;
+
+                    var rowId = await connection.QuerySingleAsync<int>(@"
+                        INSERT INTO HangGhe
+                            (KhuVucId, TenHang, SoGhe, ThuTu)
+                        OUTPUT INSERTED.Id
+                        VALUES
+                            (@zoneId, @rowName, @soGhe, @order)
+                    ", new
+                    {
+                        zoneId,
+                        rowName,
+                        soGhe = z.SoGheMoiHang,
+                        order = currentOverallRow
+                    }, transaction);
+
+                    for (int seat = 1; seat <= z.SoGheMoiHang; seat++)
+                    {
+                        await connection.ExecuteAsync(@"
+                            INSERT INTO ChoNgoi
+                                (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
+                            VALUES
+                                (@rowId, @seat, @x, @y, 0)
+                        ", new
+                        {
+                            rowId,
+                            seat  = rowName + seat,
+                            x     = seat,
+                            y     = currentOverallRow
+                        }, transaction);
+                    }
+                }
+            }
+
+            // Đánh dấu sự kiện đã kích hoạt sơ đồ chỗ ngồi
+            await connection.ExecuteAsync("UPDATE SuKien SET CoSoDoChoNgoi = 1 WHERE Id = @id", new { id = suKienId }, transaction);
+            await transaction.CommitAsync();
+            TempData["Message"] = "Đã tạo sơ đồ chỗ ngồi thành công.";
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+
+        return RedirectToAction("SoDoChoNgoi", new { suKienId });
+    }
+
+    private class ZoneDefinition
+    {
+        public string Ten { get; set; } = "";
+        public int LoaiVeId { get; set; }
+        public int SoHang { get; set; }
+        public int SoGheMoiHang { get; set; }
+        public string MauSac { get; set; } = "#198754";
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DoiTrangThaiGhe(Guid suKienId, int seatId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return NotFound();
+
+        if (await LaSuKienTamDungHoacHuy(suKienId))
+        {
+            TempData["Error"] = "Không thể thay đổi trạng thái ghế khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("SoDoChoNgoi", new { suKienId });
+        }
+
+        string sql = @"
+            UPDATE g
+            SET TrangThai = CASE WHEN g.TrangThai = 3 THEN 0 ELSE 3 END
+            FROM ChoNgoi g
+            JOIN HangGhe h ON h.Id = g.HangGheId
+            JOIN KhuVuc  k ON k.Id = h.KhuVucId
+            JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
+            WHERE g.Id          = @seatId
+              AND sd.SuKienId   = @suKienId
+              AND g.TrangThai  IN (0, 3)
+        ";
+        await Db.ThucThi(sql, new { seatId, suKienId });
+        return RedirectToAction("SoDoChoNgoi", new { suKienId });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> XoaSoDo(Guid suKienId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return NotFound();
+
+        if (await LaSuKienTamDungHoacHuy(suKienId))
+        {
+            TempData["Error"] = "Không thể xóa sơ đồ ghế khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            return RedirectToAction("SoDoChoNgoi", new { suKienId });
+        }
+
+        using var connection = Db.TaoKetNoi();
+        await connection.OpenAsync();
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            await connection.ExecuteAsync("DELETE FROM SoDoChoNgoi WHERE SuKienId = @id", new { id = suKienId }, transaction);
+            await connection.ExecuteAsync("UPDATE SuKien SET CoSoDoChoNgoi = 0 WHERE Id = @id", new { id = suKienId }, transaction);
+            await transaction.CommitAsync();
+            TempData["Message"] = "Đã xóa sơ đồ chỗ ngồi của sự kiện.";
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+        return RedirectToAction("SoDoChoNgoi", new { suKienId });
+    }
+
+    // 9. QUẢN LÝ HỒ SƠ DOANH NGHIỆP (NHÀ TỔ CHỨC)
+
+    // Trang thông tin hồ sơ ngân hàng của nhà tổ chức (Đã vô hiệu hóa)
+    [HttpGet]
+    public IActionResult HoSo()
+    {
+        return RedirectToAction("Index");
+    }
+
+    // PHƯƠNG THỨC HỖ TRỢ (HELPERS)
+
+    // Xác nhận sự kiện thuộc quyền sở hữu của Ban Tổ Chức đang thao tác
+    private async Task<bool> LaSuKienCuaToi(Guid id)
+    {
+        var count = await Db.LayGiaTri<int>(
+            "SELECT COUNT(1) FROM SuKien WHERE Id = @id AND NguoiToChucId = @organizerId",
+            new { id, organizerId = LayIdNguoiDangNhap() });
+        return count > 0;
+    }
+
+    private async Task<bool> LaSuKienTamDungHoacHuy(Guid suKienId)
+    {
+        var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @suKienId", new { suKienId });
+        if (sk == null) return true;
+        return sk.TrangThai == 1 || sk.TrangThai == 2 || sk.TrangThai == 6 || DateTime.UtcNow > sk.NgayKetThuc;
+    }
+
+    // Lấy tên sự kiện theo Id
+    private async Task<string> LayTenSuKien(Guid id)
+    {
+        return await Db.LayGiaTri<string>("SELECT TenSuKien FROM SuKien WHERE Id = @id", new { id }) ?? "";
+    }
+
+    // Lấy danh sách loại vé của sự kiện
+    private async Task<List<LoaiVe>> LayLoaiVeList(Guid suKienId)
+    {
+        return await Db.LayDanhSach<LoaiVe>("SELECT * FROM LoaiVe WHERE SuKienId = @id", new { id = suKienId });
+    }
+
+    // Lấy hồ sơ ban tổ chức
+
+
+    // Lấy danh sách sự kiện phục vụ dropdown bộ lọc
+    private async Task<Dictionary<Guid, string>> LaySuKienCuaToiDropdown()
+    {
+        var list = await Db.LayDanhSach<SuKien>(
+            "SELECT Id, TenSuKien FROM SuKien WHERE NguoiToChucId = @id ORDER BY NgayTao DESC", 
+            new { id = LayIdNguoiDangNhap() }
+        );
+        var result = new Dictionary<Guid, string>();
+        foreach (var item in list)
+        {
+            result[item.Id] = item.TenSuKien;
+        }
+        return result;
+    }
+
+    // Lấy chi tiết một mã giảm giá
+    private async Task<MaGiamGia?> LayMaGiamGia(int id)
+    {
+        string sql = @"
+            SELECT mg.*
+            FROM MaGiamGia mg
+            JOIN SuKien s ON s.Id = mg.SuKienId
+            WHERE mg.Id           = @id
+              AND s.NguoiToChucId = @organizerId
+        ";
+        return await Db.LayDonLe<MaGiamGia>(sql, new { id, organizerId = LayIdNguoiDangNhap() });
+    }
+
+    // Thay đổi trạng thái sự kiện
+    private async Task DoiTrangThaiSuKien(Guid id, byte trangThai, string message)
+    {
+        string sql = @"
+            UPDATE SuKien
+            SET TrangThai   = @trangThai,
+                NgayCapNhat = GETUTCDATE()
+            WHERE Id            = @id
+              AND NguoiToChucId = @organizerId
+        ";
+        await Db.ThucThi(sql, new { trangThai, id, organizerId = LayIdNguoiDangNhap() });
+        TempData["Message"] = message;
+    }
+
+    // Lấy thông tin sự kiện của tôi
+    private async Task<SuKien?> LaySuKienCuaToi(Guid id)
+    {
+        return await Db.LayDonLe<SuKien>(
+            "SELECT * FROM SuKien WHERE Id = @id AND NguoiToChucId = @organizerId", 
+            new { id, organizerId = LayIdNguoiDangNhap() }
+        );
+    }
+
+    // Nạp dữ liệu danh mục cho form Dropdown
+    private async Task NapDuLieuChoForm()
+    {
+        ViewBag.DanhMucs = await Db.LayDanhSach<DanhMuc>("SELECT * FROM DanhMuc WHERE TrangThai = 1 ORDER BY ThuTu");
+    }
+
+    // Lấy danh sách loại vé đang hoạt động
+    private async Task<List<LoaiVe>> LayDanhSachLoaiVe(Guid suKienId)
+    {
+        return await Db.LayDanhSach<LoaiVe>(
+            "SELECT * FROM LoaiVe WHERE SuKienId = @suKienId AND TrangThai = 1", new { suKienId }
+        );
+    }
+
+
+
+    // Lấy ID người đang đăng nhập từ token Claims
+    private Guid LayIdNguoiDangNhap()
+    {
+        string? idText = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.Parse(idText ?? Guid.Empty.ToString());
+    }
+
+    // Sinh Slug thân thiện với SEO từ chuỗi tiếng Việt (ví dụ: "Sự Kiện Ca Nhạc" -> "su-kien-ca-nhac")
+    private static string TaoSlug(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+        text = text.ToLowerInvariant();
+        string[] arr1 = new string[] { "á", "à", "ả", "ã", "ạ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ",
+            "đ",
+            "é","è","ẻ","ẽ","ẹ","ê","ế","ề","ể","ễ","ệ",
+            "í","ì","ỉ","ĩ","ị",
+            "ó","ò","ỏ","õ","ọ","ô","ố","ồ","ổ","ỗ","ộ","ơ","ớ","ờ","ở","ỡ","ợ",
+            "ú","ù","ủ","ũ","ụ","ư","ứ","ừ","ử","ữ","ự",
+            "ý","ỳ","ỷ","ỹ","ỵ",};
+        string[] arr2 = new string[] { "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a",
+            "d",
+            "e","e","e","e","e","e","e","e","e","e","e",
+            "i","i","i","i","i",
+            "o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o",
+            "u","u","u","u","u","u","u","u","u","u","u",
+            "y","y","y","y","y",};
+        for (int i = 0; i < arr1.Length; i++)
+        {
+            text = text.Replace(arr1[i], arr2[i]);
+        }
+        string result = "";
+        foreach (char character in text)
+        {
+            if (char.IsLetterOrDigit(character)) result += character;
+            else if (result.EndsWith('-') == false) result += "-";
+        }
+        return result.Trim('-');
+    }
+
+    public override async Task OnActionExecutionAsync(
+        Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context,
+        Microsoft.AspNetCore.Mvc.Filters.ActionExecutionDelegate next)
+    {
+        Guid? suKienId = null;
+
+        // Try to get from route parameters
+        if (context.RouteData.Values.TryGetValue("id", out var routeVal) && routeVal != null)
+        {
+            if (Guid.TryParse(routeVal.ToString(), out Guid parsedRouteId))
+            {
+                // Verify if it is a valid event ID
+                var count = await Db.LayGiaTri<int>("SELECT COUNT(1) FROM SuKien WHERE Id = @id", new { id = parsedRouteId });
+                if (count > 0)
+                {
+                    suKienId = parsedRouteId;
+                }
+            }
+        }
+
+        // Try to get from query parameters
+        if (suKienId == null && context.HttpContext.Request.Query.TryGetValue("suKienId", out var queryVal))
+        {
+            if (Guid.TryParse(queryVal.ToString(), out Guid parsedQueryId))
+            {
+                suKienId = parsedQueryId;
+            }
+        }
+
+        if (suKienId.HasValue && suKienId.Value != Guid.Empty)
+        {
+            var organizerId = LayIdNguoiDangNhap();
+            if (organizerId != Guid.Empty)
+            {
+                var suKien = await Db.LayDonLe<SuKien>(
+                    "SELECT Id, TenSuKien FROM SuKien WHERE Id = @id AND NguoiToChucId = @organizerId",
+                    new { id = suKienId.Value, organizerId }
+                );
+                if (suKien != null)
+                {
+                    ViewBag.ActiveEventId = suKien.Id;
+                    ViewBag.ActiveEventName = suKien.TenSuKien;
+                }
+            }
+        }
+
+        await next();
+    }
+}

@@ -1,0 +1,19 @@
+﻿@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Liên lạc người mua";
+    var suKienId = (Guid)ViewBag.SuKienId;
+}
+
+<div class="portal-page-title mb-4"><span class="portal-kicker"><i class="fas fa-envelope"></i> Liên lạc</span><h1>Gửi thông báo</h1><p>@ViewBag.TenSuKien</p></div>
+
+<div class="portal-card" style="max-width: 820px;">
+    <div class="portal-card-header"><h2>@ViewBag.SoNguoiNhan người mua sẽ nhận thông báo</h2></div>
+    <div class="portal-card-body">
+        <form method="post" action="/Organizer/LienLac/GuiThongBao">
+            <input type="hidden" name="suKienId" value="@suKienId" />
+            <div class="mb-3"><label class="form-label">Tiêu đề</label><input class="form-control" name="tieuDe" required /></div>
+            <div class="mb-3"><label class="form-label">Nội dung</label><textarea class="form-control" name="noiDung" rows="7" required></textarea></div>
+            <button class="btn btn-success" type="submit"><i class="fas fa-paper-plane me-1"></i> Gửi thông báo</button>
+        </form>
+    </div>
+</div>

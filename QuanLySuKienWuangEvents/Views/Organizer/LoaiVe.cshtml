@@ -1,0 +1,208 @@
+@model List<LoaiVe>
+
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Loại vé";
+    var suKienId = (Guid)ViewBag.SuKienId;
+    bool isExpired = ViewBag.NgayKetThucSuKien != null && DateTime.UtcNow > (DateTime)ViewBag.NgayKetThucSuKien;
+    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6 || isExpired;
+    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG" : "ĐÃ HỦY";
+}
+
+<style>
+.ticket-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+.ticket-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.ticket-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; }
+.ticket-title { font-weight: 700; font-size: 1rem; color: #111827; display: flex; align-items: center; gap: 10px; }
+.ticket-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.ticket-body { padding: 16px 20px; }
+.ticket-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.ticket-meta-item label { font-size: .73rem; text-transform: uppercase; letter-spacing: .4px; font-weight: 700; color: #9ca3af; display: block; margin-bottom: 2px; }
+.ticket-meta-item span { font-size: .95rem; font-weight: 700; color: #111827; }
+.sold-bar-wrap { margin-bottom: 14px; }
+.sold-bar-label { display: flex; justify-content: space-between; font-size: .8rem; color: #6b7280; margin-bottom: 5px; }
+.sold-bar { height: 8px; border-radius: 4px; background: #f3f4f6; overflow: hidden; }
+.sold-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+.ticket-actions { display: flex; gap: 8px; }
+.badge-open { background: #d1fae5; color: #065f46; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.badge-locked { background: #fee2e2; color: #991b1b; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+.add-ticket-form { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); padding: 0; overflow: hidden; }
+.add-ticket-form-header { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; padding: 16px 20px; font-weight: 700; font-size: .95rem; }
+.add-ticket-form-body { padding: 20px; }
+.form-label-custom { font-size: .8rem; font-weight: 700; color: #374151; margin-bottom: 4px; }
+</style>
+
+<!-- Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+    <div>
+        <a href="/Organizer/ChiTietSuKien/@suKienId" class="btn btn-sm btn-light border text-secondary mb-2" style="border-radius:8px;">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại sự kiện
+        </a>
+        <h1 class="h4 fw-bold mb-1">Cấu hình loại vé</h1>
+        <p class="text-muted small mb-0"><i class="fas fa-calendar-days me-1"></i>@ViewBag.TenSuKien</p>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-circle-exclamation me-1"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (isLocked)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" style="border-radius:12px;">
+        <i class="fas fa-lock fs-5"></i>
+        <div>
+            <strong>Đã khóa chỉnh sửa.</strong> Sự kiện đang ở trạng thái <strong>@lockReason</strong> — mọi thay đổi loại vé đã bị vô hiệu hóa.
+        </div>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Left: Ticket List -->
+    <div class="col-xl-8">
+        @if (Model == null || Model.Count == 0)
+        {
+            <div style="background:#fff;border-radius:14px;padding:60px 24px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.07);color:#9ca3af;">
+                <i class="fas fa-ticket" style="font-size:3rem;margin-bottom:16px;display:block;"></i>
+                <h5 style="color:#374151;font-weight:700;">Chưa có loại vé nào</h5>
+                <p class="small mb-0">Tạo loại vé đầu tiên ở khung bên phải để bắt đầu bán vé.</p>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var item in Model)
+                {
+                    int pct = item.SoLuongTong > 0 ? (item.SoLuongDaBan * 100 / item.SoLuongTong) : 0;
+                    string barColor = pct >= 90 ? "#ef4444" : pct >= 60 ? "#f59e0b" : "#7c3aed";
+                    <div class="ticket-card">
+                        <div class="ticket-header">
+                            <div class="ticket-title">
+                                <span class="ticket-color-dot" style="background:@(item.MauSac ?? "#7c3aed");"></span>
+                                @item.TenLoaiVe
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (item.TrangThai)
+                                {
+                                    <span class="badge-open"><i class="fas fa-circle-check me-1" style="font-size:.65rem;"></i>Đang mở</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-locked"><i class="fas fa-lock me-1" style="font-size:.65rem;"></i>Đã khóa</span>
+                                }
+                                @if (!isLocked)
+                                {
+                                    <a class="btn btn-sm btn-outline-primary" href="/Organizer/ChinhSuaLoaiVe/@item.Id" title="Chỉnh sửa" style="border-radius:7px;">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-secondary" disabled style="border-radius:7px;"><i class="fas fa-pen"></i></button>
+                                }
+                            </div>
+                        </div>
+                        <div class="ticket-body">
+                            <div class="ticket-meta">
+                                <div class="ticket-meta-item">
+                                    <label>Giá bán</label>
+                                    <span style="color:#7c3aed;">@item.GiaBan.ToString("N0") ₫</span>
+                                </div>
+                                <div class="ticket-meta-item">
+                                    <label>Đã bán / Tổng</label>
+                                    <span>@item.SoLuongDaBan / @item.SoLuongTong vé</span>
+                                </div>
+                                @if (item.NgayBatDauBan.HasValue)
+                                {
+                                    <div class="ticket-meta-item">
+                                        <label>Bắt đầu bán</label>
+                                        <span style="font-weight:600;font-size:.85rem;">@item.NgayBatDauBan.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                }
+                                @if (item.NgayKetThucBan.HasValue)
+                                {
+                                    <div class="ticket-meta-item">
+                                        <label>Kết thúc bán</label>
+                                        <span style="font-weight:600;font-size:.85rem;">@item.NgayKetThucBan.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="sold-bar-wrap">
+                                <div class="sold-bar-label">
+                                    <span>Tỷ lệ bán</span>
+                                    <span style="font-weight:700;color:@barColor;">@pct%</span>
+                                </div>
+                                <div class="sold-bar">
+                                    <div class="sold-bar-fill" style="width:@pct%;background:@barColor;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Right: Add Form -->
+    <div class="col-xl-4">
+        <div class="add-ticket-form">
+            <div class="add-ticket-form-header">
+                <i class="fas fa-plus-circle me-2"></i> Thêm loại vé mới
+            </div>
+            <div class="add-ticket-form-body">
+                <form method="post" action="/Organizer/LoaiVe/TaoMoi">
+                    <input type="hidden" name="suKienId" value="@suKienId" />
+                    <div class="mb-3">
+                        <label class="form-label-custom">Tên loại vé <span class="text-danger">*</span></label>
+                        <input class="form-control" name="tenLoaiVe" placeholder="VD: VIP, Thường, Sinh viên..." required @(isLocked ? "disabled" : "") />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Mô tả</label>
+                        <textarea class="form-control" name="moTa" rows="2" placeholder="Quyền lợi đi kèm..." @(isLocked ? "disabled" : "")></textarea>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label-custom">Giá bán (₫) <span class="text-danger">*</span></label>
+                            <input class="form-control" type="number" name="giaBan" min="0" placeholder="0" required @(isLocked ? "disabled" : "") />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label-custom">Số lượng <span class="text-danger">*</span></label>
+                            <input class="form-control" type="number" name="soLuongTong" min="1" placeholder="100" required @(isLocked ? "disabled" : "") />
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label-custom">Giới hạn/đơn</label>
+                            <input class="form-control" type="number" name="gioiHanMoiDon" value="10" min="1" @(isLocked ? "disabled" : "") />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label-custom">Màu nhận diện</label>
+                            <input class="form-control form-control-color w-100" type="color" name="mauSac" value="#7c3aed" @(isLocked ? "disabled" : "") />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Bắt đầu bán</label>
+                        <input class="form-control" type="datetime-local" name="ngayBatDauBan" @(isLocked ? "disabled" : "") />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Kết thúc bán</label>
+                        <input class="form-control" type="datetime-local" name="ngayKetThucBan" @(isLocked ? "disabled" : "") />
+                    </div>
+                    <button class="btn btn-success w-100 fw-bold py-2" type="submit" @(isLocked ? "disabled" : "") style="border-radius:10px;">
+                        <i class="fas fa-plus me-1"></i> Tạo loại vé
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

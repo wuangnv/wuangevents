@@ -1,0 +1,225 @@
+﻿@model List<MaGiamGia>
+
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Mã giảm giá";
+    var suKienId = (Guid)ViewBag.SuKienId;
+    bool isExpired = ViewBag.NgayKetThucSuKien != null && DateTime.UtcNow > (DateTime)ViewBag.NgayKetThucSuKien;
+    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6 || isExpired;
+    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG" : "ĐÃ HỦY";
+}
+
+<style>
+.coupon-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+    position: relative;
+}
+.coupon-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.coupon-left {
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.coupon-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.coupon-code { font-family: 'Courier New', monospace; font-weight: 800; font-size: 1.1rem; color: #7c3aed; letter-spacing: 1px; }
+.coupon-desc { font-size: .82rem; color: #9ca3af; margin-top: 2px; }
+.coupon-badge-active { background: #d1fae5; color: #065f46; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.coupon-badge-inactive { background: #fee2e2; color: #991b1b; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.coupon-badge-expired { background: #f3f4f6; color: #6b7280; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.coupon-stats { display: flex; gap: 20px; padding: 14px 20px; border-top: 1px solid #f3f4f6; background: #fafafa; }
+.coupon-stat label { font-size: .73rem; text-transform: uppercase; letter-spacing: .4px; font-weight: 700; color: #9ca3af; display: block; }
+.coupon-stat span { font-size: .92rem; font-weight: 700; color: #374151; }
+.coupon-actions { display: flex; gap: 8px; align-items: center; padding: 0 16px 0 0; }
+.add-coupon-form { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); overflow: hidden; }
+.add-coupon-header { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; padding: 16px 20px; font-weight: 700; font-size: .95rem; }
+.add-coupon-body { padding: 20px; }
+.fl { font-size: .8rem; font-weight: 700; color: #374151; margin-bottom: 4px; }
+.used-bar { height: 5px; border-radius: 3px; background: #f3f4f6; overflow: hidden; margin-top: 5px; }
+.used-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#7c3aed,#a855f7); }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+    <div>
+        <a href="/Organizer/ChiTietSuKien/@suKienId" class="btn btn-sm btn-light border text-secondary mb-2" style="border-radius:8px;">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại sự kiện
+        </a>
+        <h1 class="h4 fw-bold mb-1">Mã giảm giá</h1>
+        <p class="text-muted small mb-0"><i class="fas fa-calendar-days me-1"></i>@ViewBag.TenSuKien</p>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-circle-exclamation me-1"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (isLocked)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" style="border-radius:12px;">
+        <i class="fas fa-lock fs-5"></i>
+        <div><strong>Đã khóa chỉnh sửa.</strong> Sự kiện đang ở trạng thái <strong>@lockReason</strong>.</div>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Left: Coupon list -->
+    <div class="col-xl-8">
+        @if (Model == null || Model.Count == 0)
+        {
+            <div style="background:#fff;border-radius:14px;padding:60px 24px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.07);color:#9ca3af;">
+                <i class="fas fa-tags" style="font-size:3rem;margin-bottom:16px;display:block;"></i>
+                <h5 style="color:#374151;font-weight:700;">Chưa có mã giảm giá nào</h5>
+                <p class="small mb-0">Tạo mã khuyến mãi ở khung bên phải để thu hút khách hàng.</p>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var item in Model)
+                {
+                    bool isDiscountExpired = item.NgayKetThuc < DateTime.UtcNow;
+                    int usedPct = item.SoLuongTong > 0 ? (item.SoLuongDaDung * 100 / item.SoLuongTong) : 0;
+                    <div class="coupon-card">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="coupon-left flex-grow-1">
+                                <div class="coupon-icon">
+                                    <i class="fas fa-percent"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="coupon-code">@item.MaCode</span>
+                                        @if (isDiscountExpired)
+                                        {
+                                            <span class="coupon-badge-expired">Hết hạn</span>
+                                        }
+                                        else if (item.TrangThai)
+                                        {
+                                            <span class="coupon-badge-active">Đang bật</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="coupon-badge-inactive">Đã khóa</span>
+                                        }
+                                    </div>
+                                    <div class="coupon-desc">
+                                        @(item.LoaiGiamGia == 0 ? $"Giảm {item.GiaTri:N0}%" : $"Giảm {item.GiaTri:N0} VND")
+                                        — Hết hạn @item.NgayKetThuc.ToString("dd/MM/yyyy")
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="coupon-actions">
+                                @if (!isLocked)
+                                {
+                                    <a class="btn btn-sm btn-outline-primary" href="/Organizer/ChinhSuaMaGiamGia/@item.Id" style="border-radius:7px;" title="Chỉnh sửa">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <form class="d-inline" method="post" action="/Organizer/MaGiamGia/Xoa/@item.Id" onsubmit="return confirm('Xóa mã giảm giá này?')">
+                                        <button class="btn btn-sm btn-outline-danger" type="submit" style="border-radius:7px;" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-secondary" disabled style="border-radius:7px;"><i class="fas fa-pen"></i></button>
+                                }
+                            </div>
+                        </div>
+                        <div class="coupon-stats">
+                            <div class="coupon-stat">
+                                <label>Giảm giá</label>
+                                <span style="color:#7c3aed;">@(item.LoaiGiamGia == 0 ? $"{item.GiaTri:N0}%" : $"{item.GiaTri:N0} ₫")</span>
+                            </div>
+                            <div class="coupon-stat" style="flex:1;">
+                                <label>Đã dùng</label>
+                                <span>@item.SoLuongDaDung / @item.SoLuongTong lượt</span>
+                                <div class="used-bar">
+                                    <div class="used-bar-fill" style="width:@usedPct%;"></div>
+                                </div>
+                            </div>
+                            <div class="coupon-stat">
+                                <label>Hết hạn</label>
+                                <span style="font-size:.82rem;">@item.NgayKetThuc.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Right: Add form -->
+    <div class="col-xl-4">
+        <div class="add-coupon-form">
+            <div class="add-coupon-header">
+                <i class="fas fa-plus-circle me-2"></i> Tạo mã giảm giá mới
+            </div>
+            <div class="add-coupon-body">
+                <form method="post" action="/Organizer/MaGiamGia/TaoMoi">
+                    <input type="hidden" name="SuKienId" value="@suKienId" />
+                    <div class="mb-3">
+                        <label class="fl">Mã code <span class="text-danger">*</span></label>
+                        <input class="form-control text-uppercase" name="MaCode" placeholder="VD: SUMMER20" required @(isLocked ? "disabled" : "") style="font-family:monospace;font-weight:700;" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="fl">Mô tả</label>
+                        <input class="form-control" name="MoTa" placeholder="Giảm giá mùa hè..." @(isLocked ? "disabled" : "") />
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="fl">Loại giảm</label>
+                            <select class="form-select" name="LoaiGiamGia" @(isLocked ? "disabled" : "")>
+                                <option value="0">Phần trăm (%)</option>
+                                <option value="1">Số tiền (₫)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="fl">Giá trị <span class="text-danger">*</span></label>
+                            <input class="form-control" type="number" name="GiaTri" min="1" placeholder="20" required @(isLocked ? "disabled" : "") />
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="fl">Giảm tối đa (₫)</label>
+                            <input class="form-control" type="number" name="GiamToiDa" min="0" placeholder="200000" @(isLocked ? "disabled" : "") />
+                        </div>
+                        <div class="col-6">
+                            <label class="fl">Đơn tối thiểu (₫)</label>
+                            <input class="form-control" type="number" name="DonToiThieu" min="0" placeholder="0" @(isLocked ? "disabled" : "") />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="fl">Tổng lượt dùng</label>
+                        <input class="form-control" type="number" name="SoLuongTong" min="1" value="100" @(isLocked ? "disabled" : "") />
+                    </div>
+                    <div class="mb-3">
+                        <label class="fl">Bắt đầu <span class="text-danger">*</span></label>
+                        <input class="form-control" type="datetime-local" name="NgayBatDau" required @(isLocked ? "disabled" : "") />
+                    </div>
+                    <div class="mb-3">
+                        <label class="fl">Kết thúc <span class="text-danger">*</span></label>
+                        <input class="form-control" type="datetime-local" name="NgayKetThuc" required @(isLocked ? "disabled" : "") />
+                    </div>
+                    <button class="btn btn-success w-100 fw-bold py-2" type="submit" @(isLocked ? "disabled" : "") style="border-radius:10px;">
+                        <i class="fas fa-plus me-1"></i> Tạo mã giảm giá
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

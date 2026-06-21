@@ -1,0 +1,510 @@
+﻿@model SoDoChoNgoi
+@using QuanLySuKienWuangEvents.Models
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Thiết lập sơ đồ chỗ ngồi";
+    var suKienId = (Guid)ViewBag.SuKienId;
+    var loaiVes = ViewBag.LoaiVes as List<LoaiVe> ?? new List<LoaiVe>();
+    var ghe = ViewBag.Ghe as List<ChoNgoi> ?? new List<ChoNgoi>();
+    var hang = ViewBag.Hang as Dictionary<int, string> ?? new Dictionary<int, string>();
+    int soTrong = ghe.Count(g => g.TrangThai == 0);
+    int daBan = ghe.Count(g => g.TrangThai == 2);
+    int daKhoa = ghe.Count(g => g.TrangThai == 3);
+    int daChon = ghe.Count(g => g.TrangThai == 1);
+}
+@section Styles {
+<style>
+.seat-hero {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    border-radius: 20px;
+    padding: 24px 28px;
+    color: #fff;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.seat-hero h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 4px; }
+.seat-hero p { opacity: .85; margin: 0; font-size: .9rem; }
+.seat-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.seat-stat { background: #fff; border-radius: 14px; padding: 16px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.07); }
+.seat-stat .snum { font-size: 1.8rem; font-weight: 800; line-height: 1; }
+.seat-stat .slbl { font-size: .75rem; color: #888; margin-top: 3px; }
+.s-empty .snum { color: #7c3aed }
+.s-chose .snum { color: #d97706 }
+.s-sold .snum { color: #dc2626 }
+.s-lock .snum { color: #6b7280 }
+.seatmap-wrap { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 24px; overflow-x: auto; }
+.stage-bar {
+    text-align: center;
+    background: linear-gradient(90deg, #7c3aed, #a855f7);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
+    font-size: .9rem;
+}
+.seat-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; min-width: max-content; }
+.seat-row-label { width: 28px; font-weight: 700; color: #666; font-size: .85rem; text-align: center; flex-shrink: 0; }
+.seat-btn { width: 38px; height: 34px; border-radius: 7px; border: none; cursor: pointer; font-size: .72rem; font-weight: 700; transition: .15s; position: relative; }
+.seat-btn:hover { transform: scale(1.1); z-index: 1; }
+.seat-empty { background: #ede9fe; color: #5b21b6; border: 2px solid #c4b5fd }
+.seat-empty:hover { background: #7c3aed; color: #fff }
+.seat-sold { background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; cursor: not-allowed; }
+.seat-lock { background: #e5e7eb; color: #6b7280; border: 2px solid #d1d5db }
+.seat-lock:hover { background: #4b5563; color: #fff }
+.seat-chose { background: #fef9c3; color: #92400e; border: 2px solid #fde68a; cursor: not-allowed; }
+.legend-bar { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: .82rem; color: #555; }
+.legend-dot { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; }
+.action-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+@@media(max-width:600px) {
+    .seat-stats { grid-template-columns: repeat(2, 1fr) }
+    .seat-hero { flex-direction: column }
+}
+
+/* Styles cho tab chọn mẫu */
+.tpl-container { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 28px; }
+.tpl-tabs { display: flex; gap: 10px; border-bottom: 2px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 24px; overflow-x: auto; }
+.tpl-tab-btn { background: #f3f4f6; color: #4b5563; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: .15s; }
+.tpl-tab-btn:hover { background: #e5e7eb; }
+.tpl-tab-btn.active { background: #7c3aed; color: #fff; }
+.tpl-content { display: none; }
+.tpl-content.active { display: block; }
+.tpl-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #f9fafb; }
+.tpl-card h3 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tpl-card p { color: #666; font-size: .88rem; margin-bottom: 16px; }
+.zone-row { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.btn-remove-zone { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; font-size: .8rem; font-weight: 600; cursor: pointer; }
+.btn-remove-zone:hover { background: #fca5a5; }
+.btn-add-zone { background: #ede9fe; color: #5b21b6; border: none; padding: 8px 16px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
+.btn-add-zone:hover { background: #ddd6fe; }
+</style>
+}
+
+@{
+    bool isExpired = ViewBag.NgayKetThucSuKien != null && DateTime.UtcNow > (DateTime)ViewBag.NgayKetThucSuKien;
+    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6 || isExpired;
+    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG BÁN VÉ" : "ĐÃ BỊ HỦY BỎ";
+}
+
+@if (isLocked)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+        <i class="fas fa-exclamation-triangle fs-4"></i>
+        <div>
+            <strong>Cảnh báo:</strong> Sự kiện này hiện tại đang 
+            <strong>@lockReason</strong>. 
+            Mọi tính năng cấu hình sơ đồ ghế, mở/khóa ghế đã bị vô hiệu hóa.
+        </div>
+    </div>
+}
+
+<div class="seat-hero">
+    <div>
+        <h1><i class="fas fa-chair"></i> Sơ đồ chỗ ngồi</h1>
+        <p>@ViewBag.TenSuKien</p>
+    </div>
+    @if (Model.Id != 0)
+    {
+        <form method="post" action="/Organizer/XoaSoDo" onsubmit="return confirm('Xóa sơ đồ này? Tất cả ghế sẽ bị xóa!')">
+            <input type="hidden" name="suKienId" value="@suKienId" />
+            <button class="btn btn-outline" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" type="submit">
+                <i class="fas fa-trash"></i> Xóa sơ đồ
+            </button>
+        </form>
+    }
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success mb-4"><i class="fas fa-circle-check"></i> @TempData["Message"]</div>
+}
+
+@if (Model.Id != 0)
+{
+    <div class="seat-stats">
+        <div class="seat-stat s-empty"><div class="snum">@soTrong</div><div class="slbl">Ghế trống</div></div>
+        <div class="seat-stat s-chose"><div class="snum">@daChon</div><div class="slbl">Đã đặt</div></div>
+        <div class="seat-stat s-sold"><div class="snum">@daBan</div><div class="slbl">Đã bán</div></div>
+        <div class="seat-stat s-lock"><div class="snum">@daKhoa</div><div class="slbl">Bị khóa</div></div>
+    </div>
+
+    <div class="action-bar">
+        <a href="/Organizer/LoaiVe?suKienId=@suKienId" class="btn btn-outline-primary btn-sm" style="border-radius: 8px;">
+            <i class="fas fa-ticket me-1"></i> Quản lý loại vé
+        </a>
+        <span style="color:#888;align-self:center;font-size:.85rem">
+            <i class="fas fa-info-circle me-1"></i> Click vào ghế trống/khóa để khóa hoặc mở khóa vị trí.
+        </span>
+    </div>
+
+    <div class="seatmap-wrap">
+        <div class="stage-bar"><i class="fas fa-star"></i> SÂN KHẤU / MÀN HÌNH <i class="fas fa-star"></i></div>
+        @foreach (var row in ghe.GroupBy(x => x.HangGheId))
+        {
+            <div class="seat-row">
+                <span class="seat-row-label">@hang.GetValueOrDefault(row.Key)</span>
+                @foreach (var seat in row)
+                {
+                    <form method="post" action="/Organizer/DoiTrangThaiGhe" style="margin:0">
+                        <input type="hidden" name="suKienId" value="@suKienId" />
+                        <input type="hidden" name="seatId" value="@seat.Id" />
+                        @{
+                            string cls = seat.TrangThai switch {
+                                2 => "seat-btn seat-sold",
+                                3 => "seat-btn seat-lock",
+                                1 => "seat-btn seat-chose",
+                                _ => "seat-btn seat-empty"
+                            };
+                            string title = seat.TrangThai switch {
+                                2 => "Đã bán – không thể thay đổi",
+                                3 => "Đang bị khóa – Click để mở khóa",
+                                1 => "Đã đặt trước",
+                                _ => "Ghế trống – Click để khóa"
+                            };
+                            bool disabled = seat.TrangThai == 2 || seat.TrangThai == 1 || isLocked;
+                        }
+                        <button class="@cls" title="@title" @(disabled ? "disabled" : "") type="@(disabled ? "button" : "submit")">@seat.SoGhe</button>
+                    </form>
+                }
+            </div>
+        }
+        <div class="legend-bar">
+            <div class="legend-item"><div class="legend-dot" style="background:#ede9fe;border:2px solid #c4b5fd"></div> Trống (@soTrong)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:2px solid #fde68a"></div> Đã đặt (@daChon)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:2px solid #fca5a5"></div> Đã bán (@daBan)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#e5e7eb;border:2px solid #d1d5db"></div> Khóa (@daKhoa)</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="tpl-container">
+        <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:16px;color:#1a1a2e">Cấu hình sơ đồ chỗ ngồi cho sự kiện</h2>
+        
+        @if (!loaiVes.Any())
+        {
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-1"></i> Vui lòng tạo ít nhất 1 loại vé trước khi thiết lập sơ đồ chỗ ngồi.
+            </div>
+        }
+        else
+        {
+            <div class="tpl-tabs">
+                <button class="tpl-tab-btn active" onclick="switchTab('tab-cinema')"><i class="fas fa-film me-1"></i> Rạp chiếu phim</button>
+                <button class="tpl-tab-btn" onclick="switchTab('tab-theater')"><i class="fas fa-masks-theater me-1"></i> Nhà hát / Hội trường</button>
+                <button class="tpl-tab-btn" onclick="switchTab('tab-music')"><i class="fas fa-music me-1"></i> Show ca nhạc</button>
+                <button class="tpl-tab-btn" onclick="switchTab('tab-simple')"><i class="fas fa-border-all me-1"></i> Sơ đồ đơn giản</button>
+                <button class="tpl-tab-btn" onclick="switchTab('tab-custom')"><i class="fas fa-sliders me-1"></i> Tùy chỉnh Zones</button>
+                <button class="tpl-tab-btn" style="border:1.5px solid #dc3545;color:#dc3545;background:#fff" onclick="switchTab('tab-none')">
+                    <i class="fas fa-times-circle me-1"></i> Không sử dụng sơ đồ
+                </button>
+            </div>
+
+            <!-- 1. RAP CHIEU PHIM -->
+            <div class="tpl-content active" id="tab-cinema">
+                <form method="post" action="/Organizer/TaoSoDo">
+                    <input type="hidden" name="suKienId" value="@suKienId" />
+                    <input type="hidden" name="loaiSoDo" value="cinema" />
+                    <input type="hidden" name="tenSoDo" value="Rạp chiếu phim tiêu chuẩn" />
+                    <div class="tpl-card">
+                        <h3><i class="fas fa-film" style="color:#7c3aed"></i> Rạp chiếu phim tiêu chuẩn</h3>
+                        <p>Sơ đồ gồm 2 khu vực: <strong>Standard</strong> (hiệu lực từ hàng A–D, mỗi hàng 12 ghế) và <strong>VIP</strong> (từ hàng E–H, mỗi hàng 14 ghế).</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Gán loại vé cho khu Standard</label>
+                                <select class="form-select" name="cinemaNormalLoaiVeId">
+                                    @foreach (var lv in loaiVes)
+                                    {
+                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Gán loại vé cho khu VIP</label>
+                                <select class="form-select" name="cinemaVipLoaiVeId">
+                                    @foreach (var lv in loaiVes)
+                                    {
+                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Áp dụng mẫu Rạp phim</button>
+                </form>
+            </div>
+
+            <!-- 2. NHA HAT / HOI TRUONG -->
+            <div class="tpl-content" id="tab-theater">
+                <form method="post" action="/Organizer/TaoSoDo">
+                    <input type="hidden" name="suKienId" value="@suKienId" />
+                    <input type="hidden" name="loaiSoDo" value="theater" />
+                    <input type="hidden" name="tenSoDo" value="Sơ đồ Nhà hát / Hội trường" />
+                    <div class="tpl-card">
+                        <h3><i class="fas fa-masks-theater" style="color:#7c3aed"></i> Nhà hát / Hội trường</h3>
+                        <p>Gồm 2 khu vực: <strong>VIP Front</strong> (hàng A–C sát sân khấu, mỗi hàng 10 ghế) và <strong>Standard Back</strong> (hàng D–J, mỗi hàng 12 ghế).</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Gán loại vé cho khu Standard</label>
+                                <select class="form-select" name="theaterNormalLoaiVeId">
+                                    @foreach (var lv in loaiVes)
+                                    {
+                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Gán loại vé cho khu VIP Front</label>
+                                <select class="form-select" name="theaterVipLoaiVeId">
+                                    @foreach (var lv in loaiVes)
+                                    {
+                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Áp dụng mẫu Nhà hát</button>
+                </form>
+            </div>
+
+            <!-- 3. SHOW CA NHAC -->
+            <div class="tpl-content" id="tab-music">
+                <form method="post" action="/Organizer/TaoSoDo">
+                    <input type="hidden" name="suKienId" value="@suKienId" />
+                    <input type="hidden" name="loaiSoDo" value="music" />
+                    <input type="hidden" name="tenSoDo" value="Sơ đồ Show ca nhạc" />
+                    <div class="tpl-card">
+                        <h3><i class="fas fa-music" style="color:#7c3aed"></i> Show ca nhạc / Sân vận động mini</h3>
+                        <p>Gồm 2 khu vực: <strong>VIP Fanzone</strong> (hàng A–D, mỗi hàng 8 ghế sát sân khấu) và <strong>Standard Seating</strong> (hàng E–L phía sau, mỗi hàng 14 ghế).</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Gán loại vé cho Standard Seating</label>
+                                <select class="form-select" name="musicNormalLoaiVeId">
+                                    @foreach (var lv in loaiVes)
+                                    {
+                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Gán loại vé cho VIP Fanzone</label>
+                                <select class="form-select" name="musicVipLoaiVeId">
+                                    @foreach (var lv in loaiVes)
+                                    {
+                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Áp dụng mẫu Show ca nhạc</button>
+                </form>
+            </div>
+
+            <!-- 4. SO DO DON GIAN (1 ZONE) -->
+            <div class="tpl-content" id="tab-simple">
+                <form method="post" action="/Organizer/TaoSoDo">
+                    <input type="hidden" name="suKienId" value="@suKienId" />
+                    <input type="hidden" name="loaiSoDo" value="simple" />
+                    <div class="tpl-card">
+                        <h3><i class="fas fa-border-all" style="color:#7c3aed"></i> Sơ đồ đơn giản (Một khu vực)</h3>
+                        <p>Khởi tạo một khu vực ghế duy nhất với số lượng hàng và số ghế mỗi hàng tùy ý.</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tên sơ đồ</label>
+                                <input class="form-control" name="tenSoDo" value="Sơ đồ chính" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Loại vé áp dụng</label>
+                                <select class="form-select" name="simpleLoaiVeId">
+                                    @foreach (var lv in loaiVes)
+                                    {
+                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Số hàng (A–Z, tối đa 26)</label>
+                                <input class="form-control" type="number" name="simpleSoHang" min="1" max="26" value="6" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Số ghế mỗi hàng (tối đa 50)</label>
+                                <input class="form-control" type="number" name="simpleSoGheMoiHang" min="1" max="50" value="10" />
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Khởi tạo sơ đồ</button>
+                </form>
+            </div>
+
+            <!-- 5. TUY CHINH ZONES (MULTI-ZONE DONG) -->
+            <div class="tpl-content" id="tab-custom">
+                <form method="post" action="/Organizer/TaoSoDo">
+                    <input type="hidden" name="suKienId" value="@suKienId" />
+                    <input type="hidden" name="loaiSoDo" value="custom" />
+                    <div class="tpl-card">
+                        <h3><i class="fas fa-sliders" style="color:#7c3aed"></i> Tùy chỉnh nhiều khu vực (Multi-Zone)</h3>
+                        <p>Tự thiết lập từng khu vực với loại vé và số lượng ghế riêng biệt. Các hàng sẽ tự động được đánh số kế tiếp nhau.</p>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tên sơ đồ tổng thể</label>
+                            <input class="form-control" style="max-width:300px" name="tenSoDo" value="Sơ đồ tùy chỉnh" required />
+                        </div>
+
+                        <div id="customZonesContainer">
+                            <!-- Zone 1 default -->
+                            <div class="zone-row" id="zone-idx-0">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <strong style="color:#7c3aed">Khu vực #1</strong>
+                                    <button type="button" class="btn-remove-zone" onclick="removeCustomZone(0)" style="display:none">Xóa</button>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-semibold">Tên khu vực</label>
+                                        <input class="form-control form-control-sm" name="zoneTen[0]" value="Khu VIP" required />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label small fw-semibold">Gán loại vé</label>
+                                        <select class="form-select form-select-sm" name="zoneLoaiVeId[0]">
+                                            @foreach (var lv in loaiVes)
+                                            {
+                                                <option value="@lv.Id">@lv.TenLoaiVe</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-semibold">Số hàng</label>
+                                        <input class="form-control form-control-sm" type="number" name="zoneSoHang[0]" min="1" max="20" value="3" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-semibold">Ghế/hàng</label>
+                                        <input class="form-control form-control-sm" type="number" name="zoneSoGheMoiHang[0]" min="1" max="30" value="8" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small fw-semibold">Màu sắc</label>
+                                        <input class="form-control form-control-sm" type="color" name="zoneMauSac[0]" value="#dc3545" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-add-zone" onclick="addCustomZone()"><i class="fas fa-plus me-1"></i> Thêm khu vực</button>
+                    </div>
+                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Khởi tạo sơ đồ tùy chỉnh</button>
+                </form>
+            </div>
+
+            <!-- 6. KHONG SU DUNG SO DO -->
+            <div class="tpl-content" id="tab-none">
+                <form method="post" action="/Organizer/TaoSoDo">
+                    <input type="hidden" name="suKienId" value="@suKienId" />
+                    <input type="hidden" name="loaiSoDo" value="none" />
+                    <div class="tpl-card" style="border-color:#fca5a5;background:#fff5f5">
+                        <h3 style="color:#c53030"><i class="fas fa-exclamation-circle"></i> Không sử dụng sơ đồ chỗ ngồi</h3>
+                        <p style="color:#742a2a">Sự kiện của bạn sẽ <strong>không hiển thị sơ đồ chọn ghế</strong> lúc đặt vé. Khách mua vé sẽ tự động nhận vé đứng tự do (Standing) hoặc hệ thống tự xếp ngẫu nhiên mà không cần chọn chỗ ngồi.</p>
+                        <p style="color:#742a2a;margin-bottom:0"><i>* Nếu đã có sơ đồ cũ trên hệ thống, sơ đồ đó sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu.</i></p>
+                    </div>
+                    <button class="btn btn-danger" type="submit"><i class="fas fa-ban me-1"></i> Hủy bỏ sơ đồ ghế – dùng vé đứng/ngẫu nhiên</button>
+                </form>
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+<script>
+function switchTab(tabId){
+    document.querySelectorAll('.tpl-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tpl-content').forEach(c => c.classList.remove('active'));
+    
+    const targetBtn = Array.from(document.querySelectorAll('.tpl-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+    if(targetBtn) targetBtn.classList.add('active');
+    
+    document.getElementById(tabId).classList.add('active');
+}
+
+let zoneIndex = 1;
+const loaiVesOptions = `@Html.Raw(string.Join("", loaiVes.Select(lv => $"<option value='{lv.Id}'>{lv.TenLoaiVe}</option>")))`;
+
+function addCustomZone(){
+    const container = document.getElementById('customZonesContainer');
+    const idx = zoneIndex++;
+    const div = document.createElement('div');
+    div.className = 'zone-row';
+    div.id = 'zone-idx-' + idx;
+    div.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <strong style="color:#7c3aed">Khu vực #${idx + 1}</strong>
+            <button type="button" class="btn-remove-zone" onclick="removeCustomZone(${idx})">Xóa</button>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Tên khu vực</label>
+                <input class="form-control form-control-sm" name="zoneTen[${idx}]" value="Khu mới" required />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold">Gán loại vé</label>
+                <select class="form-select form-select-sm" name="zoneLoaiVeId[${idx}]">
+                    ${loaiVesOptions}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Số hàng</label>
+                <input class="form-control form-control-sm" type="number" name="zoneSoHang[${idx}]" min="1" max="20" value="4" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Ghế/hàng</label>
+                <input class="form-control form-control-sm" type="number" name="zoneSoGheMoiHang[${idx}]" min="1" max="30" value="10" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold">Màu sắc</label>
+                <input class="form-control form-control-sm" type="color" name="zoneMauSac[${idx}]" value="#198754" />
+            </div>
+        </div>
+    `;
+    container.appendChild(div);
+    updateRemoveButtons();
+}
+
+function removeCustomZone(idx){
+    const el = document.getElementById('zone-idx-' + idx);
+    if(el) el.remove();
+    updateRemoveButtons();
+}
+
+function updateRemoveButtons(){
+    const rows = document.querySelectorAll('#customZonesContainer .zone-row');
+    rows.forEach((row, i) => {
+        row.querySelector('strong').textContent = 'Khu vực #' + (i + 1);
+        const btn = row.querySelector('.btn-remove-zone');
+        if(rows.length <= 1){
+            btn.style.display = 'none';
+        } else {
+            btn.style.display = 'block';
+        }
+    });
+}
+</script>
+@if (isLocked)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".tpl-container form, .seat-hero form").forEach(form => {
+                form.querySelectorAll("input, select, textarea, button").forEach(el => {
+                    el.disabled = true;
+                });
+            });
+            document.querySelectorAll(".tpl-tabs button").forEach(btn => {
+                btn.disabled = true;
+            });
+        });
+    </script>
+}
+}

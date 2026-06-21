@@ -1,0 +1,137 @@
+@model List<NguoiDung>
+
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Quản lý tài khoản soát vé";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4 gap-3">
+    <div class="portal-page-title">
+        <span class="portal-kicker"><i class="fas fa-user-gear"></i> Nhân sự</span>
+        <h1>Quản lý tài khoản soát vé</h1>
+        <p>Danh sách tài khoản nhân viên do bạn tạo và quản trị.</p>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddStaff">
+        <i class="fas fa-plus me-1"></i> Tạo nhân viên
+    </button>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="portal-card">
+    <div class="portal-card-header">
+        <h2>Danh sách nhân viên</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table portal-table align-middle">
+            <thead>
+                <tr>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Ngày tạo</th>
+                    <th class="text-end">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Count > 0)
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.HoTen</strong></td>
+                            <td>@item.Email</td>
+                            <td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary me-1" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#modalEditStaff-@item.Id"
+                                        title="Chỉnh sửa">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <form class="d-inline" method="post" action="/Organizer/XoaNhanVienStaff/@item.Id" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên này? Tài khoản này sẽ bị xóa khỏi tất cả các sự kiện đã phân công!')">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit" title="Xóa tài khoản">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Modal Sửa Nhân viên -->
+                                <div class="modal fade text-start" id="modalEditStaff-@item.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title fw-bold">Sửa nhân viên</h5>
+                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <form method="post" action="/Organizer/SuaNhanVienStaff/@item.Id">
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Email (Không thể thay đổi)</label>
+                                                        <input class="form-control" value="@item.Email" readonly disabled />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Họ tên nhân viên</label>
+                                                        <input class="form-control" name="hoTen" value="@item.HoTen" required />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Mật khẩu mới (Để trống nếu không muốn đổi)</label>
+                                                        <input class="form-control" type="password" name="matKhau" placeholder="Nhập mật khẩu mới nếu cần đổi" />
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                                                    <button class="btn btn-primary" type="submit">Cập nhật</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">Bạn chưa tạo tài khoản soát vé nào. Nhấp nút "Tạo nhân viên" để bắt đầu.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Thêm Nhân viên -->
+<div class="modal fade" id="modalAddStaff" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Tạo tài khoản soát vé mới</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="/Organizer/TaoNhanVienStaff">
+                <div class="modal-body">
+                    <p class="text-muted small">Tài khoản được tạo sẽ có quyền đăng nhập vào ứng dụng Soát vé Check-in của bạn.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Họ tên nhân viên</label>
+                        <input class="form-control" name="hoTen" placeholder="Ví dụ: Nguyễn Văn A" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email tài khoản</label>
+                        <input class="form-control" type="email" name="email" placeholder="Ví dụ: nhanvien@gmail.com" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mật khẩu</label>
+                        <input class="form-control" type="password" name="matKhau" placeholder="Nhập mật khẩu truy cập" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="submit">Xác nhận tạo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

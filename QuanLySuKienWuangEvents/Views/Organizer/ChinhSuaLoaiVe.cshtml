@@ -1,0 +1,105 @@
+﻿@model LoaiVe
+
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Sửa loại vé";
+}
+
+<style>
+.edit-ticket-form {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.05);
+    overflow: hidden;
+    max-width: 760px;
+}
+.edit-ticket-header {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    padding: 20px 24px;
+}
+.edit-ticket-header h1 { font-size: 1.25rem; font-weight: 700; margin: 0; }
+.edit-ticket-header p { font-size: 0.85rem; opacity: 0.85; margin: 4px 0 0; }
+.edit-ticket-body { padding: 28px 24px; }
+.form-label-custom { font-size: .8rem; font-weight: 700; color: #374151; margin-bottom: 4px; }
+</style>
+
+<!-- Breadcrumb -->
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/Organizer/LoaiVe?suKienId=@Model.SuKienId" class="btn btn-sm btn-light border text-secondary" style="border-radius:8px;">
+        <i class="fas fa-arrow-left me-1"></i> Quay lại
+    </a>
+    <span class="text-muted small">/</span>
+    <span class="text-muted small">Chỉnh sửa @Model.TenLoaiVe</span>
+</div>
+
+<div class="edit-ticket-form">
+    <div class="edit-ticket-header">
+        <h1><i class="fas fa-pen-to-square me-2"></i>Chỉnh sửa loại vé</h1>
+        <p>Cập nhật thông tin chi tiết loại vé, giới hạn và thời gian bán.</p>
+    </div>
+    <div class="edit-ticket-body">
+        <form method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="SuKienId" />
+            
+            <div class="mb-3">
+                <label class="form-label-custom">Tên loại vé <span class="text-danger">*</span></label>
+                <input class="form-control" asp-for="TenLoaiVe" placeholder="VIP, Standard..." required style="font-weight: 600;" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-custom">Mô tả loại vé</label>
+                <textarea class="form-control" asp-for="MoTa" rows="3" placeholder="Ghi chú về quyền lợi của loại vé..."></textarea>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label-custom">Giá bán (₫) <span class="text-danger">*</span></label>
+                    <input class="form-control" asp-for="GiaBan" type="number" min="0" placeholder="0" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label-custom">Số lượng tổng <span class="text-danger">*</span></label>
+                    <input class="form-control" asp-for="SoLuongTong" type="number" min="@Model.SoLuongDaBan" required />
+                    <span class="text-muted small" style="font-size:0.72rem;">Đã bán: @Model.SoLuongDaBan</span>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label-custom">Giới hạn/đơn <span class="text-danger">*</span></label>
+                    <input class="form-control" asp-for="GioiHanMoiDon" type="number" min="1" required />
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label-custom">Thời gian bắt đầu bán</label>
+                    <input class="form-control" name="NgayBatDauBan" type="datetime-local" 
+                           value="@(Model.NgayBatDauBan.HasValue ? Model.NgayBatDauBan.Value.ToString("yyyy-MM-ddTHH:mm") : "")" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-custom">Thời gian kết thúc bán</label>
+                    <input class="form-control" name="NgayKetThucBan" type="datetime-local" 
+                           value="@(Model.NgayKetThucBan.HasValue ? Model.NgayKetThucBan.Value.ToString("yyyy-MM-ddTHH:mm") : "")" />
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4 align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label-custom">Màu sắc vé</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input class="form-control form-control-color" asp-for="MauSac" type="color" style="width: 50px; height: 38px; padding: 3px;" />
+                        <span class="text-muted small">Mã màu nhận diện trên sơ đồ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 border-top pt-4">
+                <button class="btn btn-success fw-bold px-4 py-2" type="submit" style="border-radius: 8px;">
+                    <i class="fas fa-save me-1"></i> Lưu thay đổi
+                </button>
+                <a class="btn btn-outline-secondary px-4 py-2" href="/Organizer/LoaiVe?suKienId=@Model.SuKienId" style="border-radius: 8px;">
+                    Hủy bỏ
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,192 @@
+@model List<NhanVienSuKien>
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Phân công soát vé";
+    var suKienId = (Guid)ViewBag.SuKienId;
+    var createdStaff = ViewBag.CreatedStaff as List<NguoiDung> ?? new List<NguoiDung>();
+    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6;
+    string lockReason = ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG" : "ĐÃ HỦY";
+}
+
+<style>
+.staff-panel {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    overflow: hidden;
+}
+.staff-panel-header {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: .95rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.staff-panel-body { padding: 20px; }
+.staff-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.staff-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+.staff-row:last-child { border-bottom: none; }
+.staff-info { flex: 1; }
+.staff-name { font-weight: 700; font-size: .92rem; color: #111827; }
+.staff-email { font-size: .8rem; color: #9ca3af; }
+.badge-role-staff { background: #f5f3ff; color: #7c3aed; font-size: .73rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.badge-role-date { font-size: .75rem; color: #9ca3af; }
+.assign-form-select .form-select {
+    border-radius: 10px;
+    border: 1.5px solid #e5e7eb;
+    padding: 10px 14px;
+    font-size: .9rem;
+}
+.assign-form-select .form-select:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+}
+.fl { font-size: .8rem; font-weight: 700; color: #374151; margin-bottom: 4px; }
+</style>
+
+<!-- Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+    <div>
+        <a href="/Organizer/ChiTietSuKien/@suKienId" class="btn btn-sm btn-light border text-secondary mb-2" style="border-radius:8px;">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại sự kiện
+        </a>
+        <h1 class="h4 fw-bold mb-1">Phân công soát viên</h1>
+        <p class="text-muted small mb-0"><i class="fas fa-calendar-days me-1"></i>@ViewBag.TenSuKien</p>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-circle-exclamation me-1"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-circle-check me-1"></i> @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (isLocked)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4" style="border-radius:12px;">
+        <i class="fas fa-lock fs-5"></i>
+        <div><strong>Đã khóa.</strong> Sự kiện đang ở trạng thái <strong>@lockReason</strong> — không thể phân công hoặc thay đổi nhân sự.</div>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Left: Assign Form -->
+    <div class="col-lg-4">
+        <div class="staff-panel">
+            <div class="staff-panel-header">
+                <span><i class="fas fa-user-plus me-2"></i>Phân công soát viên</span>
+            </div>
+            <div class="staff-panel-body">
+                @if (createdStaff.Count > 0)
+                {
+                    <form method="post" action="/Organizer/ThemStaff" class="assign-form-select">
+                        <input type="hidden" name="suKienId" value="@suKienId" />
+                        <div class="mb-3">
+                            <label class="fl">Chọn nhân viên <span class="text-danger">*</span></label>
+                            <select class="form-select" name="nguoiDungId" required @(isLocked ? "disabled" : "")>
+                                <option value="">— Chọn soát viên —</option>
+                                @foreach (var staff in createdStaff)
+                                {
+                                    <option value="@staff.Id">@staff.HoTen (@staff.Email)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="alert alert-light border d-flex gap-2 align-items-start p-2 mb-3" style="font-size:.82rem;border-radius:8px;">
+                            <i class="fas fa-circle-info text-primary mt-1" style="flex-shrink:0;"></i>
+                            <span>Chỉ hiển thị nhân viên do bạn tạo. Để thêm soát viên mới, vào <a href="/Organizer/NhanVienStaff" class="fw-bold text-decoration-none">Quản lý nhân viên</a>.</span>
+                        </div>
+                        <button type="submit" class="btn w-100 py-2 fw-bold text-white" @(isLocked ? "disabled" : "")
+                                style="background:linear-gradient(135deg,#7c3aed,#a855f7);border:none;border-radius:10px;">
+                            <i class="fas fa-check me-1"></i> Xác nhận phân công
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-users-slash" style="font-size:2.5rem;color:#d1d5db;margin-bottom:14px;display:block;"></i>
+                        <p class="text-muted small mb-3">Bạn chưa có nhân viên soát vé nào.</p>
+                        <a href="/Organizer/NhanVienStaff" class="btn btn-warning fw-bold w-100" style="border-radius:10px;">
+                            <i class="fas fa-plus me-1"></i> Tạo nhân viên mới
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Assigned Staff List -->
+    <div class="col-lg-8">
+        <div class="staff-panel">
+            <div class="staff-panel-header">
+                <span><i class="fas fa-users me-2"></i>Nhân viên được phân công</span>
+                <span style="background:rgba(255,255,255,0.2);padding:3px 12px;border-radius:20px;font-size:.82rem;">@Model.Count người</span>
+            </div>
+            <div class="staff-panel-body" style="padding: 8px 20px;">
+                @if (Model == null || Model.Count == 0)
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-user-clock" style="font-size:3rem;margin-bottom:14px;display:block;color:#d1d5db;"></i>
+                        <h5 style="color:#374151;font-weight:700;">Chưa phân công ai</h5>
+                        <p class="small mb-0">Chọn nhân viên từ form bên trái để phân công soát vé.</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        string initial = !string.IsNullOrEmpty(item.HoTenNV) ? item.HoTenNV.Substring(0, 1).ToUpper() : "?";
+                        <div class="staff-row">
+                            <div class="staff-avatar">@initial</div>
+                            <div class="staff-info">
+                                <div class="staff-name">@item.HoTenNV</div>
+                                <div class="staff-email">@item.EmailNV</div>
+                            </div>
+                            <div class="d-flex flex-column align-items-end gap-1">
+                                <span class="badge-role-staff">@item.VaiTroNV</span>
+                                <span class="badge-role-date">Gán @item.NgayThem.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <form method="post" action="/Organizer/XoaStaff" style="display:inline;"
+                                  onsubmit="return confirm('Gỡ nhân viên @item.HoTenNV khỏi sự kiện này?')">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="hidden" name="suKienId" value="@suKienId" />
+                                <button class="btn btn-sm btn-light text-danger border-0" type="submit"
+                                        title="Hủy phân công" @(isLocked ? "disabled" : "")
+                                        style="border-radius:8px;width:36px;height:36px;">
+                                    <i class="fas fa-user-minus"></i>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

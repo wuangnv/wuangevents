@@ -1,0 +1,137 @@
+@model DonHang
+
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    var chiTiet = ViewBag.ChiTiet as List<ChiTietDonHang> ?? new();
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div class="portal-page-title">
+        <h1>Đơn @Model.MaDonHang</h1>
+        <p>@ViewBag.TenSuKien</p>
+    </div>
+    <a class="btn btn-outline-secondary" href="/Organizer/DonHang?suKienId=@Model.SuKienId">Quay lại</a>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="portal-card portal-card-body">
+            <span class="text-muted">Người mua</span>
+            <strong class="d-block">@Model.HoTenNguoiMua</strong>
+            <small>@Model.EmailNguoiMua</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="portal-card portal-card-body">
+            <span class="text-muted">Tổng thanh toán</span>
+            <strong class="d-block fs-5">@Model.TongThanhToan.ToString("N0") VND</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="portal-card portal-card-body">
+            <span class="text-muted">Trạng thái</span>
+            <div class="mt-1">
+                @if (Model.TrangThai == 1)
+                {
+                    <span class="badge bg-success text-white">Đã thanh toán</span>
+                }
+                else if (Model.TrangThai == 2)
+                {
+                    <span class="badge bg-danger text-white">Đã hủy</span>
+                }
+                else if (Model.TrangThai == 3)
+                {
+                    <span class="badge bg-info text-dark">Hoàn tiền</span>
+                }
+                else if (Model.TrangThai == 4)
+                {
+                    <span class="badge bg-secondary text-white">Hết hạn</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger mb-3"><i class="fas fa-exclamation-triangle me-1"></i>@TempData["Error"]</div>
+}
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success mb-3"><i class="fas fa-check-circle me-1"></i>@TempData["Message"]</div>
+}
+
+@if (Model.TrangThai == 0)
+{
+    <div class="portal-card portal-card-body mb-3" style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-clock" style="color:#3b82f6;font-size:1.3rem"></i>
+            <div>
+                <h5 class="fw-bold mb-1" style="color:#1d4ed8"><i class="fas fa-hourglass-half me-1"></i>Đơn hàng đang chờ thanh toán qua cổng</h5>
+                <p class="text-muted small mb-0">Khách hàng đang thực hiện thanh toán qua VNPAY / MoMo / ZaloPay. Vé sẽ được kích hoạt tự động sau khi cổng xác nhận giao dịch thành công.</p>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="portal-card">
+    <div class="portal-card-header">
+        <h2>Vé trong đơn</h2>
+    </div>
+    <div class="table-responsive">
+        <table class="table portal-table align-middle">
+            <thead>
+                <tr>
+                    <th>Người tham dự</th>
+                    <th>Email</th>
+                    <th>Loại vé</th>
+                    <th>Số ghế</th>
+                    <th>Mã vé</th>
+                    <th>Giá</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in chiTiet)
+                {
+                    <tr>
+                        <td>@item.TenNguoiThamDu</td>
+                        <td>@item.EmailNguoiThamDu</td>
+                        <td><span class="badge bg-info text-dark">@item.TenLoaiVe</span></td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.SoGhe))
+                            {
+                                <span class="badge bg-secondary"><i class="fas fa-chair me-1"></i>@item.SoGhe</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">Không có</span>
+                            }
+                        </td>
+                        <td><code>@item.MaVe</code></td>
+                        <td>@item.GiaVe.ToString("N0") VND</td>
+                        <td>
+                            @if (item.TrangThaiCheckin == 1)
+                            {
+                                <span class="badge bg-success">Đã check-in</span>
+                            }
+                            else if (item.TrangThaiCheckin == 2)
+                            {
+                                <span class="badge bg-danger">Đã hủy</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Chưa sử dụng</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

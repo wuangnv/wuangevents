@@ -1,0 +1,168 @@
+@model List<SuKien>
+
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Sự kiện của tôi";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div class="portal-page-title">
+        <span class="portal-kicker"><i class="fas fa-list-check"></i> Sự kiện</span>
+        <h1>Sự kiện của tôi</h1>
+        <p>Chọn một sự kiện để quản lý vé, đơn hàng, khách tham dự và báo cáo.</p>
+    </div>
+    <a class="btn btn-success" href="/Organizer/TaoMoiSuKien">
+        <i class="fas fa-plus me-1"></i> Tạo sự kiện
+    </a>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@{
+    var now = DateTime.UtcNow;
+    var activeEvents = Model.Where(e => (e.TrangThai == 1 || e.TrangThai == 3) && e.NgayKetThuc > now).ToList();
+    var otherEvents = Model.Where(e => (e.TrangThai != 1 && e.TrangThai != 3) || e.NgayKetThuc <= now).ToList();
+}
+
+@{
+    async Task RenderEventsTable(List<SuKien> eventList)
+    {
+        <div class="table-responsive">
+            <table class="table portal-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Tên sự kiện</th>
+                        <th>Ngày bắt đầu</th>
+                        <th>Vé đã bán</th>
+                        <th>Doanh thu</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (eventList.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-4">Không có sự kiện nào trong danh mục này.</td></tr>
+                    }
+                    @foreach (var item in eventList)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">
+                                    <a href="/Organizer/ChiTietSuKien/@item.Id" class="text-decoration-none text-dark hover-primary">@item.TenSuKien</a>
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="fas @(item.LoaiSuKien == 1 ? "fa-laptop" : "fa-map-pin") me-1"></i>
+                                    @(item.LoaiSuKien == 1 ? "Trực tuyến" : item.TenDiaDiem ?? "Chưa cấu hình địa điểm")
+                                </div>
+                                @if (item.TrangThai == 7 && !string.IsNullOrWhiteSpace(item.LyDoTuChoi))
+                                {
+                                    <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>Từ chối: @item.LyDoTuChoi</div>
+                                }
+                            </td>
+                            <td>@item.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-between mb-1" style="width: 130px;">
+                                    <span class="fw-bold text-primary">@item.VeDaBan</span>
+                                    <span class="text-muted small">/ @item.TongVe vé</span>
+                                </div>
+                                <div class="progress" style="height: 6px; width: 130px; border-radius: 3px; background: #e9ecef;">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: @(item.TongVe > 0 ? (item.VeDaBan * 100 / item.TongVe) : 0)%" 
+                                         aria-valuenow="@item.VeDaBan" aria-valuemin="0" aria-valuemax="@item.TongVe"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-success fw-bold">@item.DoanhThu.ToString("N0")đ</span>
+                            </td>
+                            <td><span class="status-pill @TrangThaiClass(item)">@TrangThaiSuKienText(item)</span></td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a class="btn btn-sm btn-outline-primary" href="/Organizer/ChiTietSuKien/@item.Id" title="Quản lý chi tiết">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Mở menu chức năng">
+                                        <i class="fas fa-ellipsis"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" href="/Organizer/ChiTietSuKien/@item.Id"><i class="fas fa-info-circle me-2"></i>Chi tiết & Quản lý</a></li>
+                                        <li><a class="dropdown-item" href="/Organizer/ChinhSuaSuKien/@item.Id"><i class="fas fa-pen me-2"></i>Sửa sự kiện</a></li>
+                                        <li>
+                                            <form method="post" action="/Organizer/SaoChepSuKien/@item.Id" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn nhân bản (sao chép) sự kiện này? Một bản nháp sự kiện mới sẽ được tạo.')">
+                                                <button class="dropdown-item" type="submit"><i class="fas fa-copy me-2"></i>Sao chép</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
+
+<ul class="nav nav-pills mb-4 gap-2" id="eventTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active px-4 py-2 fw-semibold" id="active-events-tab" data-bs-toggle="pill" data-bs-target="#active-events" type="button" role="tab" aria-controls="active-events" aria-selected="true" style="border-radius: 8px;">
+            <i class="fas fa-play me-1"></i> Sự kiện đang chạy (@activeEvents.Count)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link px-4 py-2 fw-semibold" id="archived-events-tab" data-bs-toggle="pill" data-bs-target="#archived-events" type="button" role="tab" aria-controls="archived-events" aria-selected="false" style="border-radius: 8px;">
+            <i class="fas fa-archive me-1"></i> Sự kiện khác / Lưu trữ (@otherEvents.Count)
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="eventTabsContent">
+    <div class="tab-pane fade show active" id="active-events" role="tabpanel" aria-labelledby="active-events-tab">
+        <div class="portal-card">
+            <div class="portal-card-header">
+                <h2>Sự kiện đang chạy</h2>
+                <span class="text-muted small">@activeEvents.Count sự kiện đang mở bán hoặc chờ duyệt</span>
+            </div>
+            @{ await RenderEventsTable(activeEvents); }
+        </div>
+    </div>
+    <div class="tab-pane fade" id="archived-events" role="tabpanel" aria-labelledby="archived-events-tab">
+        <div class="portal-card">
+            <div class="portal-card-header">
+                <h2>Kho sự kiện khác & Lưu trữ</h2>
+                <span class="text-muted small">@otherEvents.Count sự kiện nháp, tạm dừng, từ chối hoặc đã hủy</span>
+            </div>
+            @{ await RenderEventsTable(otherEvents); }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private static string TrangThaiSuKienText(SuKien item)
+    {
+        if (item.TrangThai == 3 && DateTime.UtcNow > item.NgayKetThuc) return "Đã kết thúc";
+        byte value = item.TrangThai;
+        if (value == 1) return "Chờ duyệt";
+        if (value == 2) return "Đã duyệt / tạm dừng";
+        if (value == 3) return "Đang bán";
+        if (value == 4) return "Hết vé";
+        if (value == 5) return "Đã kết thúc";
+        if (value == 6) return "Đã hủy";
+        if (value == 7) return "Từ chối";
+        return "Nháp";
+    }
+
+    private static string TrangThaiClass(SuKien item)
+    {
+        if (item.TrangThai == 3 && DateTime.UtcNow > item.NgayKetThuc) return "status-draft"; // Gray
+        byte value = item.TrangThai;
+        if (value == 1) return "status-pending";
+        if (value is 2 or 3) return "status-approved";
+        if (value == 6) return "status-cancelled";
+        if (value == 7) return "status-rejected";
+        return "status-draft";
+    }
+}

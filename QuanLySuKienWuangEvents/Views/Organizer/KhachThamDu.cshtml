@@ -1,0 +1,159 @@
+﻿@model List<ChiTietDonHang>
+
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Khách tham dự";
+    var suKienId = (Guid)ViewBag.SuKienId;
+    int tongKhach = Model?.Count ?? 0;
+    int daCheckin = Model?.Count(x => x.TrangThaiCheckin == 1) ?? 0;
+    int chuaCheckin = tongKhach - daCheckin;
+}
+
+<style>
+.attendee-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
+@@media (max-width:576px) { .attendee-summary { grid-template-columns: repeat(2,1fr); } }
+.att-stat {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.att-stat-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.att-stat-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: #9ca3af; }
+.att-stat-val { font-size: 1.5rem; font-weight: 800; color: #111827; }
+.attendee-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    overflow: hidden;
+}
+.att-header { padding: 14px 20px; border-bottom: 1px solid #f3f4f6; background: #fafafa; display: flex; align-items: center; justify-content: space-between; }
+.att-header h2 { font-size: .9rem; font-weight: 700; color: #374151; margin: 0; }
+.att-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg,#7c3aed,#a855f7);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-size: .82rem; font-weight: 700; flex-shrink: 0;
+}
+.checkin-badge { background: #d1fae5; color: #065f46; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.notcheckin-badge { background: #fef3c7; color: #92400e; font-size: .72rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+</style>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+    <div>
+        <a href="/Organizer/ChiTietSuKien/@suKienId" class="btn btn-sm btn-light border text-secondary mb-2" style="border-radius:8px;">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại sự kiện
+        </a>
+        <h1 class="h4 fw-bold mb-1">Khách tham dự</h1>
+        <p class="text-muted small mb-0"><i class="fas fa-calendar-days me-1"></i>@ViewBag.TenSuKien</p>
+    </div>
+    <a class="btn btn-success fw-bold" href="/Organizer/XuatKhachThamDuCsv?suKienId=@suKienId" style="border-radius:10px;">
+        <i class="fas fa-file-csv me-1"></i> Xuất CSV
+    </a>
+</div>
+
+<!-- Summary Stats -->
+<div class="attendee-summary">
+    <div class="att-stat">
+        <div class="att-stat-icon" style="background:#f5f3ff;color:#7c3aed;"><i class="fas fa-users"></i></div>
+        <div>
+            <div class="att-stat-label">Tổng khách</div>
+            <div class="att-stat-val">@tongKhach</div>
+        </div>
+    </div>
+    <div class="att-stat">
+        <div class="att-stat-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-circle-check"></i></div>
+        <div>
+            <div class="att-stat-label">Đã check-in</div>
+            <div class="att-stat-val">@daCheckin</div>
+        </div>
+    </div>
+    <div class="att-stat">
+        <div class="att-stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-clock"></i></div>
+        <div>
+            <div class="att-stat-label">Chưa check-in</div>
+            <div class="att-stat-val">@chuaCheckin</div>
+        </div>
+    </div>
+</div>
+
+<!-- Search -->
+<div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,0.07);padding:14px 18px;margin-bottom:16px;">
+    <form method="get">
+        <input type="hidden" name="suKienId" value="@suKienId" />
+        <div class="input-group" style="border-radius:10px;overflow:hidden;">
+            <span class="input-group-text" style="background:#f3f4f6;border:1.5px solid #e5e7eb;border-right:none;">
+                <i class="fas fa-search text-muted"></i>
+            </span>
+            <input class="form-control" name="search" value="@ViewBag.Search" placeholder="Tìm theo tên hoặc email khách..."
+                   style="border:1.5px solid #e5e7eb;border-left:none;" />
+            <button class="btn fw-bold px-4" type="submit"
+                    style="background:#7c3aed;color:#fff;border:none;">Tìm</button>
+        </div>
+    </form>
+</div>
+
+<!-- Table -->
+<div class="attendee-card">
+    <div class="att-header">
+        <h2><i class="fas fa-table me-2" style="color:#7c3aed;"></i>Danh sách khách tham dự</h2>
+        <span style="font-size:.8rem;color:#9ca3af;">@tongKhach người</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead style="background:#fafafa;">
+                <tr>
+                    <th style="padding:12px 16px;font-size:.77rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9ca3af;border:none;border-bottom:2px solid #f3f4f6;">Khách hàng</th>
+                    <th style="padding:12px 16px;font-size:.77rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9ca3af;border:none;border-bottom:2px solid #f3f4f6;">Loại vé</th>
+                    <th style="padding:12px 16px;font-size:.77rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9ca3af;border:none;border-bottom:2px solid #f3f4f6;text-align:right;">Giá vé</th>
+                    <th style="padding:12px 16px;font-size:.77rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9ca3af;border:none;border-bottom:2px solid #f3f4f6;">Check-in</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="4" style="padding:60px;text-align:center;color:#9ca3af;">
+                            <i class="fas fa-users-slash" style="font-size:3rem;display:block;margin-bottom:14px;"></i>
+                            Chưa có khách tham dự nào
+                        </td>
+                    </tr>
+                }
+                @foreach (var item in Model ?? new())
+                {
+                    string init = !string.IsNullOrEmpty(item.TenNguoiThamDu) ? item.TenNguoiThamDu.Substring(0, 1).ToUpper() : "?";
+                    <tr style="border-bottom:1px solid #f9fafb;">
+                        <td style="padding:12px 16px;border:none;">
+                            <div class="d-flex align-items-center gap-10" style="gap:10px;">
+                                <div class="att-avatar">@init</div>
+                                <div>
+                                    <div style="font-weight:700;font-size:.9rem;color:#111827;">@item.TenNguoiThamDu</div>
+                                    <div style="font-size:.78rem;color:#9ca3af;">@item.EmailNguoiThamDu</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding:12px 16px;border:none;">
+                            <span style="font-size:.85rem;color:#374151;">@(string.IsNullOrEmpty(item.TenLoaiVe) ? $"#{item.LoaiVeId.ToString().Substring(0,8)}" : item.TenLoaiVe)</span>
+                        </td>
+                        <td style="padding:12px 16px;border:none;text-align:right;">
+                            <strong style="color:#111827;font-size:.9rem;">@item.GiaVe.ToString("N0")₫</strong>
+                        </td>
+                        <td style="padding:12px 16px;border:none;">
+                            @if (item.TrangThaiCheckin == 1)
+                            {
+                                <span class="checkin-badge"><i class="fas fa-check me-1" style="font-size:.65rem;"></i>Đã vào</span>
+                            }
+                            else
+                            {
+                                <span class="notcheckin-badge"><i class="fas fa-clock me-1" style="font-size:.65rem;"></i>Chưa check-in</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

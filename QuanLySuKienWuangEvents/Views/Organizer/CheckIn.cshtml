@@ -1,0 +1,247 @@
+@model List<ChiTietDonHang>
+@using QuanLySuKienWuangEvents.Models
+@{
+    Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
+    ViewData["Title"] = "Check-in QR";
+    var suKienId = (Guid)ViewBag.SuKienId;
+    int tongVe = Model.Count;
+    int daCheckin = (int)ViewBag.DaCheckin;
+    int chuaCheckin = tongVe - daCheckin;
+}
+@section Styles {
+<style>
+.checkin-hero{background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);border-radius:20px;padding:28px 32px;color:#fff;margin-bottom:28px}
+.checkin-hero h1{font-size:1.6rem;font-weight:800;margin:0 0 4px}
+.checkin-hero p{opacity:.85;margin:0;font-size:.95rem}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.stat-box{background:#fff;border-radius:14px;padding:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.stat-box .stat-num{font-size:2rem;font-weight:800;line-height:1}
+.stat-box .stat-lbl{font-size:.8rem;color:#888;margin-top:4px}
+.stat-total .stat-num{color:#7c3aed}
+.stat-ok .stat-num{color:#059669}
+.stat-pending .stat-num{color:#d97706}
+.scan-panel{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:24px;margin-bottom:24px}
+.scan-panel h2{font-size:1.05rem;font-weight:700;margin-bottom:16px;color:#1a1a2e}
+.scan-input-row{display:flex;gap:10px}
+.scan-input-row input{flex:1;font-size:1.1rem;padding:10px 16px;border:2px solid #e5e7eb;border-radius:10px;outline:none;transition:.2s}
+.scan-input-row input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.btn-scan{background:#7c3aed;color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s}
+.btn-scan:hover{background:#6d28d9}
+.btn-camera{background:#f3f4f6;color:#444;border:none;padding:10px 18px;border-radius:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s}
+.btn-camera:hover{background:#e5e7eb}
+.btn-camera.active{background:#dcfce7;color:#065f46}
+.camera-box{margin-top:16px;display:none;background:#000;border-radius:12px;overflow:hidden;position:relative;max-width:420px}
+.camera-box video{width:100%;display:block}
+.camera-box canvas{display:none}
+.camera-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:3px solid rgba(124,58,237,.8);width:200px;height:200px;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,.4)}
+.camera-status{font-size:.82rem;color:#888;margin-top:8px}
+.result-flash{display:none;padding:14px 18px;border-radius:12px;margin-bottom:12px;font-weight:600;font-size:.95rem;align-items:center;gap:10px}
+.result-ok{background:#d1fae5;color:#065f46;border:1.5px solid #6ee7b7}
+.result-err{background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5}
+.filter-bar{background:#fff;border-radius:14px;padding:16px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:16px}
+.checkin-table{background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden}
+.portal-table td,.portal-table th{padding:10px 16px;font-size:.88rem}
+.badge-ok{background:#d1fae5;color:#065f46;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:600}
+.badge-pending{background:#dbeafe;color:#1e40af;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:600}
+.highlight-row{animation:flashGreen .8s ease}
+@@keyframes flashGreen{0%,100%{background:transparent}50%{background:#d1fae5}}
+@@media(max-width:640px){.stats-row{grid-template-columns:repeat(3,1fr)}.scan-input-row{flex-wrap:wrap}}
+</style>
+}
+
+<div class="checkin-hero">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div>
+            <h1><i class="fas fa-qrcode"></i> Soát vé Check-in</h1>
+            <p>@ViewBag.TenSuKien</p>
+        </div>
+        @{
+            DateTime? batDau = ViewBag.BatDauCheckIn as DateTime?;
+            DateTime? ketThuc = ViewBag.KetThucCheckIn as DateTime?;
+            DateTime ngayBatDau = (DateTime)ViewBag.NgayBatDau;
+            DateTime ngayKetThuc = (DateTime)ViewBag.NgayKetThuc;
+            bool isTamDung = ViewBag.TrangThaiSuKien == 2;
+            bool isDaHuy = ViewBag.TrangThaiSuKien == 6;
+
+            // Quy đổi sang giờ Việt Nam (UTC+7)
+            DateTime nowLocal = DateTime.UtcNow.AddHours(7);
+            
+            // Thiết lập mốc check-in thông minh (Smart Default): BĐ trước 1 tiếng, KT bằng giờ kết thúc sự kiện
+            DateTime startCheckIn = batDau ?? ngayBatDau.AddHours(-1);
+            DateTime endCheckIn = ketThuc ?? ngayKetThuc;
+
+            bool isCheckInChuaBatDau = nowLocal < startCheckIn;
+            bool isCheckInDaKetThuc = nowLocal > endCheckIn;
+            bool isVoHieu = isTamDung || isDaHuy || isCheckInChuaBatDau || isCheckInDaKetThuc;
+        }
+        <a href="/Organizer/ChiTietSuKien/@suKienId#checkinWidget"
+           style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);color:#fff;padding:8px 14px;border-radius:10px;font-size:.82rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.3);transition:.2s;"
+           title="Điều chỉnh khung giờ nhận khách">
+            <i class="fas fa-clock"></i>
+            <span>
+                @startCheckIn.ToString("HH:mm dd/MM") &nbsp;→&nbsp; @endCheckIn.ToString("HH:mm dd/MM")
+            </span>
+            <i class="fas fa-pen" style="font-size:.7rem;opacity:.7;"></i>
+        </a>
+    </div>
+</div>
+
+@if (isVoHieu)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3" style="border-radius: 12px; margin-bottom: 20px; padding: 14px 18px;">
+        <i class="fas fa-exclamation-triangle fs-5 text-warning me-2"></i>
+        <div class="small">
+            <strong>Cảnh báo soát vé:</strong> 
+            @if (isTamDung) { <span>Sự kiện đang tạm dừng.</span> }
+            else if (isDaHuy) { <span>Sự kiện đã bị hủy.</span> }
+            else if (isCheckInChuaBatDau) { <span>Chưa đến khung giờ soát vé (Bắt đầu từ: @startCheckIn.ToString("dd/MM/yyyy HH:mm")).</span> }
+            else if (isCheckInDaKetThuc) { <span>Thời gian cho phép check-in của sự kiện này đã kết thúc (Hạn chót soát vé: @endCheckIn.ToString("dd/MM/yyyy HH:mm")).</span> }
+            Chức năng quét soát vé tạm thời đóng.
+        </div>
+    </div>
+}
+
+@if(TempData["Error"] != null){<div class="result-flash result-err" style="display:flex"><i class="fas fa-circle-xmark"></i> @TempData["Error"]</div>}
+@if(TempData["Message"] != null){<div class="result-flash result-ok" style="display:flex"><i class="fas fa-circle-check"></i> @TempData["Message"]</div>}
+
+<div id="resultFlash" class="result-flash"></div>
+
+<div class="stats-row">
+    <div class="stat-box stat-total"><div class="stat-num">@tongVe</div><div class="stat-lbl">Tổng vé</div></div>
+    <div class="stat-box stat-ok"><div class="stat-num">@daCheckin</div><div class="stat-lbl">Đã check-in</div></div>
+    <div class="stat-box stat-pending"><div class="stat-num">@chuaCheckin</div><div class="stat-lbl">Chưa check-in</div></div>
+</div>
+
+<div class="scan-panel">
+    <h2><i class="fas fa-barcode"></i> Quét mã vé / Nhập mã thủ công</h2>
+    <form method="post" action="/Organizer/QuetVeCheckIn" id="checkinForm">
+        <input type="hidden" name="suKienId" value="@suKienId" />
+        <div class="scan-input-row">
+            <input id="codeInput" class="form-control" name="code" placeholder="VD: QR-ABC123... hoặc VE2606..." autofocus required autocomplete="off" @(isVoHieu ? "disabled" : "") />
+            <button class="btn-scan" type="submit" @(isVoHieu ? "disabled" : "")><i class="fas fa-check"></i> Check-in</button>
+            <button type="button" class="btn-camera" id="btnCamera" onclick="toggleCamera()" @(isVoHieu ? "disabled" : "")>
+                <i class="fas fa-camera"></i> <span id="cameraLabel">Bật camera</span>
+            </button>
+        </div>
+    </form>
+    <div class="camera-box" id="cameraBox">
+        <video id="cameraFeed" autoplay playsinline></video>
+        <div class="camera-overlay"></div>
+        <canvas id="qrCanvas"></canvas>
+    </div>
+    <div class="camera-status" id="cameraStatus"></div>
+</div>
+
+<div class="filter-bar">
+    <form method="get" style="display:flex;gap:10px;flex-wrap:wrap">
+        <input type="hidden" name="suKienId" value="@suKienId" />
+        <input class="form-control" style="flex:2;min-width:180px" name="search" value="@ViewBag.Search" placeholder="Mã vé, tên, email..." />
+        <select class="form-select" style="flex:1;min-width:140px" name="trangThai">
+            <option value="">Tất cả trạng thái</option>
+            @{ var ttVal = ViewBag.TrangThai?.ToString() ?? ""; }
+            @if(ttVal == "0"){<option value="0" selected>Chưa check-in</option>}else{<option value="0">Chưa check-in</option>}
+            @if(ttVal == "1"){<option value="1" selected>Đã check-in</option>}else{<option value="1">Đã check-in</option>}
+        </select>
+        <button class="btn-scan" type="submit" style="padding:10px 18px"><i class="fas fa-search"></i></button>
+    </form>
+</div>
+
+<div class="checkin-table">
+    <div class="table-responsive">
+        <table class="table portal-table align-middle mb-0">
+            <thead style="background:#f9fafb">
+                <tr>
+                    <th>Mã vé</th><th>Khách tham dự</th><th>Loại vé</th><th>Trạng thái</th><th>Thời gian check-in</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var item in Model){
+                <tr id="row-@item.Id">
+                    <td><code style="font-size:.8rem">@item.MaVe</code></td>
+                    <td>
+                        <strong>@item.TenNguoiThamDu</strong>
+                        @if(!string.IsNullOrEmpty(item.EmailNguoiThamDu)){<div style="font-size:.8rem;color:#888">@item.EmailNguoiThamDu</div>}
+                    </td>
+                    <td style="font-size:.85rem;color:#666">@(item.TenLoaiVe ?? "")</td>
+                    <td>
+                        @if(item.TrangThaiCheckin == 1){<span class="badge-ok"><i class="fas fa-circle-check"></i> Đã check-in</span>}
+                        else if(item.TrangThaiCheckin == 2){<span style="background:#fee2e2;color:#991b1b;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:600">Đã hủy</span>}
+                        else{<span class="badge-pending"><i class="fas fa-circle"></i> Chưa check-in</span>}
+                    </td>
+                    <td style="font-size:.82rem;color:#888">@item.NgayCheckin?.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        @if(!Model.Any()){
+        <div style="text-align:center;padding:32px;color:#999"><i class="fas fa-inbox fa-2x" style="display:block;margin-bottom:12px;color:#ddd"></i>Không có dữ liệu.</div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+let stream = null; let scanning = false; let rafId = null;
+const video = document.getElementById('cameraFeed');
+const canvas = document.getElementById('qrCanvas');
+const cameraBox = document.getElementById('cameraBox');
+const btnCamera = document.getElementById('btnCamera');
+const cameraLabel = document.getElementById('cameraLabel');
+const codeInput = document.getElementById('codeInput');
+const cameraStatus = document.getElementById('cameraStatus');
+
+async function toggleCamera(){
+    if(stream){ stopCamera(); return; }
+    try{
+        cameraStatus.textContent = 'Đang kết nối camera...';
+        stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+        video.srcObject = stream;
+        await video.play();
+        cameraBox.style.display = 'block';
+        btnCamera.classList.add('active');
+        cameraLabel.textContent = 'Tắt camera';
+        scanning = true;
+        scanFrame();
+        cameraStatus.textContent = 'Đang quét QR code...';
+    } catch(e){
+        cameraStatus.textContent = 'Lỗi: ' + e.message;
+    }
+}
+function stopCamera(){
+    scanning = false;
+    if(rafId) cancelAnimationFrame(rafId);
+    if(stream) stream.getTracks().forEach(t => t.stop());
+    stream = null;
+    video.srcObject = null;
+    cameraBox.style.display = 'none';
+    btnCamera.classList.remove('active');
+    cameraLabel.textContent = 'Bật camera';
+    cameraStatus.textContent = '';
+}
+function scanFrame(){
+    if(!scanning) return;
+    if(video.readyState === video.HAVE_ENOUGH_DATA){
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video,0,0);
+        const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+        const code = jsQR(imgData.data,imgData.width,imgData.height,{inversionAttempts:'dontInvert'});
+        if(code && code.data){
+            codeInput.value = code.data;
+            cameraStatus.textContent = 'Đã đọc: ' + code.data;
+            stopCamera();
+            document.getElementById('checkinForm').submit();
+            return;
+        }
+    }
+    if(scanning) rafId = requestAnimationFrame(scanFrame);
+}
+// Auto-submit khi nhập đủ 30+ ký tự (QR scanner vật lý)
+codeInput.addEventListener('input', function(){
+    if(this.value.length >= 20 && this.value.includes('QR-'))
+        setTimeout(()=>{ if(this.value.length > 20) document.getElementById('checkinForm').submit(); }, 200);
+});
+</script>
+}
