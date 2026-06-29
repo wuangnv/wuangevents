@@ -1,0 +1,189 @@
+﻿@model DonHang
+@using QuanLySuKienWuangEvents.Models
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Vé điện tử của bạn";
+    var chiTiet = ViewBag.ChiTiet as List<ChiTietDonHang> ?? new List<ChiTietDonHang>();
+    var qrImages = ViewBag.QrImages as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var suKien = ViewBag.SuKien as SuKien;
+}
+
+@section Styles {
+<style>
+.ticket-page { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+.order-summary { background: #fff; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,.05); padding: 28px; margin-bottom: 28px; border: 1px solid #f0f0f0; }
+.order-summary h1 { font-size: 1.6rem; font-weight: 800; color: #1a1a2e; margin-bottom: 6px; }
+.order-meta { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 16px; }
+.order-meta-item { display: flex; align-items: center; gap: 8px; color: #4b5563; font-size: .9rem; }
+.order-meta-item i { color: #7c3aed; width: 18px; }
+.status-paid { display: inline-flex; align-items: center; gap: 6px; background: #d1fae5; color: #065f46; padding: 6px 16px; border-radius: 20px; font-size: .82rem; font-weight: 700; }
+.status-pending { display: inline-flex; align-items: center; gap: 6px; background: #fef9c3; color: #92400e; padding: 6px 16px; border-radius: 20px; font-size: .82rem; font-weight: 700; }
+
+/* Thẻ vé cao cấp */
+.ticket-card { background: #fff; border-radius: 20px; box-shadow: 0 4px 25px rgba(0,0,0,.08); overflow: hidden; margin-bottom: 24px; display: flex; border: 1px solid #e5e7eb; position: relative; }
+.ticket-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: linear-gradient(180deg,#7c3aed,#a855f7); }
+.ticket-left { flex: 1; padding: 28px 28px 28px 34px; display: flex; flex-direction: column; gap: 14px; }
+.ticket-right { width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; border-left: 2px dashed #e5e7eb; flex-shrink: 0; gap: 10px; background: #faf8ff; position: relative; }
+.ticket-right::before, .ticket-right::after { content: ''; position: absolute; width: 20px; height: 20px; background: #f3f4f6; border-radius: 50%; left: -10px; border: 1px solid #e5e7eb; z-index: 2; }
+.ticket-right::before { top: -11px; }
+.ticket-right::after { bottom: -11px; }
+
+.ticket-type-badge { display: inline-flex; align-items: center; gap: 6px; background: #f5f3ff; color: #7c3aed; padding: 4px 12px; border-radius: 12px; font-size: .78rem; font-weight: 700; border: 1px solid #ddd6fe; width: fit-content; }
+.ticket-event { font-size: 1.3rem; font-weight: 800; color: #111827; line-height: 1.3; }
+.ticket-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.ticket-info-item { display: flex; align-items: center; gap: 8px; color: #4b5563; font-size: .88rem; }
+.ticket-info-item i { color: #7c3aed; }
+.ticket-code { font-family: monospace; font-size: .85rem; color: #9ca3af; letter-spacing: 1px; font-weight: 600; background: #f9fafb; padding: 4px 10px; border-radius: 6px; border: 1px solid #f0f0f0; width: fit-content; }
+.qr-img { width: 140px; height: 140px; border-radius: 12px; border: 1px solid #e5e7eb; padding: 6px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.02); }
+.qr-label { font-size: .72rem; color: #6b7280; text-align: center; line-height: 1.4; font-weight: 500; }
+
+.checkin-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .78rem; font-weight: 700; padding: 4px 12px; border-radius: 12px; width: fit-content; }
+.checkin-ok { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.checkin-pending { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.ticket-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+
+@@media print {
+    .ticket-actions, nav, footer, .main-content > div.container:first-child { display: none !important; }
+    .ticket-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+    .ticket-page { padding: 0; }
+}
+
+@@media(max-width: 650px) {
+    .ticket-card { flex-direction: column; }
+    .ticket-right { width: 100%; border-left: none; border-top: 2px dashed #e5e7eb; flex-direction: row; padding: 20px 24px; gap: 20px; justify-content: space-around; background: #fff; }
+    .ticket-right::before, .ticket-right::after { display: none; }
+    .qr-img { width: 110px; height: 110px; }
+}
+</style>
+}
+
+<div class="ticket-page">
+    @* PHẦN 1: TÓM TẮT ĐƠN HÀNG *@
+    <div class="order-summary">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+            <div>
+                <h1><i class="fas fa-ticket me-2" style="color:#7c3aed"></i>Đơn hàng #@Model.MaDonHang</h1>
+                @if (suKien != null)
+                {
+                    <p style="color:#111827;margin:6px 0 0;font-size:1.05rem;font-weight:700">@suKien.TenSuKien</p>
+                }
+            </div>
+            <div>
+                @if (Model.TrangThai == 1)
+                {
+                    <span class="status-paid"><i class="fas fa-circle-check me-1"></i>Đã thanh toán</span>
+                }
+                else
+                {
+                    <span class="status-pending"><i class="fas fa-clock me-1"></i>Chờ thanh toán</span>
+                }
+            </div>
+        </div>
+        
+        <div class="order-meta border-top pt-3 mt-3">
+            @if (suKien != null)
+            {
+                <span class="order-meta-item"><i class="fas fa-calendar-days"></i> @suKien.NgayBatDau.ToString("dddd, dd/MM/yyyy HH:mm")</span>
+            }
+            @if (suKien != null && !string.IsNullOrEmpty(suKien.TenDiaDiem))
+            {
+                <span class="order-meta-item"><i class="fas fa-location-dot"></i> @suKien.TenDiaDiem</span>
+            }
+            <span class="order-meta-item"><i class="fas fa-money-bill-wave"></i> Tổng cộng: <strong style="color:#7c3aed">@Model.TongThanhToan.ToString("N0") VND</strong></span>
+            @if (Model.TienGiamGia > 0)
+            {
+                <span class="order-meta-item"><i class="fas fa-tags"></i> Đã giảm: @Model.TienGiamGia.ToString("N0") VND</span>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-info mb-4" style="border-radius:12px"><i class="fas fa-circle-info me-2"></i>@TempData["Message"]</div>
+    }
+
+    @* Nút in vé và nút quay lại *@
+    <div class="ticket-actions">
+        @if (suKien != null)
+        {
+            var format = "yyyyMMddTHHmmssZ";
+            var startUtc = DateTime.SpecifyKind(suKien.NgayBatDau, DateTimeKind.Utc).ToString(format);
+            var endUtc = DateTime.SpecifyKind(suKien.NgayKetThuc, DateTimeKind.Utc).ToString(format);
+            var gTitle = Uri.EscapeDataString(suKien.TenSuKien);
+            var gDesc = Uri.EscapeDataString(suKien.MoTaNgan ?? "");
+            var gLoc = Uri.EscapeDataString(suKien.LoaiSuKien == 1 ? "Trực tuyến: " + (suKien.LinkOnline ?? "") : $"{suKien.TenDiaDiem}, {suKien.DiaChiDiaDiem}, {suKien.ThanhPhoDiaDiem}");
+            var googleCalendarLink = $"https://calendar.google.com/calendar/render?action=TEMPLATE&text={gTitle}&dates={startUtc}/{endUtc}&details={gDesc}&location={gLoc}";
+
+            <a href="@googleCalendarLink" target="_blank" class="btn btn-outline-primary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: bold; border-radius: 10px; padding: 0.6rem 1.2rem;"><i class="fab fa-google"></i> Thêm vào Google Calendar</a>
+        }
+        <button class="btn btn-primary" onclick="window.print()" style="border-radius: 10px; padding: 0.6rem 1.2rem;"><i class="fas fa-print me-1"></i> In vé điện tử / Tải PDF</button>
+        <a href="/Booking/DonHangCuaToi" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 0.6rem 1.2rem;"><i class="fas fa-arrow-left me-1"></i> Quay lại đơn hàng của tôi</a>
+    </div>
+
+    @* PHẦN 2: DANH SÁCH VÉ CHI TIẾT *@
+    @foreach (var ve in chiTiet)
+    {
+        <div class="ticket-card">
+            @* Bên trái: Thông tin người dùng, loại vé và sự kiện *@
+            <div class="ticket-left">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span class="ticket-type-badge"><i class="fas fa-ticket me-1"></i>@(ve.TenLoaiVe ?? "Vé tham dự")</span>
+                    @if (ve.TrangThaiCheckin == 1)
+                    {
+                        <span class="checkin-badge checkin-ok"><i class="fas fa-circle-check me-1"></i>Đã check-in: @ve.NgayCheckin?.ToString("HH:mm dd/MM")</span>
+                    }
+                    else
+                    {
+                        <span class="checkin-badge checkin-pending"><i class="fas fa-circle me-1"></i>Chưa check-in</span>
+                    }
+                </div>
+                @if (suKien != null)
+                {
+                    <div class="ticket-event">@suKien.TenSuKien</div>
+                }
+                
+                <div class="ticket-info-grid border-top pt-3 mt-2">
+                    <span class="ticket-info-item"><i class="fas fa-user me-2 text-muted"></i><strong>Khách:</strong> @(ve.TenNguoiThamDu ?? "Khách tham dự")</span>
+                    @if (!string.IsNullOrEmpty(ve.EmailNguoiThamDu))
+                    {
+                        <span class="ticket-info-item"><i class="fas fa-envelope me-2 text-muted"></i>@ve.EmailNguoiThamDu</span>
+                    }
+                    <span class="ticket-info-item"><i class="fas fa-money-bill me-2 text-muted"></i><strong>Giá vé:</strong> @ve.GiaVe.ToString("N0") VND</span>
+                </div>
+                
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2">
+                    <div class="ticket-code">MÃ VÉ: @(ve.MaVe ?? "Đang xử lý...")</div>
+                </div>
+            </div>
+            
+            @* Bên phải: Hiển thị hình ảnh QR Code hoặc thông báo đang cập nhật *@
+            <div class="ticket-right">
+                @{
+                    string? qrSrc = null;
+                    qrImages.TryGetValue(ve.Id, out qrSrc);
+                }
+                @if (qrSrc != null)
+                {
+                    <img src="@qrSrc" alt="QR Code vé @ve.MaVe" class="qr-img" />
+                    <div class="qr-label">Quét mã QR<br/>để soát vé vào cửa</div>
+                }
+                else
+                {
+                    <div style="width:130px;height:130px;background:#f3f4f6;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#9ca3af;border:1px solid #e5e7eb">
+                        <i class="fas fa-qrcode fa-3x animate-pulse"></i>
+                    </div>
+                    <div class="qr-label">QR đang<br/>được cập nhật</div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (!chiTiet.Any())
+    {
+        <div class="order-summary text-center py-5 text-muted">
+            <i class="fas fa-ticket fa-3x mb-3 d-block" style="color:#ddd"></i>
+            Bạn chưa có vé nào trong đơn hàng này.
+        </div>
+    }
+</div>
