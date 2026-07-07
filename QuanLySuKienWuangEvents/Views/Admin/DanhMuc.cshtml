@@ -1,0 +1,75 @@
+@model List<DanhMuc>
+
+@{
+    Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
+    ViewData["Title"] = "Danh mục";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div class="portal-page-title">
+        <span class="portal-kicker"><i class="fas fa-layer-group"></i> Danh mục</span>
+        <h1>Quản lý danh mục</h1>
+        <p>Danh mục dùng để phân loại sự kiện ở trang khách hàng.</p>
+    </div>
+    <div class="portal-actions">
+        <a class="btn btn-primary" href="/Admin/TaoMoiDanhMuc">
+            <i class="fas fa-plus me-1"></i> Thêm danh mục
+        </a>
+    </div>
+</div>
+
+<div class="portal-card">
+    <div class="portal-card-header">
+        <h2>Danh sách danh mục</h2>
+        <span class="text-muted small">@Model.Count danh mục</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table portal-table align-middle">
+            <thead>
+                <tr>
+                    <th>Tên danh mục</th>
+                    <th>Thứ tự</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Chưa có danh mục.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.TenDanhMuc</strong>
+                                <div class="text-muted small">@item.MoTa</div>
+                            </td>
+                            <td>@item.ThuTu</td>
+                            <td>
+                                <span class="status-pill @(item.TrangThai ? "status-live" : "status-cancelled")">
+                                    @(item.TrangThai ? "Hiện" : "Ẩn")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-outline-primary btn-sm" href="/Admin/ChinhSuaDanhMuc/@item.Id">
+                                    <i class="fas fa-pen me-1"></i> Sửa
+                                </a>
+                                <form class="d-inline" method="post" action="/Admin/XoaDanhMuc/@item.Id"
+                                      onsubmit="return confirm('Xóa danh mục \u0022@item.TenDanhMuc\u0022?\nCác sự kiện thuộc danh mục này sẽ không bị xóa.')">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit">
+                                        <i class="fas fa-trash me-1"></i> Xóa
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

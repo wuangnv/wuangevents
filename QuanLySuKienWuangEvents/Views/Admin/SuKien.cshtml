@@ -1,0 +1,275 @@
+﻿@model List<SuKien>
+@{
+    Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
+    ViewData["Title"] = "Quản lý sự kiện";
+    var trangThaiFilter = Context.Request.Query["trangThai"].ToString();
+    var tuKhoa = Context.Request.Query["q"].ToString();
+}
+
+<div class="portal-page-title mb-4">
+    <span class="portal-kicker"><i class="fas fa-calendar-days"></i> Nội dung</span>
+    <h1>Quản lý sự kiện</h1>
+    <p>Duyệt, từ chối, ẩn hoặc hủy sự kiện. Tổng: <strong>@Model.Count</strong> sự kiện.</p>
+</div>
+
+@* Bộ lọc *@
+<div class="portal-card mb-4">
+    <div class="portal-card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small fw-semibold mb-1">Tìm kiếm</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" name="q" value="@tuKhoa" class="form-control border-start-0"
+                           placeholder="Tên sự kiện hoặc mô tả..." />
+                </div>
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small fw-semibold mb-1">Trạng thái</label>
+                <select class="form-select" name="trangThai">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="0" selected="@(trangThaiFilter=="0")">📝 Nháp</option>
+                    <option value="1" selected="@(trangThaiFilter=="1")">⏳ Chờ duyệt</option>
+                    <option value="2" selected="@(trangThaiFilter=="2")">✅ Đã duyệt</option>
+                    <option value="3" selected="@(trangThaiFilter=="3")">🟢 Đang bán</option>
+                    <option value="5" selected="@(trangThaiFilter=="5")">🏁 Đã kết thúc</option>
+                    <option value="6" selected="@(trangThaiFilter=="6")">❌ Đã hủy</option>
+                    <option value="7" selected="@(trangThaiFilter=="7")">🚫 Từ chối</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-filter me-1"></i>Lọc</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="fas fa-circle-check me-2"></i>@TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="portal-card">
+    <div class="table-responsive">
+        <table class="table portal-table align-middle" style="min-width:800px">
+            <thead>
+                <tr>
+                    <th style="width:36%">Sự kiện</th>
+                    <th style="width:16%">Thời gian</th>
+                    <th style="width:12%">Trạng thái</th>
+                    <th style="width:10%">Hiển thị</th>
+                    <th class="text-end" style="width:26%">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="fas fa-calendar-xmark fa-2x d-block mb-3" style="color:#e5e7eb"></i>
+                            Không có sự kiện nào phù hợp với bộ lọc đã chọn.
+                        </td>
+                    </tr>
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="flex-shrink-0" style="width:52px;height:52px;border-radius:10px;overflow:hidden;background:#f3f4f6">
+                                    <img src="@(string.IsNullOrEmpty(item.AnhBia) ? "/images/default-event.svg" : item.AnhBia)"
+                                         style="width:100%;height:100%;object-fit:cover"
+                                         onerror="this.src='/images/default-event.svg'" alt="" />
+                                </div>
+                                <div>
+                                    <div class="fw-bold" style="font-size:.95rem;line-height:1.3">@item.TenSuKien</div>
+                                    @if (!string.IsNullOrEmpty(item.MoTaNgan))
+                                    {
+                                        <div class="text-muted small text-truncate" style="max-width:220px">@item.MoTaNgan</div>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <div class="fw-semibold">@item.NgayBatDau.ToString("dd/MM/yyyy")</div>
+                                <div class="text-muted">@item.NgayBatDau.ToString("HH:mm")</div>
+                            </div>
+                        </td>
+                        <td>@BadgeTrangThai(item.TrangThai)</td>
+                        <td>
+                            @if (item.HienThiCongKhai)
+                            {
+                                <span class="badge" style="background:#d1fae5;color:#065f46;font-size:.72rem;padding:4px 8px">
+                                    <i class="fas fa-eye me-1"></i>Công khai
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background:#f3f4f6;color:#6b7280;font-size:.72rem;padding:4px 8px">
+                                    <i class="fas fa-eye-slash me-1"></i>Đang ẩn
+                                </span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex gap-1 justify-content-end flex-wrap align-items-center">
+
+                                @* Nút duyệt (chỉ khi chờ duyệt) *@
+                                @if (item.TrangThai == 1)
+                                {
+                                    <form method="post" action="/Admin/DuyetSuKien/@item.Id" class="m-0"
+                                          onsubmit="return confirm('Xác nhận duyệt sự kiện «@item.TenSuKien»?')">
+                                        <button class="btn btn-sm btn-success fw-semibold" type="submit"
+                                                style="border-radius:8px;font-size:.78rem">
+                                            <i class="fas fa-check me-1"></i>Duyệt
+                                        </button>
+                                    </form>
+                                    <button class="btn btn-sm btn-outline-danger fw-semibold"
+                                            onclick="showRejectModal('@item.Id','@item.TenSuKien.Replace("'", "\\'")')"
+                                            style="border-radius:8px;font-size:.78rem">
+                                        <i class="fas fa-times me-1"></i>Từ chối
+                                    </button>
+                                }
+                                else
+                                {
+                                    @* Nút duyệt bị mờ nếu không phải trạng thái chờ *@
+                                    <button class="btn btn-sm btn-success fw-semibold opacity-25" disabled
+                                            style="border-radius:8px;font-size:.78rem" title="Chỉ duyệt được khi sự kiện ở trạng thái Chờ duyệt">
+                                        <i class="fas fa-check me-1"></i>Duyệt
+                                    </button>
+                                }
+
+                                @* Nút ẩn/hiện *@
+                                <form method="post" action="/Admin/HienThiCongKhaiSuKien/@item.Id" class="m-0">
+                                    <button class="btn btn-sm btn-outline-secondary" type="submit"
+                                            title="@(item.HienThiCongKhai ? "Ẩn khỏi trang chủ" : "Hiện ra trang chủ")"
+                                            style="border-radius:8px">
+                                        <i class="fas @(item.HienThiCongKhai ? "fa-eye-slash" : "fa-eye")"></i>
+                                    </button>
+                                </form>
+
+                                @* Nút hủy *@
+                                @if (item.TrangThai != 6)
+                                {
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="showCancelModal('@item.Id','@item.TenSuKien.Replace("'","\\'")')"
+                                            style="border-radius:8px"
+                                            title="Hủy sự kiện">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-danger opacity-25" disabled
+                                            style="border-radius:8px" title="Sự kiện đã bị hủy">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@* Modal: Từ chối sự kiện *@
+<div class="modal fade" id="modalReject" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-times-circle text-danger me-2"></i>Từ chối sự kiện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="formReject">
+                <div class="modal-body">
+                    <p class="text-muted small mb-3">Vui lòng nhập lý do từ chối sự kiện <strong id="rejectEventName"></strong>:</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Lý do từ chối <span class="text-danger">*</span></label>
+                        <textarea class="form-control" name="lyDo" rows="3" required
+                                  placeholder="Ví dụ: Nội dung không phù hợp, thiếu thông tin địa điểm..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-danger fw-semibold">
+                        <i class="fas fa-times me-1"></i>Xác nhận từ chối
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@* Modal: Hủy sự kiện *@
+<div class="modal fade" id="modalCancel" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:16px">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-ban text-danger me-2"></i>Hủy sự kiện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="formCancel">
+                <div class="modal-body">
+                    <div class="alert alert-warning d-flex align-items-center gap-2" style="border-radius:10px">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <span class="small">Hành động này <strong>không thể hoàn tác</strong>. Sự kiện <strong id="cancelEventName"></strong> sẽ bị hủy vĩnh viễn.</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Lý do hủy</label>
+                        <input class="form-control" name="lyDo" placeholder="Lý do hủy sự kiện (không bắt buộc)" />
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Thoát</button>
+                    <button type="submit" class="btn btn-danger fw-bold">
+                        <i class="fas fa-ban me-1"></i>Xác nhận hủy sự kiện
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showRejectModal(id, name) {
+    document.getElementById('formReject').action = '/Admin/TuChoiSuKien/' + id;
+    document.getElementById('rejectEventName').textContent = name;
+    new bootstrap.Modal(document.getElementById('modalReject')).show();
+}
+function showCancelModal(id, name) {
+    document.getElementById('formCancel').action = '/Admin/HuySuKien/' + id;
+    document.getElementById('cancelEventName').textContent = name;
+    new bootstrap.Modal(document.getElementById('modalCancel')).show();
+}
+</script>
+
+@functions {
+    private static Microsoft.AspNetCore.Html.IHtmlContent BadgeTrangThai(byte v)
+    {
+        var (bg, color, icon, text) = v switch
+        {
+            1 => ("#fef9c3", "#92400e", "fa-clock", "Chờ duyệt"),
+            2 => ("#dbeafe", "#1e40af", "fa-pause", "Tạm dừng"),
+            3 => ("#d1fae5", "#065f46", "fa-circle-play", "Đang bán"),
+            4 => ("#f3f4f6", "#374151", "fa-ticket-slash", "Hết vé"),
+            5 => ("#f3f4f6", "#6b7280", "fa-flag-checkered", "Kết thúc"),
+            6 => ("#fee2e2", "#991b1b", "fa-ban", "Đã hủy"),
+            7 => ("#fee2e2", "#991b1b", "fa-times-circle", "Từ chối"),
+            _ => ("#f3f4f6", "#6b7280", "fa-file", "Nháp")
+        };
+        return new Microsoft.AspNetCore.Html.HtmlString(
+            $"<span class=\"badge\" style=\"background:{bg};color:{color};font-size:.72rem;padding:4px 9px;border-radius:20px\"><i class=\"fas {icon} me-1\"></i>{text}</span>");
+    }
+}

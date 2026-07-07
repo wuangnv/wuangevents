@@ -1,0 +1,318 @@
+﻿@model NguoiDung
+
+@{
+    Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
+    ViewData["Title"] = "Chi tiết người dùng";
+    var userRole = Model.VaiTro;
+}
+
+<div class="mb-4">
+    <a href="/Admin/NguoiDung" class="btn btn-link text-decoration-none p-0 text-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Cột bên trái: Thông tin cá nhân -->
+    <div class="col-lg-4">
+        <div class="portal-card text-center py-4">
+            <div class="portal-card-body">
+                <div class="mb-3 position-relative d-inline-block">
+                    @if (!string.IsNullOrEmpty(Model.AnhDaiDien))
+                    {
+                        <img src="@Model.AnhDaiDien" class="rounded-circle border" style="width: 110px; height: 110px; object-fit: cover;" alt="Avatar" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center mx-auto" style="width: 110px; height: 110px;">
+                            <i class="fas fa-user-circle text-secondary fa-5x"></i>
+                        </div>
+                    }
+                </div>
+                <h4 class="fw-bold mb-1 text-dark">@Model.HoTen</h4>
+                <p class="text-muted mb-3">@Model.Email</p>
+                <div class="mb-3">
+                    <span class="badge bg-primary px-3 py-2 fs-6">@RoleName(userRole)</span>
+                    <span class="badge @(Model.TrangThai == 1 ? "bg-success" : "bg-danger") px-3 py-2 fs-6">
+                        @(Model.TrangThai == 1 ? "Hoạt động" : "Bị khóa")
+                    </span>
+                </div>
+                <hr />
+                <div class="text-start px-3">
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Số điện thoại</label>
+                        <span class="fw-medium text-dark">@(string.IsNullOrEmpty(Model.SoDienThoai) ? "Chưa cung cấp" : Model.SoDienThoai)</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="text-muted small d-block">Ngày đăng ký</label>
+                        <span class="fw-medium text-dark">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+                    </div>
+                    @if (Model.NgayCapNhat.HasValue)
+                    {
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">Cập nhật lần cuối</label>
+                            <span class="fw-medium text-dark">@Model.NgayCapNhat.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    }
+                </div>
+                @if (Model.VaiTro != 3)
+                {
+                    <div class="d-grid mt-4">
+                        <form method="post" action="/Admin/KhoaMoKhoaNguoiDung/@Model.Id">
+                            <button class="btn w-100 @(Model.TrangThai == 1 ? "btn-danger" : "btn-success")" type="submit">
+                                <i class="fas @(Model.TrangThai == 1 ? "fa-lock" : "fa-lock-open") me-1"></i>
+                                @(Model.TrangThai == 1 ? "Khóa tài khoản" : "Mở khóa tài khoản")
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột bên phải: Chi tiết số liệu thống kê & Lịch sử -->
+    <div class="col-lg-8">
+        @if (userRole == 0) // Người mua
+        {
+            <!-- Thống kê Người mua -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="portal-card bg-light border-0">
+                        <div class="portal-card-body text-center py-4">
+                            <div class="fs-2 fw-bold text-primary">@ViewBag.TotalOrders</div>
+                            <div class="text-muted small uppercase fw-bold mt-1"><i class="fas fa-ticket me-1"></i> Đơn hàng thành công</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="portal-card bg-light border-0">
+                        <div class="portal-card-body text-center py-4">
+                            <div class="fs-2 fw-bold text-success">@ViewBag.TotalSpent.ToString("N0")đ</div>
+                            <div class="text-muted small uppercase fw-bold mt-1"><i class="fas fa-wallet me-1"></i> Tổng tiền đã chi</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="portal-card">
+                <div class="portal-card-body">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-history text-muted me-1"></i> Lịch sử đặt vé gần đây</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Sự kiện</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Ngày mua</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.LastOrders != null && ((List<dynamic>)ViewBag.LastOrders).Count > 0)
+                                {
+                                    foreach (var order in ViewBag.LastOrders)
+                                    {
+                                        <tr>
+                                            <td><strong>@order.MaDonHang</strong></td>
+                                            <td>@order.TenSuKien</td>
+                                            <td>@order.TongThanhToan.ToString("N0")đ</td>
+                                            <td>@order.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                <span class="badge @(order.TrangThai == 1 ? "bg-success" : "bg-secondary")">
+                                                    @(order.TrangThai == 1 ? "Đã thanh toán" : "Hủy/Chờ")
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted py-3">Chưa có giao dịch nào được thực hiện.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (userRole == 1) // Ban tổ chức
+        {
+            var profile = ViewBag.OrgProfile;
+            
+            <!-- Thông tin tổ chức -->
+            <div class="portal-card mb-4">
+                <div class="portal-card-body">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-building text-muted me-1"></i> Hồ sơ đối tác tổ chức</h5>
+                    @if (profile != null)
+                    {
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Tên nhà tổ chức</label>
+                                <span class="fw-bold text-dark">@profile.HoTen</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="text-muted small d-block">Số điện thoại</label>
+                                <span class="fw-medium text-dark">@(string.IsNullOrEmpty(profile.SoDienThoai) ? "Chưa cập nhật" : profile.SoDienThoai)</span>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="text-muted small d-block">Tài khoản thanh toán nhận doanh thu</label>
+                                <span class="fw-bold text-success">
+                                    @if (!string.IsNullOrEmpty(profile.SoTaiKhoan))
+                                    {
+                                        @profile.ChuTaiKhoan<text> - </text>@profile.SoTaiKhoan<text> (</text>@profile.TenNganHang<text>)</text>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fw-normal">Chưa cập nhật thông tin ngân hàng</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Đối tác chưa cập nhật hồ sơ doanh nghiệp.</p>
+                    }
+                </div>
+            </div>
+
+            <!-- Thống kê doanh số BTC -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="portal-card bg-light border-0">
+                        <div class="portal-card-body text-center py-3">
+                            <div class="fs-3 fw-bold text-primary">@ViewBag.TotalEvents</div>
+                            <div class="text-muted small uppercase fw-bold mt-1">Sự kiện đã tạo</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="portal-card bg-light border-0">
+                        <div class="portal-card-body text-center py-3">
+                            <div class="fs-3 fw-bold text-info">@ViewBag.TotalOrders</div>
+                            <div class="text-muted small uppercase fw-bold mt-1">Vé đã bán</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="portal-card bg-light border-0">
+                        <div class="portal-card-body text-center py-3">
+                            <div class="fs-3 fw-bold text-success">@ViewBag.TotalRevenue.ToString("N0")đ</div>
+                            <div class="text-muted small uppercase fw-bold mt-1">Doanh thu toàn sàn</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách sự kiện gần nhất -->
+            <div class="portal-card">
+                <div class="portal-card-body">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-calendar-days text-muted me-1"></i> Sự kiện mới tạo gần đây</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Sự kiện</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Trạng thái</th>
+                                    <th>Vé đã bán</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.LastEvents != null && ((List<dynamic>)ViewBag.LastEvents).Count > 0)
+                                {
+                                    foreach (var ev in ViewBag.LastEvents)
+                                    {
+                                        <tr>
+                                            <td><strong>@ev.TenSuKien</strong></td>
+                                            <td>@ev.NgayTao.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <span class="badge @TrangThaiSuKienBg(ev.TrangThai)">
+                                                    @TrangThaiSuKienText(ev.TrangThai)
+                                                </span>
+                                            </td>
+                                            <td>@ev.VeDaBan / @ev.TongVe vé</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Chưa tạo sự kiện nào.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else if (userRole == 2) // Staff
+        {
+            <!-- Danh sách sự kiện check-in của Staff -->
+            <div class="portal-card">
+                <div class="portal-card-body">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-qrcode text-muted me-1"></i> Sự kiện được phân công soát vé</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Tên sự kiện</th>
+                                    <th>Thời gian bắt đầu</th>
+                                    <th>Ngày phân công</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (ViewBag.StaffEvents != null && ((List<dynamic>)ViewBag.StaffEvents).Count > 0)
+                                {
+                                    foreach (var sev in ViewBag.StaffEvents)
+                                    {
+                                        <tr>
+                                            <td><strong>@sev.TenSuKien</strong></td>
+                                            <td>@sev.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@sev.NgayThem.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-3">Nhân viên này chưa được phân công soát vé cho sự kiện nào.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    private static string RoleName(byte role)
+    {
+        return role == 3 ? "Quản trị viên" : role == 2 ? "Nhân viên soát vé" : role == 1 ? "Ban tổ chức" : "Người mua";
+    }
+
+    private static string TrangThaiSuKienBg(byte value)
+    {
+        if (value == 1) return "bg-warning text-dark";
+        if (value == 3) return "bg-success";
+        if (value == 6) return "bg-danger";
+        return "bg-secondary";
+    }
+
+    private static string TrangThaiSuKienText(byte value)
+    {
+        if (value == 1) return "Chờ duyệt";
+        if (value == 2) return "Tạm dừng";
+        if (value == 3) return "Đang bán";
+        if (value == 6) return "Đã hủy";
+        if (value == 7) return "Từ chối";
+        return "Nháp";
+    }
+}

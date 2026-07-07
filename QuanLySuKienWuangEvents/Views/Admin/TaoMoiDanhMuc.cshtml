@@ -1,0 +1,53 @@
+﻿@model DanhMuc
+
+@{
+    Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
+    ViewData["Title"] = "Thêm danh mục";
+}
+
+<div class="portal-page-title mb-4">
+    <span class="portal-kicker"><i class="fas fa-plus"></i> Danh mục</span>
+    <h1>Thêm danh mục</h1>
+    <p>Nhập thông tin danh mục để hiển thị ở trang sự kiện.</p>
+</div>
+
+<div class="portal-card form-panel">
+    <div class="portal-card-body">
+        <form method="post" action="/Admin/TaoMoiDanhMuc">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label class="form-label">Tên danh mục</label>
+                <input class="form-control" asp-for="TenDanhMuc" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea class="form-control" asp-for="MoTa" rows="3"></textarea>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Icon</label>
+                    <input class="form-control" asp-for="Icon" placeholder="Ví dụ: 🎵 hoặc fa-music" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Thứ tự</label>
+                    <input class="form-control" asp-for="ThuTu" type="number" />
+                </div>
+            </div>
+
+            <div class="form-check my-3">
+                <input class="form-check-input" asp-for="TrangThai" checked />
+                <label class="form-check-label">Hiển thị</label>
+            </div>
+
+            <div class="portal-actions">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-floppy-disk me-1"></i> Lưu
+                </button>
+                <a class="btn btn-outline-secondary" href="/Admin/DanhMuc">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
