@@ -1,0 +1,218 @@
+@model List<ChiTietDonHang>
+@using QuanLySuKienWuangEvents.Models
+@{
+    Layout = "~/Views/Shared/_StaffLayout.cshtml";
+    ViewData["Title"] = "Quét soát vé QR Code";
+    var suKienId = (Guid)ViewBag.SuKienId;
+    int tongVe = (int)ViewBag.TongVe;
+    int daCheckin = (int)ViewBag.DaCheckin;
+    int chuaCheckin = tongVe - daCheckin;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a href="/Staff/Index" class="btn btn-outline-secondary btn-sm" style="border-radius: 8px;">
+        <i class="fas fa-arrow-left me-1"></i> Quay lại
+    </a>
+    <span class="badge bg-primary px-3 py-2" style="font-size: 0.85rem; border-radius: 8px;">@ViewBag.TenSuKien</span>
+</div>
+
+@{
+    bool isTamDung = ViewBag.TrangThaiSuKien == 2;
+    bool isDaHuy = ViewBag.TrangThaiSuKien == 6;
+    
+    DateTime? batDauCheckInVal = (DateTime?)ViewBag.BatDauCheckIn;
+    DateTime? ketThucCheckInVal = (DateTime?)ViewBag.KetThucCheckIn;
+    DateTime ngayBatDau = (DateTime)ViewBag.NgayBatDauSuKien;
+    DateTime ngayKetThuc = (DateTime)ViewBag.NgayKetThucSuKien;
+    
+    // Quy đổi thời gian hiện tại sang giờ Việt Nam (UTC+7)
+    DateTime nowLocal = DateTime.UtcNow.AddHours(7);
+    
+    // Thiết lập mốc check-in thông minh (Smart Default): BĐ trước 1 tiếng, KT bằng giờ kết thúc sự kiện
+    DateTime startCheckIn = batDauCheckInVal ?? ngayBatDau.AddHours(-1);
+    DateTime endCheckIn = ketThucCheckInVal ?? ngayKetThuc;
+    
+    bool isCheckInChuaBatDau = nowLocal < startCheckIn;
+    bool isCheckInDaKetThuc = nowLocal > endCheckIn;
+    
+    bool isVoHieu = isTamDung || isDaHuy || isCheckInChuaBatDau || isCheckInDaKetThuc;
+}
+
+@if (isVoHieu)
+{
+    <div class="alert alert-warning d-flex align-items-center gap-2 mb-3" style="border-radius: 12px;">
+        <i class="fas fa-exclamation-triangle fs-5 text-warning"></i>
+        <div class="small">
+            <strong>Cảnh báo soát vé:</strong> 
+            @if (isTamDung) { <span>Sự kiện đang tạm dừng.</span> }
+            else if (isDaHuy) { <span>Sự kiện đã bị hủy.</span> }
+            else if (isCheckInChuaBatDau) { <span>Chưa đến khung giờ soát vé (Bắt đầu từ: @startCheckIn.ToString("dd/MM/yyyy HH:mm")).</span> }
+            else if (isCheckInDaKetThuc) { <span>Thời gian cho phép check-in của sự kiện này đã kết thúc (Hạn chót soát vé: @endCheckIn.ToString("dd/MM/yyyy HH:mm")).</span> }
+            Chức năng quét soát vé tạm thời đóng.
+        </div>
+    </div>
+}
+
+<!-- Stats row -->
+<div class="row g-2 mb-3">
+    <div class="col-4">
+        <div class="card-custom p-2 text-center">
+            <h4 class="mb-0 fw-bold text-primary">@tongVe</h4>
+            <small class="text-muted" style="font-size: 0.72rem;">Tổng bán</small>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card-custom p-2 text-center">
+            <h4 class="mb-0 fw-bold text-success">@daCheckin</h4>
+            <small class="text-muted" style="font-size: 0.72rem;">Đã soát</small>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card-custom p-2 text-center">
+            <h4 class="mb-0 fw-bold text-warning">@chuaCheckin</h4>
+            <small class="text-muted" style="font-size: 0.72rem;">Còn lại</small>
+        </div>
+    </div>
+</div>
+
+<!-- Scan Panel -->
+<div class="card-custom p-3 mb-3">
+    <h5 class="font-heading mb-2" style="font-weight: 700; font-size: 0.95rem;">
+        <i class="fas fa-camera text-primary me-1"></i> Quét camera hoặc nhập mã
+    </h5>
+    
+    <form method="post" action="/Staff/QuetVeCheckIn" id="manualForm" class="mb-2">
+        <input type="hidden" name="suKienId" value="@suKienId" />
+        <div class="input-group">
+            <input class="form-control" name="code" id="manualCode" placeholder="Gõ mã vé hoặc quét QR..." required @(isVoHieu ? "disabled" : "") style="border-radius: 8px 0 0 8px;" />
+            <button class="btn btn-primary" type="submit" @(isVoHieu ? "disabled" : "") style="border-radius: 0 8px 8px 0; background: var(--primary); border: none;">
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </form>
+
+    <button class="btn btn-light w-100 py-2 border" id="btnToggleCamera" onclick="toggleCamera()" @(isVoHieu ? "disabled" : "") style="border-radius: 8px; font-weight: 600; font-size: 0.85rem;">
+        <i class="fas fa-video me-1"></i> Bật camera quét QR Code
+    </button>
+
+    <div id="cameraBox" class="mt-2 text-center" style="display: none; background: #000; border-radius: 12px; overflow: hidden; position: relative;">
+        <div id="reader" style="width: 100%;"></div>
+        <small class="text-white-50 d-block p-2" style="font-size: 0.75rem;">Đưa mã QR của vé vào giữa camera để tự động quét soát vé.</small>
+    </div>
+</div>
+
+<!-- Filter and search in table -->
+<div class="card-custom p-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0 font-heading" style="font-weight: 700; font-size: 0.95rem;">Khách tham dự</h5>
+        <span class="text-muted small">Tìm thấy @Model.Count vé</span>
+    </div>
+
+    <form method="get" class="row g-2 mb-3">
+        <input type="hidden" name="suKienId" value="@suKienId" />
+        <div class="col-7">
+            <input class="form-control form-control-sm" name="search" value="@ViewBag.Search" placeholder="Tên, email, mã vé..." style="border-radius: 6px;" />
+        </div>
+        <div class="col-3">
+            <select class="form-select form-select-sm" name="trangThai" style="border-radius: 6px;">
+                <option value="">Tất cả</option>
+                <option value="1" selected="@(ViewBag.TrangThai == 1)">Đã soát</option>
+                <option value="0" selected="@(ViewBag.TrangThai == 0)">Chưa soát</option>
+            </select>
+        </div>
+        <div class="col-2">
+            <button class="btn btn-sm btn-primary w-100" style="border-radius: 6px; background: var(--primary); border: none;">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </form>
+
+    <div class="table-responsive" style="max-height: 380px;">
+        <table class="table table-sm align-middle table-hover small">
+            <thead>
+                <tr class="table-light">
+                    <th>Họ và tên</th>
+                    <th>Loại vé</th>
+                    <th>Mã vé</th>
+                    <th class="text-center">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-bold">@item.TenNguoiThamDu</div>
+                            <div class="text-muted" style="font-size: 0.75rem;">@item.EmailNguoiThamDu</div>
+                        </td>
+                        <td>@item.TenLoaiVe</td>
+                        <td><code class="text-dark">@item.MaVe</code></td>
+                        <td class="text-center">
+                            @if (item.TrangThaiCheckin == 1)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đã soát</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Chưa soát</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<!-- Tích hợp html5-qrcode library từ CDN -->
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+    let html5QrcodeScanner = null;
+
+    function toggleCamera() {
+        const cameraBox = document.getElementById("cameraBox");
+        const btn = document.getElementById("btnToggleCamera");
+
+        if (cameraBox.style.display === "none") {
+            cameraBox.style.display = "block";
+            btn.innerHTML = '<i class="fas fa-video-slash me-1"></i> Tắt camera soát vé';
+            btn.className = "btn btn-danger w-100 py-2";
+
+            // Start Scanner
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, // Ưu tiên camera sau
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText) => {
+                    // Khi phát hiện mã QR code
+                    html5QrcodeScanner.stop().then(() => {
+                        document.getElementById("manualCode").value = decodedText;
+                        document.getElementById("manualForm").submit();
+                    });
+                },
+                (errorMessage) => {
+                    // Bỏ qua lỗi scan không thấy mã
+                }
+            ).catch(err => {
+                alert("Không thể khởi động camera: " + err);
+                toggleCamera();
+            });
+
+        } else {
+            cameraBox.style.display = "none";
+            btn.innerHTML = '<i class="fas fa-video me-1"></i> Bật camera quét QR Code';
+            btn.className = "btn btn-light w-100 py-2 border";
+
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner = null;
+                });
+            }
+        }
+    }
+</script>
+}
