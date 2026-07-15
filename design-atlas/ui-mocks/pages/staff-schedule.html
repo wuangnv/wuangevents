@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lịch làm việc - WuangEvents</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css"/>
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css"/>
+<link rel="stylesheet" href="../assets/bootstrap.min.css"/>
+<link rel="stylesheet" href="../assets/site.css"/>
+<link rel="stylesheet" href="../assets/portal.css"/>
+<style>
+.staff-header{background:#fff;border-bottom:1px solid #e2e8f0;padding:.75rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+.staff-brand{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;color:#7c3aed;text-decoration:none;display:flex;align-items:center;gap:6px;font-size:1.1rem;}
+.staff-brand strong{color:#0f172a;}
+.staff-user-chip{display:flex;align-items:center;gap:10px;}
+.staff-user-name{font-weight:600;font-size:.85rem;color:#64748b;}
+.btn-logout{padding:.35rem .75rem;font-size:.8rem;font-weight:600;border-radius:8px;}
+.staff-container{max-width:960px;margin:0 auto;padding:1.5rem 1rem;}
+.card-custom{background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 4px 6px -1px rgba(0,0,0,.05);margin-bottom:1.5rem;}
+body{background:#f8fafc;}
+</style><style>
+.staff-hero {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    color: #fff;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+.staff-hero::after {
+    content: '\f0c0';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 24px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 5rem;
+    opacity: 0.12;
+}
+.staff-hero h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 4px; }
+.staff-hero p  { opacity: .85; margin: 0; font-size: .95rem; }
+.tab-pills { display: flex; gap: 8px; margin-bottom: 20px; }
+.tab-pill {
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 2px solid #e5e7eb;
+    background: #fff;
+    color: #6b7280;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.tab-pill.active {
+    background: #7c3aed;
+    border-color: #7c3aed;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+.event-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.event-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.event-card-img {
+    width: 100%; aspect-ratio: 16/7;
+    object-fit: cover;
+    background: #e5e7eb;
+    display: block;
+}
+.event-card-img-placeholder {
+    width: 100%; aspect-ratio: 16/7;
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem; color: rgba(255,255,255,0.6);
+}
+.event-card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; }
+.event-card-title { font-weight: 700; font-size: 1rem; color: #111827; margin-bottom: 10px; line-height: 1.4; }
+.event-meta { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.event-meta-item { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; color: #6b7280; }
+.event-meta-item i { width: 16px; text-align: center; }
+.checkin-window {
+    background: #f5f3ff;
+    border: 1px solid #ede9fe;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+.checkin-window-title { font-size: 0.78rem; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.checkin-window-row { display: flex; justify-content: space-between; font-size: 0.82rem; color: #374151; }
+.checkin-window-row span:first-child { color: #9ca3af; }
+.btn-checkin {
+    width: 100%;
+    padding: 11px 0;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: none;
+    margin-top: auto;
+    transition: all 0.2s;
+    cursor: pointer;
+    text-align: center;
+    display: block;
+}
+.btn-checkin-active {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(124,58,237,0.35);
+    text-decoration: none;
+}
+.btn-checkin-active:hover { opacity: 0.9; transform: translateY(-1px); color: #fff; }
+.badge-role {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(124, 58, 237, 0.9);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+.tab-content-section { display: none; }
+.tab-content-section.active { display: block; }
+.empty-state {
+    background: #fff;
+    border-radius: 16px;
+    padding: 60px 24px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    color: #9ca3af;
+}
+.empty-state i { font-size: 3.5rem; margin-bottom: 16px; display: block; }
+</style>
+</head><body><header class="staff-header"><a href="#" class="staff-brand"><i class="fas fa-qrcode"></i><span>Wuang<strong>Check-in</strong></span></a><div class="staff-user-chip"><span class="staff-user-name d-none d-sm-inline"><i class="fas fa-user-circle me-1"></i> Nhân viên soát vé</span><a href="#" class="btn btn-outline-danger btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></div></header><main class="staff-container">
+<div class="staff-hero">
+    <h1><i class="fas fa-clipboard-check me-2"></i>Lịch làm việc soát vé</h1>
+    <p>Chọn sự kiện đang diễn ra để bắt đầu quét QR Code kiểm soát vào cửa.</p>
+</div>
+
+<div class="tab-pills">
+    <button class="tab-pill active" onclick="switchTab('active', this)">
+        <i class="fas fa-play-circle me-1"></i> Đang diễn ra <span style="background:rgba(255,255,255,0.25);padding:1px 8px;border-radius:10px;margin-left:4px;">3</span>
+    </button>
+    <button class="tab-pill" onclick="switchTab('archived', this)">
+        <i class="fas fa-archive me-1"></i> Lưu trữ <span style="background:rgba(0,0,0,0.08);padding:1px 8px;border-radius:10px;margin-left:4px;">3</span>
+    </button>
+</div>
+
+<div id="tab-active" class="tab-content-section active">
+    <div class="row g-3">
+        
+    <div class="col-md-6 col-lg-4">
+        <div class="event-card">
+            <div style="position:relative;">
+                <div class="event-card-img-placeholder" style="background:linear-gradient(135deg, #a78bfa, #7c3aed);">
+                    <i class="fas fa-calendar-star"></i>
+                </div>
+                <span class="badge-role">Trưởng nhóm soát vé</span>
+                <span style="position:absolute;top:12px;right:12px;background:#059669;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-circle" style="font-size:.5rem;vertical-align:middle;margin-right:3px;"></i>Đang diễn ra</span>
+            </div>
+            <div class="event-card-body">
+                <div class="event-card-title">Đêm nhạc Acoustic Mùa Thu 2026</div>
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <i class="fas fa-calendar-alt" style="color:#7c3aed;"></i>
+                        <span>20/09/2026 19:00</span>
+                    </div>
+                    <div class="event-meta-item">
+                        <i class="fas fa-map-marker-alt" style="color:#ef4444;"></i>
+                        <span>Nhà hát Hòa Bình, Q.10, TP.HCM</span>
+                    </div>
+                </div>
+                <div class="checkin-window">
+                    <div class="checkin-window-title"><i class="fas fa-clock me-1"></i>Khung giờ soát vé</div>
+                    <div class="checkin-window-row"><span>Bắt đầu</span><strong>18:00 20/09</strong></div>
+                    <div class="checkin-window-row"><span>Kết thúc</span><strong>22:00 20/09</strong></div>
+                </div>
+                <a href="staff-checkin.html" class="btn-checkin btn-checkin-active"><i class="fas fa-qrcode me-1"></i> Vào soát vé ngay</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="event-card">
+            <div style="position:relative;">
+                <div class="event-card-img-placeholder" style="background:linear-gradient(135deg, #38bdf8, #6366f1);">
+                    <i class="fas fa-calendar-star"></i>
+                </div>
+                <span class="badge-role">Nhân viên soát vé</span>
+                <span style="position:absolute;top:12px;right:12px;background:#059669;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-circle" style="font-size:.5rem;vertical-align:middle;margin-right:3px;"></i>Đang diễn ra</span>
+            </div>
+            <div class="event-card-body">
+                <div class="event-card-title">Hội thảo Công nghệ AI & Tương lai Việc làm</div>
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <i class="fas fa-calendar-alt" style="color:#7c3aed;"></i>
+                        <span>20/09/2026 08:30</span>
+                    </div>
+                    <div class="event-meta-item">
+                        <i class="fas fa-map-marker-alt" style="color:#ef4444;"></i>
+                        <span>Trung tâm Hội nghị GEM Center, Q.1</span>
+                    </div>
+                </div>
+                <div class="checkin-window">
+                    <div class="checkin-window-title"><i class="fas fa-clock me-1"></i>Khung giờ soát vé</div>
+                    <div class="checkin-window-row"><span>Bắt đầu</span><strong>07:30 20/09</strong></div>
+                    <div class="checkin-window-row"><span>Kết thúc</span><strong>17:00 20/09</strong></div>
+                </div>
+                <a href="staff-checkin.html" class="btn-checkin btn-checkin-active"><i class="fas fa-qrcode me-1"></i> Vào soát vé ngay</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="event-card">
+            <div style="position:relative;">
+                <div class="event-card-img-placeholder" style="background:linear-gradient(135deg, #fb7185, #e11d48);">
+                    <i class="fas fa-calendar-star"></i>
+                </div>
+                <span class="badge-role">Nhân viên soát vé</span>
+                <span style="position:absolute;top:12px;right:12px;background:#f59e0b;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">Sắp diễn ra</span>
+            </div>
+            <div class="event-card-body">
+                <div class="event-card-title">Lễ hội Ẩm thực Đường phố Sài Gòn</div>
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <i class="fas fa-calendar-alt" style="color:#7c3aed;"></i>
+                        <span>21/09/2026 16:00</span>
+                    </div>
+                    <div class="event-meta-item">
+                        <i class="fas fa-map-marker-alt" style="color:#ef4444;"></i>
+                        <span>Công viên 23/9, Q.1, TP.HCM</span>
+                    </div>
+                </div>
+                <div class="checkin-window">
+                    <div class="checkin-window-title"><i class="fas fa-clock me-1"></i>Khung giờ soát vé</div>
+                    <div class="checkin-window-row"><span>Bắt đầu</span><strong>15:00 21/09</strong></div>
+                    <div class="checkin-window-row"><span>Kết thúc</span><strong>23:00 21/09</strong></div>
+                </div>
+                <button class="btn-checkin" style="background:#fef3c7;color:#92400e;cursor:not-allowed;" disabled><i class="fas fa-hourglass-start me-1"></i> Chờ đến giờ check-in</button>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<div id="tab-archived" class="tab-content-section">
+    <div class="row g-3">
+        
+    <div class="col-md-6 col-lg-4">
+        <div class="event-card" style="opacity:0.72;">
+            <div style="position:relative;">
+                <div class="event-card-img-placeholder" style="background:linear-gradient(135deg,#9ca3af,#6b7280);">
+                    <i class="fas fa-calendar-xmark"></i>
+                </div>
+                <span style="position:absolute;top:12px;right:12px;background:#6b7280;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">Đã kết thúc</span>
+            </div>
+            <div class="event-card-body">
+                <div class="event-card-title" style="color:#6b7280;">Workshop Nhiếp ảnh Cơ bản</div>
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>10/08/2026 – 10/08/2026</span>
+                    </div>
+                </div>
+                <button class="btn-checkin" style="background:#f3f4f6;color:#9ca3af;cursor:not-allowed;margin-top:auto;" disabled>
+                    <i class="fas fa-ban me-1"></i> Không thể soát vé
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="event-card" style="opacity:0.72;">
+            <div style="position:relative;">
+                <div class="event-card-img-placeholder" style="background:linear-gradient(135deg,#9ca3af,#6b7280);">
+                    <i class="fas fa-calendar-xmark"></i>
+                </div>
+                <span style="position:absolute;top:12px;right:12px;background:#6b7280;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">Hết giờ check-in</span>
+            </div>
+            <div class="event-card-body">
+                <div class="event-card-title" style="color:#6b7280;">Talkshow Khởi nghiệp Trẻ 2026</div>
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>02/07/2026 – 02/07/2026</span>
+                    </div>
+                </div>
+                <button class="btn-checkin" style="background:#f3f4f6;color:#9ca3af;cursor:not-allowed;margin-top:auto;" disabled>
+                    <i class="fas fa-ban me-1"></i> Không thể soát vé
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="event-card" style="opacity:0.72;">
+            <div style="position:relative;">
+                <div class="event-card-img-placeholder" style="background:linear-gradient(135deg,#9ca3af,#6b7280);">
+                    <i class="fas fa-calendar-xmark"></i>
+                </div>
+                <span style="position:absolute;top:12px;right:12px;background:#dc2626;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">Đã hủy</span>
+            </div>
+            <div class="event-card-body">
+                <div class="event-card-title" style="color:#6b7280;">Đêm nhạc Trịnh Công Sơn</div>
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>15/06/2026 – 15/06/2026</span>
+                    </div>
+                </div>
+                <button class="btn-checkin" style="background:#f3f4f6;color:#9ca3af;cursor:not-allowed;margin-top:auto;" disabled>
+                    <i class="fas fa-ban me-1"></i> Không thể soát vé
+                </button>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<script>
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content-section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+}
+</script></main></body></html>

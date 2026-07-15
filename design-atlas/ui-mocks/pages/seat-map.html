@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sơ đồ chỗ ngồi - WuangEvents</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css"/>
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css"/>
+<link rel="stylesheet" href="../assets/bootstrap.min.css"/>
+<link rel="stylesheet" href="../assets/site.css"/>
+<link rel="stylesheet" href="../assets/portal.css"/>
+<style>
+.active-event-card{background:#1e1e2d;border:1px solid #2d2d3f;border-radius:8px;padding:10px 12px;margin-bottom:16px;}
+.active-event-card .card-label{font-size:.72rem;text-transform:uppercase;color:#a855f7;font-weight:700;letter-spacing:.5px;margin-bottom:2px;}
+.active-event-card .card-name{font-size:.88rem;font-weight:600;color:#f3f4f6;}
+.org-nav-item{transition:all .15s ease;border-left:3px solid transparent;}
+.org-nav-item:hover{background:rgba(168,85,247,.08);color:#a855f7 !important;}
+.org-nav-item.active{background:rgba(168,85,247,.15) !important;color:#a855f7 !important;font-weight:600;border-left:3px solid #a855f7;}
+</style><style>
+.seat-hero{background:linear-gradient(135deg,#7c3aed 0%,#a855f7 100%);border-radius:20px;padding:24px 28px;color:#fff;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.seat-hero h1{font-size:1.5rem;font-weight:800;margin:0 0 4px;}
+.seat-hero p{opacity:.85;margin:0;font-size:.9rem;}
+.seat-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.seat-stat{background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.07);}
+.seat-stat .snum{font-size:1.8rem;font-weight:800;line-height:1;}
+.seat-stat .slbl{font-size:.75rem;color:#888;margin-top:3px;}
+.s-empty .snum{color:#7c3aed}.s-chose .snum{color:#d97706}.s-sold .snum{color:#dc2626}.s-lock .snum{color:#6b7280}
+.seatmap-wrap{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:24px;overflow-x:auto;}
+.stage-bar{text-align:center;background:linear-gradient(90deg,#7c3aed,#a855f7);color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;letter-spacing:2px;margin-bottom:28px;font-size:.9rem;}
+.seat-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:8px;min-width:max-content;}
+.seat-row-label{width:28px;font-weight:700;color:#666;font-size:.85rem;text-align:center;flex-shrink:0;}
+.seat-btn{width:38px;height:34px;border-radius:7px;border:none;cursor:pointer;font-size:.72rem;font-weight:700;transition:.15s;position:relative;}
+.seat-btn:hover{transform:scale(1.1);z-index:1;}
+.seat-empty{background:#ede9fe;color:#5b21b6;border:2px solid #c4b5fd}
+.seat-empty:hover{background:#7c3aed;color:#fff}
+.seat-sold{background:#fee2e2;color:#dc2626;border:2px solid #fca5a5;cursor:not-allowed;}
+.seat-lock{background:#e5e7eb;color:#6b7280;border:2px solid #d1d5db}
+.seat-chose{background:#fef9c3;color:#92400e;border:2px solid #fde68a;cursor:not-allowed;}
+.legend-bar{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid #f0f0f0;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.82rem;color:#555;}
+.legend-dot{width:16px;height:16px;border-radius:4px;flex-shrink:0;}
+.action-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+.tpl-container{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.08);padding:28px;margin-top:24px;}
+.tpl-tabs{display:flex;gap:10px;border-bottom:2px solid #f3f4f6;padding-bottom:12px;margin-bottom:24px;overflow-x:auto;}
+.tpl-tab-btn{background:#f3f4f6;color:#4b5563;border:none;padding:10px 18px;border-radius:10px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.15s;}
+.tpl-tab-btn.active{background:#7c3aed;color:#fff;}
+.tpl-card{border:1px solid #e5e7eb;border-radius:12px;padding:20px;margin-bottom:20px;background:#f9fafb;}
+.tpl-card h3{font-size:1.1rem;font-weight:700;color:#1a1a2e;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.tpl-card p{color:#666;font-size:.88rem;margin-bottom:16px;}
+.form-label{font-weight:600;color:#334155;margin-bottom:.3rem;font-size:.88rem;}
+.form-control,.form-select{border:1px solid #cbd5e1;border-radius:8px;padding:.5rem .7rem;}
+</style>
+</head><body><div class="portal-shell"><aside class="org-sidebar"><a class="org-brand" href="#"><span class="brand-mark"><i class="fas fa-calendar-days"></i></span><span>Wuang<strong>Organizer</strong></span></a><nav class="org-nav"><a class="btn btn-sm btn-outline-light mb-3 text-start w-100 py-2 fw-semibold" href="#" style="border-radius:8px;"><i class="fas fa-arrow-left me-1"></i> Đổi sự kiện khác</a><div class="active-event-card"><div class="card-label">Đang quản lý</div><div class="card-name text-truncate">Ben Thanh Concert 2026</div></div><span class="nav-label">Tính năng sự kiện</span><a class="org-nav-item" href="#"><i class="fas fa-info-circle"></i><span>Thông tin chung</span></a><a class="org-nav-item" href="#"><i class="fas fa-pen"></i><span>Sửa thông tin</span></a><a class="org-nav-item" href="#"><i class="fas fa-ticket-simple"></i><span>Cấu hình loại vé</span></a><a class="org-nav-item active" href="#"><i class="fas fa-chair"></i><span>Sơ đồ chỗ ngồi</span></a><a class="org-nav-item" href="#"><i class="fas fa-tags"></i><span>Mã giảm giá</span></a><a class="org-nav-item" href="#"><i class="fas fa-user-check"></i><span>Phân công soát vé</span></a><a class="org-nav-item" href="#"><i class="fas fa-receipt"></i><span>Đơn hàng đặt vé</span></a><a class="org-nav-item" href="#"><i class="fas fa-users"></i><span>Khách tham dự</span></a><a class="org-nav-item" href="#"><i class="fas fa-chart-line"></i><span>Báo cáo doanh thu</span></a><a class="org-nav-item" href="#"><i class="fas fa-qrcode"></i><span>Cổng soát vé check-in</span></a><span class="nav-label">Tài khoản</span><a class="org-nav-item" href="#"><i class="fas fa-user"></i><span>Hồ sơ cá nhân</span></a><a class="org-nav-item" href="#"><i class="fas fa-house"></i><span>Trang chủ</span></a><a class="org-nav-item" href="#"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a></nav></aside><div class="org-main"><header class="org-header"><div><strong>Trang ban tổ chức</strong><div class="text-muted small">Tạo và vận hành sự kiện của bạn</div></div><div class="account-chip"><i class="fas fa-user"></i><span>Nhà Tổ Chức 1</span></div></header><main class="org-content-body">
+<div class="seat-hero">
+  <div>
+    <h1><i class="fas fa-chair"></i> Sơ đồ chỗ ngồi</h1>
+    <p>Ben Thanh Concert 2026</p>
+  </div>
+  <form method="post" action="#">
+    <button class="btn btn-outline" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" type="button"><i class="fas fa-trash"></i> Xóa sơ đồ</button>
+  </form>
+</div>
+
+<div class="seat-stats">
+  <div class="seat-stat s-empty"><div class="snum">148</div><div class="slbl">Ghế trống</div></div>
+  <div class="seat-stat s-chose"><div class="snum">22</div><div class="slbl">Đã đặt</div></div>
+  <div class="seat-stat s-sold"><div class="snum">96</div><div class="slbl">Đã bán</div></div>
+  <div class="seat-stat s-lock"><div class="snum">14</div><div class="slbl">Bị khóa</div></div>
+</div>
+
+<div class="action-bar">
+  <a href="#" class="btn btn-outline-primary btn-sm" style="border-radius:8px;"><i class="fas fa-ticket me-1"></i> Quản lý loại vé</a>
+  <span style="color:#888;align-self:center;font-size:.85rem"><i class="fas fa-info-circle me-1"></i> Click vào ghế trống/khóa để khóa hoặc mở khóa vị trí.</span>
+</div>
+
+<div class="seatmap-wrap">
+  <div class="stage-bar"><i class="fas fa-star"></i> SÂN KHẤU / MÀN HÌNH <i class="fas fa-star"></i></div>
+  <div class="seat-row"><span class="seat-row-label">A</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-sold" type="button">3</button><button class="seat-btn seat-empty" type="button">4</button><button class="seat-btn seat-sold" type="button">5</button><button class="seat-btn seat-sold" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-sold" type="button">8</button></div><div class="seat-row"><span class="seat-row-label">B</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-sold" type="button">2</button><button class="seat-btn seat-empty" type="button">3</button><button class="seat-btn seat-empty" type="button">4</button><button class="seat-btn seat-sold" type="button">5</button><button class="seat-btn seat-chose" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-empty" type="button">8</button></div><div class="seat-row"><span class="seat-row-label">C</span><button class="seat-btn seat-sold" type="button">1</button><button class="seat-btn seat-lock" type="button">2</button><button class="seat-btn seat-sold" type="button">3</button><button class="seat-btn seat-sold" type="button">4</button><button class="seat-btn seat-lock" type="button">5</button><button class="seat-btn seat-empty" type="button">6</button><button class="seat-btn seat-chose" type="button">7</button><button class="seat-btn seat-empty" type="button">8</button></div><div class="seat-row"><span class="seat-row-label">D</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-empty" type="button">3</button><button class="seat-btn seat-chose" type="button">4</button><button class="seat-btn seat-empty" type="button">5</button><button class="seat-btn seat-sold" type="button">6</button><button class="seat-btn seat-sold" type="button">7</button><button class="seat-btn seat-sold" type="button">8</button></div><div class="seat-row"><span class="seat-row-label">E</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-empty" type="button">3</button><button class="seat-btn seat-empty" type="button">4</button><button class="seat-btn seat-sold" type="button">5</button><button class="seat-btn seat-empty" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-empty" type="button">8</button><button class="seat-btn seat-empty" type="button">9</button><button class="seat-btn seat-empty" type="button">10</button><button class="seat-btn seat-sold" type="button">11</button><button class="seat-btn seat-sold" type="button">12</button><button class="seat-btn seat-empty" type="button">13</button><button class="seat-btn seat-empty" type="button">14</button></div><div class="seat-row"><span class="seat-row-label">F</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-sold" type="button">2</button><button class="seat-btn seat-sold" type="button">3</button><button class="seat-btn seat-empty" type="button">4</button><button class="seat-btn seat-lock" type="button">5</button><button class="seat-btn seat-empty" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-sold" type="button">8</button><button class="seat-btn seat-empty" type="button">9</button><button class="seat-btn seat-empty" type="button">10</button><button class="seat-btn seat-empty" type="button">11</button><button class="seat-btn seat-sold" type="button">12</button><button class="seat-btn seat-sold" type="button">13</button><button class="seat-btn seat-empty" type="button">14</button></div><div class="seat-row"><span class="seat-row-label">G</span><button class="seat-btn seat-sold" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-sold" type="button">3</button><button class="seat-btn seat-empty" type="button">4</button><button class="seat-btn seat-empty" type="button">5</button><button class="seat-btn seat-empty" type="button">6</button><button class="seat-btn seat-sold" type="button">7</button><button class="seat-btn seat-chose" type="button">8</button><button class="seat-btn seat-empty" type="button">9</button><button class="seat-btn seat-sold" type="button">10</button><button class="seat-btn seat-empty" type="button">11</button><button class="seat-btn seat-sold" type="button">12</button><button class="seat-btn seat-sold" type="button">13</button><button class="seat-btn seat-lock" type="button">14</button></div><div class="seat-row"><span class="seat-row-label">H</span><button class="seat-btn seat-sold" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-empty" type="button">3</button><button class="seat-btn seat-sold" type="button">4</button><button class="seat-btn seat-empty" type="button">5</button><button class="seat-btn seat-empty" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-empty" type="button">8</button><button class="seat-btn seat-empty" type="button">9</button><button class="seat-btn seat-sold" type="button">10</button><button class="seat-btn seat-empty" type="button">11</button><button class="seat-btn seat-empty" type="button">12</button><button class="seat-btn seat-empty" type="button">13</button><button class="seat-btn seat-sold" type="button">14</button></div><div class="seat-row"><span class="seat-row-label">I</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-empty" type="button">3</button><button class="seat-btn seat-chose" type="button">4</button><button class="seat-btn seat-sold" type="button">5</button><button class="seat-btn seat-sold" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-empty" type="button">8</button><button class="seat-btn seat-empty" type="button">9</button><button class="seat-btn seat-chose" type="button">10</button><button class="seat-btn seat-chose" type="button">11</button><button class="seat-btn seat-empty" type="button">12</button><button class="seat-btn seat-empty" type="button">13</button><button class="seat-btn seat-empty" type="button">14</button></div><div class="seat-row"><span class="seat-row-label">J</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-empty" type="button">3</button><button class="seat-btn seat-empty" type="button">4</button><button class="seat-btn seat-empty" type="button">5</button><button class="seat-btn seat-empty" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-empty" type="button">8</button><button class="seat-btn seat-chose" type="button">9</button><button class="seat-btn seat-sold" type="button">10</button><button class="seat-btn seat-empty" type="button">11</button><button class="seat-btn seat-sold" type="button">12</button><button class="seat-btn seat-sold" type="button">13</button><button class="seat-btn seat-empty" type="button">14</button></div><div class="seat-row"><span class="seat-row-label">K</span><button class="seat-btn seat-chose" type="button">1</button><button class="seat-btn seat-sold" type="button">2</button><button class="seat-btn seat-sold" type="button">3</button><button class="seat-btn seat-sold" type="button">4</button><button class="seat-btn seat-empty" type="button">5</button><button class="seat-btn seat-empty" type="button">6</button><button class="seat-btn seat-empty" type="button">7</button><button class="seat-btn seat-sold" type="button">8</button><button class="seat-btn seat-empty" type="button">9</button><button class="seat-btn seat-empty" type="button">10</button><button class="seat-btn seat-empty" type="button">11</button><button class="seat-btn seat-empty" type="button">12</button><button class="seat-btn seat-empty" type="button">13</button><button class="seat-btn seat-empty" type="button">14</button></div><div class="seat-row"><span class="seat-row-label">L</span><button class="seat-btn seat-empty" type="button">1</button><button class="seat-btn seat-empty" type="button">2</button><button class="seat-btn seat-empty" type="button">3</button><button class="seat-btn seat-empty" type="button">4</button><button class="seat-btn seat-empty" type="button">5</button><button class="seat-btn seat-sold" type="button">6</button><button class="seat-btn seat-sold" type="button">7</button><button class="seat-btn seat-empty" type="button">8</button><button class="seat-btn seat-empty" type="button">9</button><button class="seat-btn seat-empty" type="button">10</button><button class="seat-btn seat-empty" type="button">11</button><button class="seat-btn seat-empty" type="button">12</button><button class="seat-btn seat-sold" type="button">13</button><button class="seat-btn seat-lock" type="button">14</button></div>
+  <div class="legend-bar">
+    <div class="legend-item"><div class="legend-dot" style="background:#ede9fe;border:2px solid #c4b5fd"></div> Trống (148)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:2px solid #fde68a"></div> Đã đặt (22)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:2px solid #fca5a5"></div> Đã bán (96)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e5e7eb;border:2px solid #d1d5db"></div> Khóa (14)</div>
+  </div>
+</div>
+
+<!-- Config panel (template chooser) -->
+<div class="tpl-container">
+  <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:16px;color:#1a1a2e">Cấu hình sơ đồ chỗ ngồi cho sự kiện</h2>
+  <div class="tpl-tabs">
+    <button class="tpl-tab-btn"><i class="fas fa-film me-1"></i> Rạp chiếu phim</button>
+    <button class="tpl-tab-btn"><i class="fas fa-masks-theater me-1"></i> Nhà hát / Hội trường</button>
+    <button class="tpl-tab-btn active"><i class="fas fa-music me-1"></i> Show ca nhạc</button>
+    <button class="tpl-tab-btn"><i class="fas fa-border-all me-1"></i> Sơ đồ đơn giản</button>
+    <button class="tpl-tab-btn"><i class="fas fa-sliders me-1"></i> Tùy chỉnh Zones</button>
+    <button class="tpl-tab-btn" style="border:1.5px solid #dc3545;color:#dc3545;background:#fff"><i class="fas fa-times-circle me-1"></i> Không sử dụng sơ đồ</button>
+  </div>
+
+  <div class="tpl-card">
+    <h3><i class="fas fa-music" style="color:#7c3aed"></i> Show ca nhạc / Sân vận động mini</h3>
+    <p>Gồm 2 khu vực: <strong>VIP Fanzone</strong> (hàng A–D, mỗi hàng 8 ghế sát sân khấu) và <strong>Standard Seating</strong> (hàng E–L phía sau, mỗi hàng 14 ghế).</p>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Gán loại vé cho Standard Seating</label>
+        <select class="form-select"><option>Vé Thường (Standard) (500.000 VND)</option><option>Vé VIP (1.200.000 VND)</option></select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Gán loại vé cho VIP Fanzone</label>
+        <select class="form-select"><option>Vé SVIP (Fanzone) (2.500.000 VND)</option><option>Vé VIP (1.200.000 VND)</option></select>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-primary" type="button"><i class="fas fa-magic me-1"></i> Áp dụng mẫu Show ca nhạc</button>
+</div></main><footer class="org-footer"><small>&copy; 2026 WuangEvents Student MVC</small></footer></div></div></body></html>

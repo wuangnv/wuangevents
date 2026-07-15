@@ -1,0 +1,41 @@
+{
+  "project": "WuangEvents",
+  "framework": "ASP.NET Core MVC",
+  "targetFramework": "net9.0",
+  "dataAccess": "Dapper",
+  "database": "SQL Server",
+  "brand": {
+    "primary": "#7c3aed",
+    "primaryDark": "#6d28d9",
+    "primarySoft": "#f5f3ff",
+    "fontSans": "Inter",
+    "fontDisplay": "Plus Jakarta Sans"
+  },
+  "roles": [
+    { "code": "GUEST", "label": "Khách" },
+    { "code": "CUSTOMER", "label": "Khách hàng", "databaseValue": 0 },
+    { "code": "ORGANIZER", "label": "Ban tổ chức", "databaseValue": 1 },
+    { "code": "STAFF", "label": "Nhân viên soát vé", "databaseValue": 2 },
+    { "code": "ADMIN", "label": "Quản trị viên", "databaseValue": 3 }
+  ],
+  "entities": [
+    "NguoiDung",
+    "DanhMuc",
+    "SuKien",
+    "LoaiVe",
+    "MaGiamGia",
+    "DonHang",
+    "ChiTietDonHang",
+    "SoDoChoNgoi",
+    "KhuVuc",
+    "HangGhe",
+    "ChoNgoi",
+    "NhanVienSuKien"
+  ],
+  "statusContracts": {
+    "event": ["Bản nháp", "Chờ duyệt", "Đang bán vé", "Đã hủy", "Từ chối"],
+    "order": ["Chờ thanh toán", "Đã thanh toán", "Đã hủy", "Hoàn tiền"],
+    "checkin": ["Chưa check-in", "Đã check-in", "Đã hủy"],
+    "organizerRequest": ["Chưa gửi", "Chờ duyệt", "Đã duyệt", "Từ chối"]
+  }
+}

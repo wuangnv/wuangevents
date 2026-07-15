@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tạo sự kiện - WuangEvents</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css"/>
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css"/>
+<link rel="stylesheet" href="../assets/bootstrap.min.css"/>
+<link rel="stylesheet" href="../assets/site.css"/>
+<link rel="stylesheet" href="../assets/portal.css"/>
+<style>
+.active-event-card{background:#1e1e2d;border:1px solid #2d2d3f;border-radius:8px;padding:10px 12px;margin-bottom:16px;}
+.active-event-card .card-label{font-size:.72rem;text-transform:uppercase;color:#a855f7;font-weight:700;letter-spacing:.5px;margin-bottom:2px;}
+.active-event-card .card-name{font-size:.88rem;font-weight:600;color:#f3f4f6;}
+.org-nav-item{transition:all .15s ease;border-left:3px solid transparent;}
+.org-nav-item:hover{background:rgba(168,85,247,.08);color:#a855f7 !important;}
+.org-nav-item.active{background:rgba(168,85,247,.15) !important;color:#a855f7 !important;font-weight:600;border-left:3px solid #a855f7;}
+</style><style>
+.stepper-container{display:flex;justify-content:space-between;align-items:center;margin-bottom:2.5rem;position:relative;padding:0 1rem;}
+.stepper-container::before{content:'';position:absolute;top:20px;left:50px;right:50px;height:3px;background:#e2e8f0;z-index:1;}
+.stepper-progress{position:absolute;top:20px;left:50px;height:3px;background:#7c3aed;z-index:2;transition:width .4s ease;width:0%;}
+.step-item{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;width:50%;}
+.step-circle{width:40px;height:40px;border-radius:50%;background:#fff;border:3px solid #e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#94a3b8;transition:all .3s ease;box-shadow:0 4px 6px -1px rgba(0,0,0,.05);}
+.step-item.active .step-circle{border-color:#7c3aed;color:#7c3aed;background:#f5f3ff;box-shadow:0 0 0 4px rgba(124,58,237,.15);}
+.step-item.completed .step-circle{border-color:#7c3aed;background:#7c3aed;color:#fff;}
+.step-title{margin-top:.6rem;font-size:.85rem;font-weight:600;color:#94a3b8;text-align:center;transition:color .3s ease;}
+.step-item.active .step-title,.step-item.completed .step-title{color:#1e1b4b;font-weight:700;}
+.step-content{display:none;}
+.step-content.active{display:block;}
+.portal-card{background:#fff;border:1px solid #ede9fe;border-radius:12px;box-shadow:0 10px 15px -3px rgba(124,58,237,.05);margin-bottom:2rem;}
+.portal-card-header{border-bottom:1px solid #f5f3ff;padding:1.25rem 1.5rem;background:#faf8ff;border-top-left-radius:12px;border-top-right-radius:12px;}
+.portal-card-header h2{font-size:1.1rem;font-weight:700;color:#7c3aed;margin:0;display:flex;align-items:center;gap:8px;}
+.portal-card-body{padding:1.5rem;}
+.form-label{font-weight:600;color:#334155;margin-bottom:.4rem;font-size:.9rem;}
+.form-control,.form-select{border:1px solid #cbd5e1;border-radius:8px;padding:.6rem .8rem;font-size:.95rem;transition:all .2s ease;}
+.form-control:focus,.form-select:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.15);outline:none;}
+.btn-group-toggle .btn{padding:.6rem 1.5rem;font-weight:600;border:1px solid #cbd5e1;background:#fff;color:#64748b;transition:all .2s ease;}
+.btn-group-toggle .btn.active{background:#7c3aed;color:#fff;border-color:#7c3aed;box-shadow:0 4px 6px -1px rgba(124,58,237,.2);}
+.preview-box{aspect-ratio:16/9;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-weight:600;overflow:hidden;position:relative;margin-bottom:1rem;}
+.preview-thumbnail{width:120px;height:120px;border-radius:8px;background:#f8fafc;border:2px dashed #cbd5e1;display:flex;align-items:center;justify-content:center;color:#94a3b8;overflow:hidden;position:relative;}
+.ticket-card{background:#fafafa;border:1px solid #e5e7eb;border-radius:8px;padding:1.25rem;margin-bottom:1rem;position:relative;}
+.ticket-card:hover{border-color:#c084fc;}
+.remove-ticket-btn{position:absolute;top:10px;right:10px;color:#ef4444;background:none;border:none;font-size:1.1rem;cursor:pointer;padding:4px;line-height:1;}
+.cover-fill{width:100%;height:100%;background:linear-gradient(135deg,#7c3aed,#a855f7,#ec4899);}
+.thumb-fill{width:100%;height:100%;background:linear-gradient(135deg,#6366f1,#a855f7);}
+</style>
+</head><body><div class="portal-shell"><aside class="org-sidebar"><a class="org-brand" href="#"><span class="brand-mark"><i class="fas fa-calendar-days"></i></span><span>Wuang<strong>Organizer</strong></span></a><nav class="org-nav"><span class="nav-label">Chức năng chính</span><a class="org-nav-item" href="#"><i class="fas fa-chart-simple"></i><span>Thống kê hoạt động</span></a><a class="org-nav-item active" href="#"><i class="fas fa-calendar-days"></i><span>Sự kiện của tôi</span></a><a class="org-nav-item" href="#"><i class="fas fa-user-gear"></i><span>Quản lý nhân sự soát vé</span></a><span class="nav-label">Tài khoản</span><a class="org-nav-item" href="#"><i class="fas fa-user"></i><span>Hồ sơ cá nhân</span></a><a class="org-nav-item" href="#"><i class="fas fa-house"></i><span>Trang chủ</span></a><a class="org-nav-item" href="#"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a></nav></aside><div class="org-main"><header class="org-header"><div><strong>Trang ban tổ chức</strong><div class="text-muted small">Tạo và vận hành sự kiện của bạn</div></div><div class="account-chip"><i class="fas fa-user"></i><span>Nhà Tổ Chức 1</span></div></header><main class="org-content-body">
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div class="portal-page-title">
+    <span class="portal-kicker"><i class="fas fa-plus"></i> Sự kiện mới</span>
+    <h1>Tạo sự kiện</h1>
+  </div>
+  <a class="btn btn-outline-secondary" href="#"><i class="fas fa-arrow-left me-1"></i> Quay lại danh sách</a>
+</div>
+
+<!-- Stepper Navigation -->
+<div class="stepper-container">
+  <div class="stepper-progress" id="stepperProgress"></div>
+  <div class="step-item active" id="stepIndicator-1">
+    <div class="step-circle">1</div>
+    <div class="step-title">Thông tin sự kiện</div>
+  </div>
+  <div class="step-item" id="stepIndicator-2">
+    <div class="step-circle">2</div>
+    <div class="step-title">Thời gian &amp; Loại vé</div>
+  </div>
+</div>
+
+<form method="post" action="#" id="wizardForm" enctype="multipart/form-data">
+
+  <!-- ================= STEP 1 ================= -->
+  <div class="step-content active" id="stepPanel-1">
+    <div class="row">
+      <div class="col-lg-8">
+        <!-- Info Section -->
+        <div class="portal-card">
+          <div class="portal-card-header"><h2><i class="fas fa-info-circle"></i> Thông tin cơ bản</h2></div>
+          <div class="portal-card-body">
+            <div class="mb-3">
+              <label class="form-label">Tên sự kiện <span class="text-danger">*</span></label>
+              <input class="form-control" name="tenSuKien" value="Ben Thanh Concert 2026" placeholder="Ví dụ: Đại nhạc hội Mùa Hè 2026" required />
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Danh mục <span class="text-danger">*</span></label>
+                <select class="form-select" name="danhMucId" required>
+                  <option>Âm nhạc</option>
+                  <option>Sân khấu &amp; Nghệ thuật</option>
+                  <option>Thể thao</option>
+                  <option>Hội thảo &amp; Workshop</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Hình thức sự kiện <span class="text-danger">*</span></label>
+                <div class="btn-group w-100 btn-group-toggle" role="group">
+                  <button type="button" class="btn active w-50" id="btnOffline">Offline</button>
+                  <button type="button" class="btn w-50" id="btnOnline">Online</button>
+                </div>
+                <input type="hidden" name="loaiSuKien" value="0" />
+              </div>
+            </div>
+
+            <!-- Offline Fields -->
+            <div id="offlineSection" class="p-3 bg-light rounded border mb-3">
+              <h3 class="h6 font-weight-bold text-dark mb-3"><i class="fas fa-map-marker-alt text-primary me-1"></i>Địa điểm tổ chức</h3>
+              <div class="mb-3">
+                <label class="form-label">Tên địa điểm <span class="text-danger">*</span></label>
+                <input class="form-control" name="tenDiaDiem" value="Nhà hát Bến Thành" placeholder="Ví dụ: Hội trường A, Nhà văn hóa..." />
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label class="form-label">Tỉnh / Thành phố <span class="text-danger">*</span></label>
+                  <select class="form-select"><option>Thành phố Hồ Chí Minh</option></select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Quận / Huyện <span class="text-danger">*</span></label>
+                  <select class="form-select"><option>Quận 1</option></select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
+                  <select class="form-select"><option>Phường Bến Thành</option></select>
+                </div>
+              </div>
+              <div>
+                <label class="form-label">Số nhà, tên đường <span class="text-danger">*</span></label>
+                <input class="form-control" name="soNhaDuong" value="6 Mạc Đĩnh Chi" placeholder="Ví dụ: 123 Nguyễn Văn Cừ" />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Mô tả ngắn sự kiện</label>
+              <textarea class="form-control" name="moTaNgan" rows="2" placeholder="Tóm tắt ngắn gọn...">Đêm nhạc quy tụ những giọng ca hàng đầu Việt Nam trong không gian Nhà hát Bến Thành huyền thoại.</textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Mô tả chi tiết</label>
+              <textarea class="form-control" name="moTaChiTiet" rows="6" placeholder="Giới thiệu chương trình...">Ben Thanh Concert 2026 là chương trình hòa nhạc thường niên do WuangEvents tổ chức, với sự góp mặt của dàn nghệ sĩ khách mời đặc biệt, ban nhạc live và hệ thống âm thanh - ánh sáng đạt chuẩn quốc tế.
+
+Chương trình kéo dài 180 phút gồm 2 phần biểu diễn, thời gian mở cửa đón khách từ 18:30. Vui lòng có mặt trước giờ diễn 30 phút để làm thủ tục soát vé và ổn định chỗ ngồi.
+
+Điều khoản: Vé đã mua không hoàn/không đổi. Trẻ em dưới 6 tuổi không được vào khu vực khán phòng.</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Organizer Section -->
+        <div class="portal-card">
+          <div class="portal-card-header"><h2><i class="fas fa-user-tie"></i> Ban tổ chức sự kiện</h2></div>
+          <div class="portal-card-body">
+            <div class="mb-3">
+              <label class="form-label">Tên nhà tổ chức <span class="text-danger">*</span></label>
+              <input class="form-control" name="tenToChuc" value="Nhà Tổ Chức 1" placeholder="Ví dụ: Công ty sự kiện WuangCorp" required />
+            </div>
+            <div>
+              <label class="form-label">Thông tin chi tiết về nhà tổ chức</label>
+              <textarea class="form-control" name="moTaToChuc" rows="3" placeholder="Đơn vị tổ chức...">Đơn vị tổ chức các chương trình nghệ thuật, hòa nhạc và sự kiện giải trí quy mô lớn tại khu vực TP. Hồ Chí Minh.</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <!-- Visuals Section -->
+        <div class="portal-card">
+          <div class="portal-card-header"><h2><i class="fas fa-images"></i> Thiết kế / Ảnh sự kiện</h2></div>
+          <div class="portal-card-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold text-dark">Tải ảnh bìa / Banner sự kiện (16:9)</label>
+              <div class="preview-box mb-2" style="height:180px;border-radius:8px;"><div class="cover-fill"></div></div>
+              <input type="file" class="form-control mb-2" accept="image/*" />
+              <input class="form-control" value="https://cdn.wuangevents.vn/covers/benthanh-2026.jpg" placeholder="Hoặc nhập liên kết URL ảnh bìa trực tiếp" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold text-dark">Tải ảnh nhỏ / Thumbnail (1:1)</label>
+              <div class="d-flex align-items-center gap-3">
+                <div class="preview-thumbnail" style="width:80px;height:80px;border-radius:8px;flex-shrink:0;"><div class="thumb-fill"></div></div>
+                <div class="flex-grow-1">
+                  <input type="file" class="form-control mb-2" accept="image/*" />
+                  <input class="form-control" value="https://cdn.wuangevents.vn/thumbs/benthanh.jpg" placeholder="Hoặc nhập liên kết URL ảnh đại diện" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button type="button" class="btn btn-primary px-4 py-2">Tiếp tục <i class="fas fa-arrow-right ms-1"></i></button>
+    </div>
+  </div>
+
+  <!-- ================= STEP 2 (shown for mock) ================= -->
+  <div class="step-content active" id="stepPanel-2">
+    <div class="portal-card">
+      <div class="portal-card-header"><h2><i class="fas fa-clock"></i> Cài đặt Thời gian</h2></div>
+      <div class="portal-card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Thời gian bắt đầu sự kiện <span class="text-danger">*</span></label>
+            <input class="form-control" type="datetime-local" value="2026-09-20T19:00" required />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Thời gian kết thúc sự kiện <span class="text-danger">*</span></label>
+            <input class="form-control" type="datetime-local" value="2026-09-20T22:00" required />
+            <span class="text-muted small d-block mt-1"><i class="fas fa-circle-info text-primary me-1"></i>Sự kiện có thể diễn ra trong vài tiếng cùng ngày.</span>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Thời gian bắt đầu check-in (Tùy chọn)</label>
+            <input class="form-control" type="datetime-local" value="2026-09-20T18:00" />
+            <span class="text-muted small">Mặc định là thời điểm sự kiện bắt đầu nếu bỏ trống.</span>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Thời gian kết thúc check-in (Tùy chọn)</label>
+            <input class="form-control" type="datetime-local" value="2026-09-20T20:00" />
+            <span class="text-muted small">Mặc định là thời điểm sự kiện kết thúc nếu bỏ trống.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-card">
+      <div class="portal-card-header d-flex justify-content-between align-items-center">
+        <h2><i class="fas fa-ticket-alt"></i> Phân loại vé bán</h2>
+        <button type="button" class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Thêm loại vé</button>
+      </div>
+      <div class="portal-card-body">
+        <div class="ticket-card">
+          <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Tên loại vé <span class="text-danger">*</span></label><input class="form-control" value="Vé Thường (Standard)" required /></div>
+            <div class="col-md-3"><label class="form-label">Giá vé (VND) <span class="text-danger">*</span></label><input class="form-control" type="number" value="500000" required /></div>
+            <div class="col-md-3"><label class="form-label">Số lượng tổng <span class="text-danger">*</span></label><input class="form-control" type="number" value="600" required /></div>
+            <div class="col-md-3"><label class="form-label">Giới hạn mỗi đơn <span class="text-danger">*</span></label><input class="form-control" type="number" value="6" required /></div>
+          </div>
+        </div>
+        <div class="ticket-card">
+          <button type="button" class="remove-ticket-btn"><i class="fas fa-trash-alt"></i></button>
+          <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Tên loại vé <span class="text-danger">*</span></label><input class="form-control" value="Vé VIP" required /></div>
+            <div class="col-md-3"><label class="form-label">Giá vé (VND) <span class="text-danger">*</span></label><input class="form-control" type="number" value="1200000" required /></div>
+            <div class="col-md-3"><label class="form-label">Số lượng tổng <span class="text-danger">*</span></label><input class="form-control" type="number" value="200" required /></div>
+            <div class="col-md-3"><label class="form-label">Giới hạn mỗi đơn <span class="text-danger">*</span></label><input class="form-control" type="number" value="4" required /></div>
+          </div>
+        </div>
+        <div class="ticket-card">
+          <button type="button" class="remove-ticket-btn"><i class="fas fa-trash-alt"></i></button>
+          <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Tên loại vé <span class="text-danger">*</span></label><input class="form-control" value="Vé SVIP (Fanzone)" required /></div>
+            <div class="col-md-3"><label class="form-label">Giá vé (VND) <span class="text-danger">*</span></label><input class="form-control" type="number" value="2500000" required /></div>
+            <div class="col-md-3"><label class="form-label">Số lượng tổng <span class="text-danger">*</span></label><input class="form-control" type="number" value="80" required /></div>
+            <div class="col-md-3"><label class="form-label">Giới hạn mỗi đơn <span class="text-danger">*</span></label><input class="form-control" type="number" value="2" required /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-3">
+      <button type="button" class="btn btn-outline-secondary px-4 py-2"><i class="fas fa-arrow-left me-1"></i> Quay lại</button>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-outline-secondary px-4 py-2"><i class="fas fa-floppy-disk me-1"></i> Lưu bản nháp</button>
+        <button type="submit" class="btn btn-success px-4 py-2"><i class="fas fa-paper-plane me-1"></i> Tạo và gửi duyệt</button>
+      </div>
+    </div>
+  </div>
+</form></main><footer class="org-footer"><small>&copy; 2026 WuangEvents Student MVC</small></footer></div></div></body></html>

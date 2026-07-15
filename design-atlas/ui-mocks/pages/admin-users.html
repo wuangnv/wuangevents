@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Người dùng - WuangEvents</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css"/>
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css"/>
+<link rel="stylesheet" href="../assets/bootstrap.min.css"/>
+<link rel="stylesheet" href="../assets/site.css"/>
+<link rel="stylesheet" href="../assets/portal.css"/>
+
+</head><body><div class="portal-shell"><aside class="admin-sidebar"><a class="admin-brand" href="#"><span class="brand-mark"><i class="fas fa-bolt"></i></span><span>Wuang<strong>Admin</strong></span></a><nav class="admin-nav"><span class="nav-label">Chức năng chính</span><a class="admin-nav-item" href="#"><i class="fas fa-chart-line"></i><span>Thống kê hệ thống</span></a><a class="admin-nav-item active" href="#"><i class="fas fa-users"></i><span>Quản lý người dùng</span></a><a class="admin-nav-item" href="#"><i class="fas fa-handshake"></i><span>Phê duyệt ban tổ chức</span></a><a class="admin-nav-item" href="#"><i class="fas fa-calendar-check"></i><span>Phê duyệt sự kiện</span></a><a class="admin-nav-item" href="#"><i class="fas fa-layer-group"></i><span>Quản lý danh mục</span></a><a class="admin-nav-item" href="#"><i class="fas fa-receipt"></i><span>Giám sát giao dịch</span></a><span class="nav-label">Hệ thống</span><a class="admin-nav-item" href="#"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a></nav></aside><div class="admin-main"><header class="admin-header"><div><strong>Trang quản trị</strong><div class="text-muted small">Quản lý toàn bộ hoạt động hệ thống</div></div><div class="account-chip"><i class="fas fa-user-shield"></i><span>Quản Trị Viên Hệ Thống</span></div></header><main class="admin-content-body">
+<div class="d-flex justify-content-between align-items-start mb-4 gap-3">
+    <div class="portal-page-title"><span class="portal-kicker"><i class="fas fa-users"></i> Tài khoản</span><h1>Quản lý người dùng</h1><p>Tìm kiếm, lọc và khóa hoặc mở tài khoản.</p></div>
+    <a class="btn btn-outline-primary" href="#"><i class="fas fa-file-csv me-1"></i> Xuất CSV</a>
+</div>
+
+<div class="portal-card mb-3"><div class="portal-card-body"><form method="get" class="row g-2">
+    <div class="col-md-5"><input class="form-control" name="search" placeholder="Tên hoặc email" /></div>
+    <div class="col-md-3"><select class="form-select" name="vaiTro"><option value="">Tất cả vai trò</option><option value="0">Người mua</option><option value="1">Ban tổ chức</option><option value="2">Nhân viên soát vé</option><option value="3">Quản trị viên</option></select></div>
+    <div class="col-md-2"><select class="form-select" name="trangThai"><option value="">Tất cả</option><option value="1">Hoạt động</option><option value="0">Bị khóa</option></select></div>
+    <div class="col-md-2 d-grid"><button class="btn btn-primary">Lọc</button></div>
+</form></div></div>
+
+<div class="portal-card"><div class="table-responsive"><table class="table portal-table align-middle"><thead><tr><th>Người dùng</th><th>Vai trò</th><th>Ngày tạo</th><th>Trạng thái</th><th class="text-end">Hành động</th></tr></thead><tbody>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Nguyễn Minh Anh</a><div class="text-muted small">minhanh.nguyen@gmail.com</div></td>
+        <td>Người mua</td>
+        <td>12/01/2026</td>
+        <td><span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-circle-check me-1"></i>Hoạt động</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                <form method="post" action="#" class="m-0"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="fas fa-lock me-1"></i> Khóa</button></form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Trần Hoàng Long</a><div class="text-muted small">hoanglong.tran@gmail.com</div></td>
+        <td>Ban tổ chức</td>
+        <td>18/07/2026</td>
+        <td><span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-circle-check me-1"></i>Hoạt động</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                <form method="post" action="#" class="m-0"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="fas fa-lock me-1"></i> Khóa</button></form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Sun Media Entertainment</a><div class="text-muted small">contact@sunmedia.vn</div></td>
+        <td>Ban tổ chức</td>
+        <td>03/03/2026</td>
+        <td><span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-circle-check me-1"></i>Hoạt động</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                <form method="post" action="#" class="m-0"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="fas fa-lock me-1"></i> Khóa</button></form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Lê Thị Thu Hà</a><div class="text-muted small">thuha.le@gmail.com</div></td>
+        <td>Người mua</td>
+        <td>25/05/2026</td>
+        <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-ban me-1"></i>Bị khóa</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                <form method="post" action="#" class="m-0"><button class="btn btn-sm btn-outline-success" type="submit"><i class="fas fa-lock-open me-1"></i> Mở khóa</button></form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Phạm Văn Đức</a><div class="text-muted small">ducpham.staff@wuangevents.vn</div></td>
+        <td>Nhân viên soát vé</td>
+        <td>10/06/2026</td>
+        <td><span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-circle-check me-1"></i>Hoạt động</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                <form method="post" action="#" class="m-0"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="fas fa-lock me-1"></i> Khóa</button></form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Võ Hoài Nam</a><div class="text-muted small">hoainam.vo@gmail.com</div></td>
+        <td>Người mua</td>
+        <td>02/07/2026</td>
+        <td><span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-circle-check me-1"></i>Hoạt động</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                <form method="post" action="#" class="m-0"><button class="btn btn-sm btn-outline-danger" type="submit"><i class="fas fa-lock me-1"></i> Khóa</button></form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Đặng Thị Kim Chi</a><div class="text-muted small">kimchi.dang@yahoo.com</div></td>
+        <td>Người mua</td>
+        <td>29/06/2026</td>
+        <td><span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-ban me-1"></i>Bị khóa</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                <form method="post" action="#" class="m-0"><button class="btn btn-sm btn-outline-success" type="submit"><i class="fas fa-lock-open me-1"></i> Mở khóa</button></form>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="#" class="text-decoration-none fw-bold text-dark">Quản Trị Viên Hệ Thống</a><div class="text-muted small">admin@wuangevents.vn</div></td>
+        <td>Quản trị viên</td>
+        <td>01/01/2026</td>
+        <td><span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:.75rem;border-radius:8px;padding:3px 10px;"><i class="fas fa-circle-check me-1"></i>Hoạt động</span></td>
+        <td class="text-end">
+            <div class="d-flex justify-content-end align-items-center gap-1">
+                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-info-circle me-1"></i>Chi tiết</a>
+                
+            </div>
+        </td>
+    </tr>
+</tbody></table></div></div></main><footer class="admin-footer"><small>&copy; 2026 WuangEvents Student MVC</small></footer></div></div></body></html>

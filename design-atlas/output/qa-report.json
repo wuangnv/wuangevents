@@ -1,0 +1,10 @@
+{
+  "screens": 36,
+  "viewports": [
+    "mobile",
+    "tablet",
+    "desktop",
+    "wide"
+  ],
+  "errors": []
+}

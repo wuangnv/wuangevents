@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Báo cáo sự kiện - WuangEvents</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css"/>
+<link rel="stylesheet" href="../assets/fontawesome/css/all.min.css"/>
+<link rel="stylesheet" href="../assets/bootstrap.min.css"/>
+<link rel="stylesheet" href="../assets/site.css"/>
+<link rel="stylesheet" href="../assets/portal.css"/>
+<style>
+.active-event-card{background:#1e1e2d;border:1px solid #2d2d3f;border-radius:8px;padding:10px 12px;margin-bottom:16px;}
+.active-event-card .card-label{font-size:.72rem;text-transform:uppercase;color:#a855f7;font-weight:700;letter-spacing:.5px;margin-bottom:2px;}
+.active-event-card .card-name{font-size:.88rem;font-weight:600;color:#f3f4f6;}
+.org-nav-item{transition:all .15s ease;border-left:3px solid transparent;}
+.org-nav-item:hover{background:rgba(168,85,247,.08);color:#a855f7 !important;}
+.org-nav-item.active{background:rgba(168,85,247,.15) !important;color:#a855f7 !important;font-weight:600;border-left:3px solid #a855f7;}
+</style><style>
+.report-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+@media (max-width:768px){.report-stat-grid{grid-template-columns:repeat(2,1fr);}}
+.report-stat{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:18px 20px;display:flex;flex-direction:column;gap:8px;}
+.report-stat-icon{font-size:1.5rem;}
+.report-stat-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#9ca3af;}
+.report-stat-val{font-size:1.8rem;font-weight:800;color:#111827;line-height:1;}
+.report-stat-sub{font-size:.78rem;color:#9ca3af;}
+.progress-thin{height:7px;border-radius:4px;background:#f3f4f6;overflow:hidden;}
+.progress-fill{height:100%;border-radius:4px;}
+.report-card{background:#fff;border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;}
+.report-card-header{padding:14px 20px;font-weight:700;font-size:.9rem;color:#374151;border-bottom:1px solid #f3f4f6;background:#fafafa;display:flex;align-items:center;gap:8px;}
+.ticket-bar{height:10px;border-radius:5px;background:#f3f4f6;overflow:hidden;margin-top:4px;}
+.ticket-bar-fill{height:100%;border-radius:5px;}
+</style>
+</head><body><div class="portal-shell"><aside class="org-sidebar"><a class="org-brand" href="#"><span class="brand-mark"><i class="fas fa-calendar-days"></i></span><span>Wuang<strong>Organizer</strong></span></a><nav class="org-nav"><a class="btn btn-sm btn-outline-light mb-3 text-start w-100 py-2 fw-semibold" href="#" style="border-radius:8px;"><i class="fas fa-arrow-left me-1"></i> Đổi sự kiện khác</a><div class="active-event-card"><div class="card-label">Đang quản lý</div><div class="card-name text-truncate">Ben Thanh Concert 2026</div></div><span class="nav-label">Tính năng sự kiện</span><a class="org-nav-item" href="#"><i class="fas fa-info-circle"></i><span>Thông tin chung</span></a><a class="org-nav-item" href="#"><i class="fas fa-pen"></i><span>Sửa thông tin</span></a><a class="org-nav-item" href="#"><i class="fas fa-ticket-simple"></i><span>Cấu hình loại vé</span></a><a class="org-nav-item" href="#"><i class="fas fa-chair"></i><span>Sơ đồ chỗ ngồi</span></a><a class="org-nav-item" href="#"><i class="fas fa-tags"></i><span>Mã giảm giá</span></a><a class="org-nav-item" href="#"><i class="fas fa-user-check"></i><span>Phân công soát vé</span></a><a class="org-nav-item" href="#"><i class="fas fa-receipt"></i><span>Đơn hàng đặt vé</span></a><a class="org-nav-item" href="#"><i class="fas fa-users"></i><span>Khách tham dự</span></a><a class="org-nav-item active" href="#"><i class="fas fa-chart-line"></i><span>Báo cáo doanh thu</span></a><a class="org-nav-item" href="#"><i class="fas fa-qrcode"></i><span>Cổng soát vé check-in</span></a><span class="nav-label">Tài khoản</span><a class="org-nav-item" href="#"><i class="fas fa-user"></i><span>Hồ sơ cá nhân</span></a><a class="org-nav-item" href="#"><i class="fas fa-house"></i><span>Trang chủ</span></a><a class="org-nav-item" href="#"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a></nav></aside><div class="org-main"><header class="org-header"><div><strong>Trang ban tổ chức</strong><div class="text-muted small">Tạo và vận hành sự kiện của bạn</div></div><div class="account-chip"><i class="fas fa-user"></i><span>Nhà Tổ Chức 1</span></div></header><main class="org-content-body">
+<div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+  <div>
+    <a href="#" class="btn btn-sm btn-light border text-secondary mb-2" style="border-radius:8px;"><i class="fas fa-arrow-left me-1"></i> Quay lại sự kiện</a>
+    <h1 class="h4 fw-bold mb-1">Báo cáo sự kiện</h1>
+    <p class="text-muted small mb-0"><i class="fas fa-calendar-days me-1"></i>Ben Thanh Concert 2026</p>
+  </div>
+  <a class="btn btn-success fw-bold" href="#" style="border-radius:10px;"><i class="fas fa-file-csv me-1"></i> Xuất báo cáo CSV</a>
+</div>
+
+<div class="report-stat-grid">
+  <div class="report-stat">
+    <div class="report-stat-icon" style="color:#7c3aed;">🧾</div>
+    <div class="report-stat-label">Đơn đã thanh toán</div>
+    <div class="report-stat-val">142</div>
+    <div class="report-stat-sub">đơn hàng</div>
+  </div>
+  <div class="report-stat">
+    <div class="report-stat-icon" style="color:#0891b2;">🎟️</div>
+    <div class="report-stat-label">Vé đã bán</div>
+    <div class="report-stat-val">638</div>
+    <div class="report-stat-sub">vé phát hành</div>
+  </div>
+  <div class="report-stat">
+    <div class="report-stat-icon" style="color:#059669;">✅</div>
+    <div class="report-stat-label">Đã check-in</div>
+    <div class="report-stat-val">421</div>
+    <div class="progress-thin mt-1"><div class="progress-fill" style="width:66%;background:linear-gradient(90deg,#059669,#34d399);"></div></div>
+    <div class="report-stat-sub">66% khách đã vào</div>
+  </div>
+  <div class="report-stat">
+    <div class="report-stat-icon" style="color:#d97706;">💰</div>
+    <div class="report-stat-label">Doanh thu</div>
+    <div class="report-stat-val" style="font-size:1.3rem;">585.600.000</div>
+    <div class="report-stat-sub">VND</div>
+  </div>
+</div>
+
+<div class="report-card">
+  <div class="report-card-header"><i class="fas fa-tags" style="color:#7c3aed;"></i> Tổng giá trị giảm giá từ voucher</div>
+  <div style="padding:18px 20px;">
+    <div style="font-size:1.5rem;font-weight:800;color:#7c3aed;">18.450.000 ₫</div>
+    <div style="font-size:.82rem;color:#9ca3af;margin-top:4px;">Tổng số tiền đã giảm từ mã khuyến mãi</div>
+  </div>
+</div>
+
+<div class="report-card">
+  <div class="report-card-header"><i class="fas fa-chart-bar" style="color:#7c3aed;"></i> Hiệu quả từng loại vé</div>
+  <div style="padding:20px;">
+    <div class="d-flex flex-column gap-4"><div>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <div><span style="font-weight:700;color:#111827;">Vé SVIP (Fanzone)</span><span style="font-size:.8rem;color:#9ca3af;margin-left:8px;">2.500.000 ₫/vé</span></div>
+        <div class="text-end"><span style="font-weight:700;color:#ef4444;font-size:.9rem;">92.5%</span><span style="font-size:.78rem;color:#9ca3af;margin-left:6px;">(74 / 80)</span></div>
+      </div>
+      <div class="ticket-bar"><div class="ticket-bar-fill" style="width:92.5%;background:#ef4444;"></div></div>
+      <div style="font-size:.78rem;color:#6b7280;margin-top:4px;">Doanh thu ước tính: <strong style="color:#059669;">185.000.000 ₫</strong></div>
+    </div><div>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <div><span style="font-weight:700;color:#111827;">Vé VIP</span><span style="font-size:.8rem;color:#9ca3af;margin-left:8px;">1.200.000 ₫/vé</span></div>
+        <div class="text-end"><span style="font-weight:700;color:#f59e0b;font-size:.9rem;">88.0%</span><span style="font-size:.78rem;color:#9ca3af;margin-left:6px;">(176 / 200)</span></div>
+      </div>
+      <div class="ticket-bar"><div class="ticket-bar-fill" style="width:88.0%;background:#f59e0b;"></div></div>
+      <div style="font-size:.78rem;color:#6b7280;margin-top:4px;">Doanh thu ước tính: <strong style="color:#059669;">211.200.000 ₫</strong></div>
+    </div><div>
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <div><span style="font-weight:700;color:#111827;">Vé Thường (Standard)</span><span style="font-size:.8rem;color:#9ca3af;margin-left:8px;">500.000 ₫/vé</span></div>
+        <div class="text-end"><span style="font-weight:700;color:#f59e0b;font-size:.9rem;">64.7%</span><span style="font-size:.78rem;color:#9ca3af;margin-left:6px;">(388 / 600)</span></div>
+      </div>
+      <div class="ticket-bar"><div class="ticket-bar-fill" style="width:64.7%;background:#f59e0b;"></div></div>
+      <div style="font-size:.78rem;color:#6b7280;margin-top:4px;">Doanh thu ước tính: <strong style="color:#059669;">194.000.000 ₫</strong></div>
+    </div></div>
+  </div>
+</div></main><footer class="org-footer"><small>&copy; 2026 WuangEvents Student MVC</small></footer></div></div></body></html>
