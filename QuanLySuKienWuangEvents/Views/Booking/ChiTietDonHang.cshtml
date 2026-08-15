@@ -1,12 +1,17 @@
-﻿@model DonHang
+@model DonHang
 @using QuanLySuKienWuangEvents.Models
+@using System.Globalization
 
 @{
+    // GET ChiTietDonHang/{id}; Controller bắt buộc đơn thuộc user hiện tại.
+    // Model là DonHang; ViewBag.ChiTiet là vé; QrImages là ảnh QR base64.
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Vé điện tử của bạn";
     var chiTiet = ViewBag.ChiTiet as List<ChiTietDonHang> ?? new List<ChiTietDonHang>();
     var qrImages = ViewBag.QrImages as Dictionary<int, string> ?? new Dictionary<int, string>();
     var suKien = ViewBag.SuKien as SuKien;
+    bool laTrucTuyen = suKien?.LoaiSuKien == 1;
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+    ViewData["Title"] = laTrucTuyen ? "Quyền tham dự trực tuyến" : "Vé điện tử của bạn";
 }
 
 @section Styles {
@@ -41,7 +46,25 @@
 .checkin-badge { display: inline-flex; align-items: center; gap: 5px; font-size: .78rem; font-weight: 700; padding: 4px 12px; border-radius: 12px; width: fit-content; }
 .checkin-ok { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
 .checkin-pending { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-.ticket-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+.ticket-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+.ticket-actions .btn { display: inline-flex; align-items: center; gap: 7px; border-radius: 10px !important; padding: 9px 14px !important; font-size: .84rem; font-weight: 650 !important; }
+.online-access { overflow: hidden; margin-bottom: 24px; border-radius: 20px; color: #172033; background: #fff; border: 1px solid #e8e5f3; box-shadow: 0 10px 32px rgba(38,31,77,.08); font-family: Inter, "Segoe UI", sans-serif; }
+.online-access-main { padding: 28px 30px; display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: center; background: linear-gradient(135deg,#faf9ff 0%,#f4f1ff 50%,#fff 100%); }
+.online-access-heading { display: flex; gap: 16px; align-items: flex-start; }
+.online-access-icon { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 14px; display: grid; place-items: center; background: #ede9fe; color: #6d28d9; font-size: 1.15rem; border: 1px solid #ddd6fe; }
+.online-status { display: inline-flex; align-items: center; gap: 6px; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 999px; padding: 4px 9px; font-size: .72rem; font-weight: 700; margin-bottom: 8px; }
+.online-access h2 { font-size: 1.25rem; color: #18142c; font-weight: 750; margin: 0 0 7px; letter-spacing: -.02em; }
+.online-access p { color: #667085; margin: 0; font-size: .9rem; line-height: 1.55; }
+.online-join { display: inline-flex; align-items: center; justify-content: center; gap: 9px; white-space: nowrap; background: #6d28d9; color: #fff; text-decoration: none; font-weight: 700; font-size: .9rem; padding: 12px 18px; border-radius: 11px; border: 1px solid #6d28d9; box-shadow: 0 6px 18px rgba(109,40,217,.18); transition: .2s ease; }
+.online-join:hover { color: #fff; background: #5b21b6; border-color: #5b21b6; transform: translateY(-1px); box-shadow: 0 9px 22px rgba(109,40,217,.22); }
+.online-attendees { background: #fff; border-top: 1px solid #eceaf2; padding: 20px 30px 22px; }
+.online-attendees-title { color: #344054; font-size: .78rem; font-weight: 700; margin-bottom: 5px; }
+.online-attendee { display: grid; grid-template-columns: 40px 1fr auto; gap: 13px; align-items: center; padding: 13px 0; border-bottom: 1px solid #f0eef5; }
+.online-attendee:last-child { border-bottom: 0; }
+.online-avatar { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: #f4f1ff; color: #6d28d9; border: 1px solid #e7e1ff; }
+.online-attendee-name { color: #1f2937; font-size: .9rem; font-weight: 700; }
+.online-attendee-meta { color: #667085; font-size: .8rem; margin-top: 2px; }
+.online-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem; color: #667085; background: #f8fafc; border: 1px solid #eaecf0; border-radius: 8px; padding: 6px 9px; }
 
 @@media print {
     .ticket-actions, nav, footer, .main-content > div.container:first-child { display: none !important; }
@@ -54,6 +77,12 @@
     .ticket-right { width: 100%; border-left: none; border-top: 2px dashed #e5e7eb; flex-direction: row; padding: 20px 24px; gap: 20px; justify-content: space-around; background: #fff; }
     .ticket-right::before, .ticket-right::after { display: none; }
     .qr-img { width: 110px; height: 110px; }
+    .online-access-main { grid-template-columns: 1fr; padding: 22px; }
+    .online-access-heading { gap: 12px; }
+    .online-join { width: 100%; }
+    .online-attendees { padding: 16px 22px 20px; }
+    .online-attendee { grid-template-columns: 38px 1fr; }
+    .online-code { grid-column: 2; }
 }
 </style>
 }
@@ -72,7 +101,7 @@
             <div>
                 @if (Model.TrangThai == 1)
                 {
-                    <span class="status-paid"><i class="fas fa-circle-check me-1"></i>Đã thanh toán</span>
+                    <span class="status-paid"><i class="fas fa-circle-check me-1"></i>@(Model.TongThanhToan == 0 ? "Đăng ký thành công" : "Đã thanh toán")</span>
                 }
                 else
                 {
@@ -84,13 +113,17 @@
         <div class="order-meta border-top pt-3 mt-3">
             @if (suKien != null)
             {
-                <span class="order-meta-item"><i class="fas fa-calendar-days"></i> @suKien.NgayBatDau.ToString("dddd, dd/MM/yyyy HH:mm")</span>
+                <span class="order-meta-item"><i class="fas fa-calendar-days"></i> @suKien.NgayBatDau.ToString("dddd, dd/MM/yyyy HH:mm", vi)</span>
             }
             @if (suKien != null && !string.IsNullOrEmpty(suKien.TenDiaDiem))
             {
                 <span class="order-meta-item"><i class="fas fa-location-dot"></i> @suKien.TenDiaDiem</span>
             }
-            <span class="order-meta-item"><i class="fas fa-money-bill-wave"></i> Tổng cộng: <strong style="color:#7c3aed">@Model.TongThanhToan.ToString("N0") VND</strong></span>
+            else if (laTrucTuyen)
+            {
+                <span class="order-meta-item"><i class="fas fa-video"></i> Tham dự trực tuyến</span>
+            }
+            <span class="order-meta-item"><i class="fas fa-money-bill-wave"></i> Tổng cộng: <strong style="color:#5b21b6">@(Model.TongThanhToan == 0 ? "Miễn phí" : Model.TongThanhToan.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + " đ")</strong></span>
             @if (Model.TienGiamGia > 0)
             {
                 <span class="order-meta-item"><i class="fas fa-tags"></i> Đã giảm: @Model.TienGiamGia.ToString("N0") VND</span>
@@ -108,8 +141,8 @@
         @if (suKien != null)
         {
             var format = "yyyyMMddTHHmmssZ";
-            var startUtc = DateTime.SpecifyKind(suKien.NgayBatDau, DateTimeKind.Utc).ToString(format);
-            var endUtc = DateTime.SpecifyKind(suKien.NgayKetThuc, DateTimeKind.Utc).ToString(format);
+            var startUtc = VietnamTime.ToUtc(suKien.NgayBatDau).ToString(format);
+            var endUtc = VietnamTime.ToUtc(suKien.NgayKetThuc).ToString(format);
             var gTitle = Uri.EscapeDataString(suKien.TenSuKien);
             var gDesc = Uri.EscapeDataString(suKien.MoTaNgan ?? "");
             var gLoc = Uri.EscapeDataString(suKien.LoaiSuKien == 1 ? "Trực tuyến: " + (suKien.LinkOnline ?? "") : $"{suKien.TenDiaDiem}, {suKien.DiaChiDiaDiem}, {suKien.ThanhPhoDiaDiem}");
@@ -117,13 +150,66 @@
 
             <a href="@googleCalendarLink" target="_blank" class="btn btn-outline-primary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: bold; border-radius: 10px; padding: 0.6rem 1.2rem;"><i class="fab fa-google"></i> Thêm vào Google Calendar</a>
         }
-        <button class="btn btn-primary" onclick="window.print()" style="border-radius: 10px; padding: 0.6rem 1.2rem;"><i class="fas fa-print me-1"></i> In vé điện tử / Tải PDF</button>
+        @if (!laTrucTuyen)
+        {
+            <button class="btn btn-primary" onclick="window.print()" style="border-radius: 10px; padding: 0.6rem 1.2rem;"><i class="fas fa-print me-1"></i> In vé điện tử / Tải PDF</button>
+        }
         <a href="/Booking/DonHangCuaToi" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 0.6rem 1.2rem;"><i class="fas fa-arrow-left me-1"></i> Quay lại đơn hàng của tôi</a>
     </div>
 
     @* PHẦN 2: DANH SÁCH VÉ CHI TIẾT *@
-    @foreach (var ve in chiTiet)
+    @if (laTrucTuyen)
     {
+        <section class="online-access" aria-label="Quyền tham dự trực tuyến">
+            <div class="online-access-main">
+                <div class="online-access-heading">
+                    <div class="online-access-icon"><i class="fas fa-video"></i></div>
+                    <div>
+                        <span class="online-status"><i class="fas fa-circle-check"></i> Đăng ký thành công</span>
+                        <h2>Tham gia sự kiện trực tuyến</h2>
+                        @if (suKien != null)
+                        {
+                            <p><i class="far fa-calendar me-1"></i> @suKien.NgayBatDau.ToString("HH:mm, dddd dd/MM/yyyy", vi)</p>
+                        }
+                    </div>
+                </div>
+                @if (suKien != null && !string.IsNullOrWhiteSpace(suKien.LinkOnline))
+                {
+                    <a class="online-join" href="@suKien.LinkOnline" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-arrow-up-right-from-square"></i> Vào phòng trực tuyến
+                    </a>
+                }
+                else
+                {
+                    <span class="online-join" style="background:#f2f4f7;color:#667085;border-color:#eaecf0;box-shadow:none;cursor:not-allowed">
+                        <i class="fas fa-clock"></i> Chưa mở phòng
+                    </span>
+                }
+            </div>
+            <div class="online-attendees">
+                <div class="online-attendees-title">Người tham dự trong đơn (@chiTiet.Count)</div>
+                @foreach (var ve in chiTiet)
+                {
+                    <div class="online-attendee">
+                        <span class="online-avatar"><i class="fas fa-user"></i></span>
+                        <div>
+                            <div class="online-attendee-name">@(ve.TenNguoiThamDu ?? "Khách tham dự")</div>
+                            <div class="online-attendee-meta">@(ve.TenLoaiVe ?? "Vé tham dự") · @(ve.GiaVe == 0 ? "Miễn phí" : ve.GiaVe.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + " đ")</div>
+                            @if (!string.IsNullOrWhiteSpace(ve.EmailNguoiThamDu))
+                            {
+                                <div class="online-attendee-meta">@ve.EmailNguoiThamDu</div>
+                            }
+                        </div>
+                        <div class="online-code">@(ve.MaVe ?? "Đang xử lý")</div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+    else
+    {
+      @foreach (var ve in chiTiet)
+      {
         <div class="ticket-card">
             @* Bên trái: Thông tin người dùng, loại vé và sự kiện *@
             <div class="ticket-left">
@@ -131,7 +217,7 @@
                     <span class="ticket-type-badge"><i class="fas fa-ticket me-1"></i>@(ve.TenLoaiVe ?? "Vé tham dự")</span>
                     @if (ve.TrangThaiCheckin == 1)
                     {
-                        <span class="checkin-badge checkin-ok"><i class="fas fa-circle-check me-1"></i>Đã check-in: @ve.NgayCheckin?.ToString("HH:mm dd/MM")</span>
+                        <span class="checkin-badge checkin-ok"><i class="fas fa-circle-check me-1"></i>Đã check-in: @(VietnamTime.FromUtc(ve.NgayCheckin)?.ToString("HH:mm dd/MM") ?? "—")</span>
                     }
                     else
                     {
@@ -177,6 +263,7 @@
                 }
             </div>
         </div>
+      }
     }
 
     @if (!chiTiet.Any())

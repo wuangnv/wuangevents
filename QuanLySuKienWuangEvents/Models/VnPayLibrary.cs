@@ -1,9 +1,5 @@
 ﻿// VNPAY LIBRARY — Thư viện xử lý thanh toán VNPAY
-// Chức năng:
-//   - Thu thập thông tin giao dịch (AddRequestData)
-//   - Sắp xếp và mã hóa tham số theo chuẩn API VNPAY 2.1.0
-//   - Tạo chữ ký bảo mật HMAC-SHA512 (vnp_SecureHash)
-//   - Xác thực chữ ký nhận về từ VNPAY để tránh hack/giao dịch ảo
+// Tạo URL, ký HMAC-SHA512 và xác minh callback VNPAY để chống giả mạo.
 
 using System.Globalization;
 using System.Net;

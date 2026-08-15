@@ -1,5 +1,7 @@
 ﻿@model List<SuKien>
 @{
+    // GET SuKien(trangThai, q) trả danh sách sau lọc.
+    // Form/JavaScript gọi các POST duyệt, từ chối, ẩn/hiện hoặc hủy.
     Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
     ViewData["Title"] = "Quản lý sự kiện";
     var trangThaiFilter = Context.Request.Query["trangThai"].ToString();
@@ -9,7 +11,7 @@
 <div class="portal-page-title mb-4">
     <span class="portal-kicker"><i class="fas fa-calendar-days"></i> Nội dung</span>
     <h1>Quản lý sự kiện</h1>
-    <p>Duyệt, từ chối, ẩn hoặc hủy sự kiện. Tổng: <strong>@Model.Count</strong> sự kiện.</p>
+    <span class="text-muted small">@Model.Count sự kiện</span>
 </div>
 
 @* Bộ lọc *@
@@ -30,7 +32,7 @@
                     <option value="">Tất cả trạng thái</option>
                     <option value="0" selected="@(trangThaiFilter=="0")">📝 Nháp</option>
                     <option value="1" selected="@(trangThaiFilter=="1")">⏳ Chờ duyệt</option>
-                    <option value="2" selected="@(trangThaiFilter=="2")">✅ Đã duyệt</option>
+                    <option value="2" selected="@(trangThaiFilter=="2")">⏸ Tạm dừng</option>
                     <option value="3" selected="@(trangThaiFilter=="3")">🟢 Đang bán</option>
                     <option value="5" selected="@(trangThaiFilter=="5")">🏁 Đã kết thúc</option>
                     <option value="6" selected="@(trangThaiFilter=="6")">❌ Đã hủy</option>
@@ -127,8 +129,9 @@
                                 @* Nút duyệt (chỉ khi chờ duyệt) *@
                                 @if (item.TrangThai == 1)
                                 {
-                                    <form method="post" action="/Admin/DuyetSuKien/@item.Id" class="m-0"
-                                          onsubmit="return confirm('Xác nhận duyệt sự kiện «@item.TenSuKien»?')">
+                                    <form method="post" asp-controller="Admin" asp-action="DuyetSuKien" asp-route-id="@item.Id" class="m-0"
+                                          data-confirm="Duyệt sự kiện “@item.TenSuKien”?"
+                                          data-confirm-title="Duyệt sự kiện" data-confirm-button="Phê duyệt" data-confirm-tone="normal">
                                         <button class="btn btn-sm btn-success fw-semibold" type="submit"
                                                 style="border-radius:8px;font-size:.78rem">
                                             <i class="fas fa-check me-1"></i>Duyệt
@@ -150,7 +153,7 @@
                                 }
 
                                 @* Nút ẩn/hiện *@
-                                <form method="post" action="/Admin/HienThiCongKhaiSuKien/@item.Id" class="m-0">
+                                <form method="post" asp-controller="Admin" asp-action="HienThiCongKhaiSuKien" asp-route-id="@item.Id" class="m-0">
                                     <button class="btn btn-sm btn-outline-secondary" type="submit"
                                             title="@(item.HienThiCongKhai ? "Ẩn khỏi trang chủ" : "Hiện ra trang chủ")"
                                             style="border-radius:8px">
@@ -193,6 +196,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" id="formReject">
+                @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <p class="text-muted small mb-3">Vui lòng nhập lý do từ chối sự kiện <strong id="rejectEventName"></strong>:</p>
                     <div class="mb-3">
@@ -221,6 +225,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" id="formCancel">
+                @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <div class="alert alert-warning d-flex align-items-center gap-2" style="border-radius:10px">
                         <i class="fas fa-triangle-exclamation"></i>
@@ -243,13 +248,16 @@
 </div>
 
 <script>
+const rejectEventUrl = '@Url.Action("TuChoiSuKien", "Admin")';
+const cancelEventUrl = '@Url.Action("HuySuKien", "Admin")';
+
 function showRejectModal(id, name) {
-    document.getElementById('formReject').action = '/Admin/TuChoiSuKien/' + id;
+    document.getElementById('formReject').action = rejectEventUrl + '/' + id;
     document.getElementById('rejectEventName').textContent = name;
     new bootstrap.Modal(document.getElementById('modalReject')).show();
 }
 function showCancelModal(id, name) {
-    document.getElementById('formCancel').action = '/Admin/HuySuKien/' + id;
+    document.getElementById('formCancel').action = cancelEventUrl + '/' + id;
     document.getElementById('cancelEventName').textContent = name;
     new bootstrap.Modal(document.getElementById('modalCancel')).show();
 }

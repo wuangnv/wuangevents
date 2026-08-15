@@ -1,9 +1,12 @@
 ﻿@model List<DonHang>
 
 @{
+    // DonHang(suKienId, trangThai, search) SELECT đơn thuộc sự kiện của BTC.
+    // Model là List<DonHang>; form GET lọc; link id mở ChiTietDonHang.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Đơn hàng";
-    var suKienId = (Guid)ViewBag.SuKienId;
+    Guid? suKienId = ViewBag.SuKienId == null ? null : (Guid?)ViewBag.SuKienId;
+    string tenSuKien = ViewBag.TenSuKien as string ?? "Sự kiện";
 
     int tongDon = Model?.Count ?? 0;
     int daThanhToan = Model?.Count(d => d.TrangThai == 1) ?? 0;
@@ -55,7 +58,6 @@
 .badge-paid { background: #d1fae5; color: #065f46; font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
 .badge-pending { background: #fef3c7; color: #92400e; font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
 .badge-cancelled { background: #fee2e2; color: #991b1b; font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
-.badge-refund { background: #e0f2fe; color: #0369a1; font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
 .badge-expired { background: #f3f4f6; color: #6b7280; font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
 .buyer-avatar {
     width: 34px; height: 34px;
@@ -72,11 +74,14 @@
 <!-- Header -->
 <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
     <div>
-        <a href="/Organizer/ChiTietSuKien/@suKienId" class="btn btn-sm btn-light border text-secondary mb-2" style="border-radius:8px;">
-            <i class="fas fa-arrow-left me-1"></i> Quay lại sự kiện
-        </a>
+        @if (suKienId.HasValue)
+        {
+            <a href="/Organizer/ChiTietSuKien/@suKienId.Value" class="btn btn-sm btn-light border text-secondary mb-2" style="border-radius:8px;">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại sự kiện
+            </a>
+        }
         <h1 class="h4 fw-bold mb-1">Quản lý đơn hàng</h1>
-        <p class="text-muted small mb-0"><i class="fas fa-calendar-days me-1"></i>@ViewBag.TenSuKien</p>
+        <p class="text-muted small mb-0"><i class="fas fa-calendar-days me-1"></i>@tenSuKien</p>
     </div>
 </div>
 
@@ -139,8 +144,8 @@
                     else { <option value="1">Đã thanh toán</option> }
                     @if (ttFilter == "2") { <option value="2" selected>Đã hủy</option> }
                     else { <option value="2">Đã hủy</option> }
-                    @if (ttFilter == "3") { <option value="3" selected>Hoàn tiền</option> }
-                    else { <option value="3">Hoàn tiền</option> }
+                    @if (ttFilter == "4") { <option value="4" selected>Hết hạn</option> }
+                    else { <option value="4">Hết hạn</option> }
                 </select>
         </div>
         <div class="col-md-3 d-grid">
@@ -192,7 +197,7 @@
                             </div>
                         </td>
                         <td style="padding:14px 16px;border:none;font-size:.85rem;color:#6b7280;">
-                            @item.NgayTao.ToString("dd/MM/yyyy HH:mm")
+                            @VietnamTime.FromUtc(item.NgayTao).ToString("dd/MM/yyyy HH:mm")
                         </td>
                         <td style="padding:14px 16px;border:none;">
                             @if (item.TrangThai == 1)
@@ -202,10 +207,6 @@
                             else if (item.TrangThai == 2)
                             {
                                 <span class="badge-cancelled"><i class="fas fa-ban me-1" style="font-size:.65rem;"></i>Đã hủy</span>
-                            }
-                            else if (item.TrangThai == 3)
-                            {
-                                <span class="badge-refund"><i class="fas fa-rotate-left me-1" style="font-size:.65rem;"></i>Hoàn tiền</span>
                             }
                             else if (item.TrangThai == 4)
                             {

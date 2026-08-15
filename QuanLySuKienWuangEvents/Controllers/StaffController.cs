@@ -1,4 +1,7 @@
 ﻿using System;
+// Hiển thị ca được phân công và xử lý quét vé tại cổng sự kiện.
+// Check-in yêu cầu đúng Staff/sự kiện/giờ, đơn đã thanh toán và vé chưa dùng.
+
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,16 +13,15 @@ using QuanLySuKienWuangEvents.Models;
 
 namespace QuanLySuKienWuangEvents.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Nhân viên soát vé")]
     [Route("Staff/[action]/{id?}")]
     public class StaffController : Controller
     {
         // Lấy ID của nhân viên đăng nhập từ Cookie Claims
         private Guid LayIdNguoiDangNhap()
         {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null) return Guid.Empty;
-            return Guid.Parse(claim.Value);
+            string? value = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return Guid.TryParse(value, out Guid id) ? id : Guid.Empty;
         }
 
         // Kiểm tra xem nhân viên này có được phân công cho sự kiện này không
@@ -48,6 +50,7 @@ namespace QuanLySuKienWuangEvents.Controllers
                 FROM NhanVienSuKien nv
                 JOIN SuKien s ON s.Id = nv.SuKienId
                 WHERE nv.NguoiDungId = @userId
+                  AND s.LoaiSuKien = 0
                 ORDER BY s.NgayBatDau ASC
             ";
             var list = await Db.LayDanhSach<NhanVienSuKien>(sql, new { userId });
@@ -59,9 +62,14 @@ namespace QuanLySuKienWuangEvents.Controllers
         {
             if (!await LaSuKienDuocPhanCong(suKienId)) return Forbid();
 
-            string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @suKienId";
+            string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, LoaiSuKien, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @suKienId";
             var skInfo = await Db.LayDonLe<dynamic>(sqlSuKien, new { suKienId });
             if (skInfo == null) return NotFound();
+            if ((byte)skInfo.LoaiSuKien == 1)
+            {
+                TempData["Error"] = "Sự kiện trực tuyến không sử dụng QR hoặc check-in tại cổng.";
+                return RedirectToAction("Index");
+            }
             ViewBag.TrangThaiSuKien = (int)skInfo.TrangThai;
             ViewBag.NgayBatDauSuKien = (DateTime)skInfo.NgayBatDau;
             ViewBag.NgayKetThucSuKien = (DateTime)skInfo.NgayKetThuc;
@@ -106,13 +114,23 @@ namespace QuanLySuKienWuangEvents.Controllers
 
         // Xử lý soát vé
         [HttpPost]
-        public async Task<IActionResult> QuetVeCheckIn(Guid suKienId, string code)
+        public async Task<IActionResult> QuetVeCheckIn(Guid suKienId, string? code)
         {
             if (!await LaSuKienDuocPhanCong(suKienId)) return Forbid();
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                TempData["Error"] = "Vui lòng quét hoặc nhập mã vé.";
+                return RedirectToAction("CheckIn", new { suKienId });
+            }
 
-            string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @suKienId";
+            string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, LoaiSuKien, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @suKienId";
             var skInfo = await Db.LayDonLe<dynamic>(sqlSuKien, new { suKienId });
             if (skInfo == null) return NotFound();
+            if ((byte)skInfo.LoaiSuKien == 1)
+            {
+                TempData["Error"] = "Sự kiện trực tuyến không sử dụng QR hoặc check-in tại cổng.";
+                return RedirectToAction("Index");
+            }
 
             if (skInfo.TrangThai == 2 || skInfo.TrangThai == 6)
             {
@@ -121,7 +139,7 @@ namespace QuanLySuKienWuangEvents.Controllers
             }
 
             // Quy đổi thời gian hiện tại sang giờ Việt Nam (UTC+7)
-            DateTime now = DateTime.UtcNow.AddHours(7);
+            DateTime now = VietnamTime.Now;
             
             // Thiết lập mốc check-in thông minh (Smart Default): BĐ trước 1 tiếng, KT bằng giờ kết thúc sự kiện
             DateTime batDauCheckIn = skInfo.BatDauCheckIn ?? ((DateTime)skInfo.NgayBatDau).AddHours(-1);

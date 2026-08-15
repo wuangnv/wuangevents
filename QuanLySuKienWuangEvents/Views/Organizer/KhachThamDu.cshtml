@@ -1,6 +1,8 @@
 ﻿@model List<ChiTietDonHang>
 
 @{
+    // KhachThamDu() JOIN đơn đã thanh toán + vé + loại vé của sự kiện.
+    // Model là List<ChiTietDonHang>; form GET search; link xuất gọi action CSV.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Khách tham dự";
     var suKienId = (Guid)ViewBag.SuKienId;

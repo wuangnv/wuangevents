@@ -4,13 +4,21 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>QuanLySuKienWuangEvents-LocalSecrets</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- BCrypt băm và kiểm tra mật khẩu; không lưu mật khẩu gốc. -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <!-- Dapper: gửi SQL có tham số và ánh xạ kết quả SQL thành object C#. -->
     <PackageReference Include="Dapper" Version="2.1.79" />
+    <PackageReference Include="HtmlSanitizer" Version="9.1.982" />
+    <!-- Driver giúp ứng dụng .NET mở kết nối tới Microsoft SQL Server. -->
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
-    <PackageReference Include="QRCoder" Version="1.4.3" />
+    <!-- Middleware OAuth chính thức xử lý challenge/callback đăng nhập Google. -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.18" />
+    <!-- QRCoder tạo ảnh mã QR cho vé điện tử. -->
+    <PackageReference Include="QRCoder" Version="1.8.0" />
   </ItemGroup>
 
 </Project>

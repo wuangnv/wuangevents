@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
+@* Khung chung cho nhân viên soát vé. @RenderBody chèn Index/CheckIn.
+   Việc thấy menu không cấp quyền; StaffController vẫn kiểm tra đăng nhập/phân công. *@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
         :root {
             --primary: #7c3aed;
@@ -64,6 +67,7 @@
             border-radius: 8px;
         }
         .staff-container {
+            width: 100%;
             max-width: 960px;
             margin: 0 auto;
             padding: 1.5rem 1rem;
@@ -79,6 +83,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+    @await Html.PartialAsync("_UiNotifications")
     <header class="staff-header">
         <a href="/Staff/Index" class="staff-brand">
             <i class="fas fa-qrcode"></i>
@@ -88,32 +93,19 @@
             <span class="staff-user-name d-none d-sm-inline">
                 <i class="fas fa-user-circle me-1"></i> @User.Identity?.Name
             </span>
-            <a href="/Account/DangXuat" class="btn btn-outline-danger btn-logout">
-                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-            </a>
+            <form method="post" asp-controller="Account" asp-action="DangXuat">
+                <button type="submit" class="btn btn-outline-danger btn-logout"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+            </form>
         </div>
     </header>
 
     <main class="staff-container">
-        @if (TempData["Message"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-1"></i> @TempData["Message"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-1"></i> @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
         @RenderBody()
     </main>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

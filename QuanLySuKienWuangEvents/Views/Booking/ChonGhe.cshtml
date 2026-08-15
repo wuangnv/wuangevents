@@ -1,0 +1,353 @@
+@model SuKien
+@{
+    ViewData["Title"] = "Chọn ghế - " + Model.TenSuKien;
+    var loaiVes = ViewBag.LoaiVes as List<LoaiVe> ?? new List<LoaiVe>();
+}
+
+@section Styles {
+<style>
+.seat-page{max-width:1280px;margin:auto;padding:34px 18px 72px}.seat-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:24px}.seat-head h1{font-size:1.65rem;font-weight:850;color:#18152d;margin:0}.seat-head p{color:#64748b;margin:7px 0 0}.stepbar{display:flex;gap:8px;align-items:center;font-size:.82rem;font-weight:750;color:#94a3b8}.stepbar .active{color:#7c3aed}.stepbar i{font-size:.65rem}.seat-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}.map-card,.summary-card{background:#fff;border:1px solid #e8e5f2;border-radius:20px;box-shadow:0 12px 35px rgba(41,31,77,.07)}.map-card{padding:24px;min-width:0}.summary-card{padding:22px;position:sticky;top:92px}.screen{max-width:720px;margin:0 auto 32px;text-align:center;color:#6d28d9;font-size:.75rem;font-weight:850;letter-spacing:3px}.screen-line{height:8px;border-radius:50% 50% 10px 10px;background:linear-gradient(90deg,#ddd6fe,#7c3aed,#ddd6fe);box-shadow:0 10px 20px rgba(124,58,237,.22);margin-bottom:9px}.map-scroll{overflow:auto;padding:4px 4px 18px}.zone-block{min-width:max-content;margin:0 auto 30px}.zone-title{text-align:center;font-size:.82rem;font-weight:850;letter-spacing:.08em;margin:0 0 13px}.seat-row{display:flex;align-items:center;justify-content:center;gap:7px;margin:8px 0}.row-label{width:30px;text-align:center;font-size:.76rem;font-weight:850;color:#94a3b8}.seat{width:45px;height:38px;border-radius:10px 10px 7px 7px;border:2px solid var(--seat-color,#7c3aed);color:var(--seat-color,#7c3aed);background:#fff;font-size:.67rem;font-weight:800;cursor:pointer;transition:.15s}.seat:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 7px 14px rgba(15,23,42,.12)}.seat.selected{background:var(--seat-color,#7c3aed);color:#fff;box-shadow:0 5px 12px color-mix(in srgb,var(--seat-color) 35%,transparent)}.seat.held{background:#fef3c7;color:#92400e;border-color:#f59e0b}.seat.sold{background:#fee2e2;color:#b91c1c;border-color:#fca5a5}.seat.locked,.seat.unavailable{background:#f1f5f9;color:#94a3b8;border-color:#cbd5e1}.seat:disabled{cursor:not-allowed}.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;border-top:1px solid #eeeaf5;padding-top:18px;color:#64748b;font-size:.78rem}.legend span{display:flex;align-items:center;gap:6px}.dot{width:15px;height:15px;border-radius:5px}.ticket-legend{display:grid;gap:9px;margin-bottom:22px}.ticket-legend-item{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border:1px solid #eeeaf5;border-radius:12px}.ticket-name{display:flex;align-items:center;gap:8px;font-size:.84rem;font-weight:750}.ticket-price{font-size:.82rem;font-weight:850;color:#4c1d95}.summary-card h2{font-size:1.05rem;font-weight:850;color:#211c3d;margin:0 0 16px}.empty-selection{padding:18px;text-align:center;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;color:#64748b;font-size:.85rem}.selected-list{display:grid;gap:9px;max-height:270px;overflow:auto}.selected-item{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #f0edf6;font-size:.82rem}.selected-seat{font-weight:850;color:#312e81}.selected-type{color:#64748b;font-size:.75rem}.total-row{display:flex;justify-content:space-between;align-items:end;border-top:1px solid #e8e5f2;margin-top:17px;padding-top:17px}.total-row span{font-size:.82rem;color:#64748b}.total-row strong{font-size:1.3rem;color:#7c3aed}.continue-btn{width:100%;border:0;border-radius:13px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;padding:14px;font-weight:850;margin-top:18px;box-shadow:0 9px 22px rgba(124,58,237,.22)}.continue-btn:disabled{background:#cbd5e1;box-shadow:none}.safe-note{display:flex;gap:8px;color:#64748b;font-size:.75rem;line-height:1.45;margin-top:13px}.loading{text-align:center;color:#64748b;padding:60px 10px}.alert-modern{border-radius:14px;padding:13px 16px;margin-bottom:18px;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;font-weight:650}.back-link{color:#64748b;text-decoration:none;font-weight:700;font-size:.86rem}.back-link:hover{color:#7c3aed}@@media(max-width:900px){.seat-layout{grid-template-columns:1fr}.summary-card{position:static}.seat-head{display:block}.stepbar{margin-top:14px}.map-card{padding:18px 10px}.seat{width:39px;height:35px}}
+ .purchase-layout{display:grid;grid-template-columns:repeat(12,minmax(58px,1fr));grid-template-rows:repeat(12,52px);gap:5px;align-items:stretch;min-width:840px;padding:10px;border:1px dashed #ddd6fe;border-radius:16px;background:#fbfaff}.purchase-layout .zone-block{grid-column:var(--zone-column) / span var(--zone-span-x);grid-row:var(--zone-row) / span var(--zone-span-y);min-width:0;width:100%;height:100%;max-height:none;overflow:auto;margin:0;padding:14px 10px 18px;border:2px solid var(--zone-color,#7c3aed);border-radius:16px;background:color-mix(in srgb,var(--zone-color,#7c3aed) 8%,white);box-shadow:0 7px 18px color-mix(in srgb,var(--zone-color,#7c3aed) 9%,transparent);z-index:1}.map-stage{display:grid;place-items:center;border-radius:18px 18px 8px 8px;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#5b21b6);color:#fff;font-size:.66rem;font-weight:900;letter-spacing:.13em;text-align:center;padding:5px;z-index:2}.zone-subtitle{text-align:center;font-size:.7rem;font-weight:750;color:#64748b;margin:-5px 0 12px}.seat{background:color-mix(in srgb,var(--seat-color,#7c3aed) 11%,white);box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--seat-color,#7c3aed) 12%,transparent)}.purchase-theatre .zone-block{border-radius:20px}.purchase-arena .zone-block{border-radius:26px}.purchase-custom .zone-block{border-style:dashed}.purchase-cinema .zone-block{border-radius:12px 12px 18px 18px}@@media(max-width:900px){.map-scroll{padding-bottom:12px}.purchase-layout{min-width:760px;grid-template-columns:repeat(12,minmax(52px,1fr))}.summary-card{position:static}}@@media(max-width:520px){.purchase-layout{min-width:700px;grid-template-columns:repeat(12,minmax(47px,1fr))}.seat{width:39px;height:35px}.seat-row{gap:5px}}
+ .library-map{padding:0;overflow:hidden;border:1px solid #e9ddff;border-radius:16px;background:radial-gradient(circle at 50% 0,#faf7ff 0,#fff 58%)}.seatmap-canvas-host{position:relative;min-width:720px;height:610px}.seatmap-canvas-host .seatmap-svg{display:block;min-width:720px;outline:0}.seatmap-canvas-host .seatmap-svg .stage .blocks .block{filter:drop-shadow(0 7px 12px rgba(49,46,129,.13))}.seatmap-canvas-host .seatmap-svg .stage .blocks .block .info .title{font-family:inherit;font-weight:850}.seatmap-canvas-host .seatmap-svg .stage .blocks .block .seats .seat{filter:none}.seatmap-canvas-host .seat-level-mask{pointer-events:none}.seatmap-event-stage rect{fill:#6d28d9;stroke:#4c1d95;stroke-width:2}.seatmap-event-stage text{fill:#fff;font-family:inherit;font-size:15px;font-weight:850;letter-spacing:2px}.seatmap-control{position:absolute;z-index:3;top:14px;right:14px;border:1px solid #ddd6fe;border-radius:10px;background:#fff;color:#5b21b6;width:38px;height:38px;box-shadow:0 6px 18px rgba(76,29,149,.14);font-size:.95rem}.seatmap-control:hover{background:#f5f3ff}.seatmap-venue-caption{position:absolute;z-index:2;left:18px;bottom:15px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.92);border:1px solid #64748b;font-size:.72rem;font-weight:750;pointer-events:none}@@media(max-width:900px){.seatmap-canvas-host,.seatmap-canvas-host .seatmap-svg{min-width:660px}}@@media(max-width:520px){.seatmap-canvas-host,.seatmap-canvas-host .seatmap-svg{min-width:600px;height:520px}}
+</style>
+}
+
+<main class="seat-page">
+    <div class="seat-head">
+        <div>
+            <a class="back-link" href="/Home/ChiTiet/@Model.Id"><i class="fas fa-arrow-left me-1"></i> Chi tiết sự kiện</a>
+            <h1 class="mt-3">Chọn ghế của bạn</h1>
+            <p>@Model.TenSuKien · @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+        <div class="stepbar"><span class="active">1. Chọn ghế</span><i class="fas fa-chevron-right"></i><span>2. Thanh toán</span></div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert-modern"><i class="fas fa-circle-exclamation me-2"></i>@TempData["Error"]</div>
+    }
+
+    <div class="seat-layout">
+        <section class="map-card">
+            <div class="screen" id="defaultScreen"><div class="screen-line"></div>SÂN KHẤU / MÀN HÌNH</div>
+            <div id="seatLoading" class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải ghế mới nhất...</div>
+            <div id="seatMap" class="map-scroll" hidden></div>
+            <div class="legend" id="statusLegend" hidden>
+                <span><i class="dot" style="background:#7c3aed"></i>Đang chọn</span>
+                <span><i class="dot" style="background:#fef3c7;border:1px solid #f59e0b"></i>Đang giữ</span>
+                <span><i class="dot" style="background:#fee2e2;border:1px solid #fca5a5"></i>Đã bán</span>
+                <span><i class="dot" style="background:#f1f5f9;border:1px solid #cbd5e1"></i>Không khả dụng</span>
+            </div>
+        </section>
+
+        <aside class="summary-card">
+            <h2><i class="fas fa-ticket me-2" style="color:#7c3aed"></i>Loại vé theo khu vực</h2>
+            <div class="ticket-legend" id="ticketLegend">
+                @foreach (var ve in loaiVes)
+                {
+                    <div class="ticket-legend-item">
+                        <div class="ticket-name"><i class="dot" style="background:@(ve.MauSac ?? "#7c3aed")"></i>@ve.TenLoaiVe</div>
+                        <div class="ticket-price">@ve.GiaBan.ToString("N0")đ</div>
+                    </div>
+                }
+            </div>
+
+            <h2>Ghế đã chọn <span id="seatCount" class="badge bg-light text-dark ms-1">0</span></h2>
+            <div id="emptySelection" class="empty-selection"><i class="fas fa-chair d-block mb-2 fs-4"></i>Chưa chọn ghế</div>
+            <div id="selectedList" class="selected-list" hidden></div>
+            <div class="total-row"><span>Tổng tạm tính</span><strong id="grandTotal">0đ</strong></div>
+
+            <form method="post" action="/Booking/DatVe" id="seatForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="suKienId" value="@Model.Id" />
+                <div id="seatInputs"></div>
+                <button class="continue-btn" id="continueBtn" disabled type="submit">Tiếp tục thanh toán <i class="fas fa-arrow-right ms-1"></i></button>
+            </form>
+        </aside>
+    </div>
+</main>
+
+@section Scripts {
+<script>
+const eventId = '@Model.Id';
+const selected = new Map();
+const typeCounts = new Map();
+
+const valueOf = (obj, camel, pascal) => obj[camel] ?? obj[pascal];
+const money = value => new Intl.NumberFormat('vi-VN').format(value) + 'đ';
+
+async function loadSeats(){
+    try{
+        const response = await fetch('/Booking/LaySoDoGheTheoSuKien?suKienId=' + eventId);
+        if(!response.ok) throw new Error('Không tải được dữ liệu ghế');
+        const seats = await response.json();
+        renderMap(seats);
+    }catch(error){
+        document.getElementById('seatLoading').innerHTML = '<i class="fas fa-triangle-exclamation me-2"></i>' + error.message;
+    }
+}
+
+async function renderMapWithSeatmapCanvas(seats){
+    const model=buildSeatmapModel(seats);
+    const map=document.getElementById('seatMap');
+    map.className='map-scroll library-map';
+    map.innerHTML='<div class="seatmap-canvas-host"><button type="button" id="seatMapZoomOut" class="seatmap-control" title="Xem toàn bộ sơ đồ" aria-label="Xem toàn bộ sơ đồ"><i class="fas fa-compress"></i></button><div id="seatMapCanvas"></div><span class="seatmap-venue-caption">Sơ đồ khu vực</span></div>';
+    map.hidden=false;
+
+    const {SeatMapCanvas}=await import('/lib/seatmap-canvas/seatmap.canvas.js');
+    if(typeof SeatMapCanvas !== 'function') throw new Error('Không nhận được lớp sơ đồ ghế');
+    const canvas=new SeatMapCanvas('#seatMapCanvas',{
+        min_zoom:.34,max_zoom:2.8,animation_speed:160,legend:false,canvas_stageout_control:false,
+        style:{
+            seat:{shape:'rect',size:28,corner_radius:8,color:'#e0e7ff',hover:'#c4b5fd',selected:'#5b21b6',not_salable:'#cbd5e1',check_color:'#fff'},
+            block:{title_color:'#1e1b4b'},label:{color:'#312e81',bg:'#fff',font_size:11,radius:10}
+        }
+    });
+    canvas.data.addBulkBlock(toSeatmapBlocks(model));
+    document.getElementById('seatMapZoomOut').addEventListener('click',()=>canvas.zoomManager.zoomToVenue(true));
+
+    const screen=document.getElementById('defaultScreen');
+    screen.hidden=true;
+    document.getElementById('seatLoading').hidden=true;
+    document.getElementById('statusLegend').hidden=false;
+    renderTicketLegend(model.zones);
+
+    // Chờ SVG được dựng xong trước khi nối hành động vào từng ghế.
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    renderSeatmapStage(model);
+    bindSeatmapInteractions(canvas);
+}
+
+function buildSeatmapModel(seats){
+    const allowedLayouts=['auditorium','theatre','cinema','concert','arena','custom'];
+    const savedLayout=valueOf(seats[0],'loaiSoDo','LoaiSoDo');
+    const layout=allowedLayouts.includes(savedLayout)?savedLayout:'custom';
+    const savedStageX=Number(valueOf(seats[0],'sanKhauX','SanKhauX'));
+    const savedStageY=Number(valueOf(seats[0],'sanKhauY','SanKhauY'));
+    const hasCanvas=savedStageX>=1&&savedStageX<=9&&savedStageY>=1&&savedStageY<=12;
+    const zones=new Map();
+
+    seats.forEach(seat=>{
+        const zoneId=valueOf(seat,'khuVucId','KhuVucId');
+        const rowId=valueOf(seat,'hangGheId','HangGheId');
+        if(!zones.has(zoneId)) zones.set(zoneId,{
+            id:zoneId,name:valueOf(seat,'tenKhuVuc','TenKhuVuc'),color:valueOf(seat,'mauSac','MauSac')||'#7c3aed',
+            order:valueOf(seat,'thuTuKhuVuc','ThuTuKhuVuc')||0,x:valueOf(seat,'khuVucViTriX','KhuVucViTriX'),y:valueOf(seat,'khuVucViTriY','KhuVucViTriY'),
+            ticket:valueOf(seat,'tenLoaiVe','TenLoaiVe'),price:Number(valueOf(seat,'giaBan','GiaBan')),rows:new Map()
+        });
+        const zone=zones.get(zoneId);
+        if(!zone.rows.has(rowId)) zone.rows.set(rowId,{name:valueOf(seat,'tenHang','TenHang'),order:valueOf(seat,'thuTuHang','ThuTuHang')||0,seats:[]});
+        zone.rows.get(rowId).seats.push(seat);
+    });
+    return {layout,hasCanvas,stage:{x:hasCanvas?savedStageX:5,y:hasCanvas?savedStageY:1},zones:[...zones.values()].sort((a,b)=>a.order-b.order)};
+}
+
+function toSeatmapBlocks(model){
+    return model.zones.map((zone,index)=>{
+        const position=resolveZonePosition(model.layout,zone.x,zone.y,index,model.hasCanvas);
+        const rows=[...zone.rows.values()].sort((a,b)=>a.order-b.order);
+        return {
+            id:'zone-'+zone.id,title:zone.name,color:zone.color,border_color:zone.color,gap:26,labels:[],
+            seats:rows.flatMap((row,rowIndex)=>row.seats.map((seat,seatIndex)=>({
+                id:'seat-'+valueOf(seat,'id','Id'),title:valueOf(seat,'soGhe','SoGhe'),
+                x:(position.x-1)*96+seatIndex*36,y:(position.y-2)*115+rowIndex*39,
+                salable:isSeatSelectable(seat),color:zone.color,
+                note:valueOf(seat,'tenLoaiVe','TenLoaiVe')+' · '+money(valueOf(seat,'giaBan','GiaBan')),
+                custom_data:{source:seat,color:zone.color}
+            })))
+        };
+    });
+}
+
+function bindSeatmapInteractions(canvas,attempt=0){
+    let renderedSeats=0;
+    canvas.data.getBlocks().forEach(block=>{
+        const blockNode=document.getElementById(block.id);
+        if(blockNode && !blockNode.dataset.seatmapZoomBound){
+            blockNode.dataset.seatmapZoomBound='true';
+            blockNode.addEventListener('click',event=>{
+                if(event.target.closest('.seat')) return;
+                canvas.zoomManager.zoomToBlock(block.id,true);
+            });
+        }
+        block.seats.forEach(librarySeat=>{
+            const source=librarySeat.custom_data?.source;
+            const node=librarySeat.svg?.node?.node?.();
+            if(!source || !node) return;
+            renderedSeats++;
+            if(node.dataset.seatmapBound) return;
+            node.dataset.seatmapBound='true';
+            const color=librarySeat.custom_data.color||'#7c3aed';
+            const status=valueOf(source,'trangThai','TrangThai');
+            const displayColor=!librarySeat.salable ? (status===1?'#f59e0b':status===2?'#ef4444':'#cbd5e1') : color;
+            librarySeat.svg.setColor(displayColor);
+            node.setAttribute('aria-label','Ghế '+valueOf(source,'soGhe','SoGhe'));
+            node.addEventListener('mouseenter',()=>librarySeat.svg.setColor(selected.has(valueOf(source,'id','Id')) ? '#5b21b6' : displayColor));
+            node.addEventListener('mouseleave',()=>librarySeat.svg.setColor(selected.has(valueOf(source,'id','Id')) ? '#5b21b6' : displayColor));
+            node.addEventListener('click',event=>{
+                event.stopPropagation();
+                if(!librarySeat.salable) return;
+                const id=valueOf(source,'id','Id');
+                const wasSelected=selected.has(id);
+                toggleSeat({classList:{add(){},remove(){}}},source,color);
+                if(wasSelected!==selected.has(id)) selected.has(id) ? librarySeat.svg.select() : librarySeat.svg.unSelect();
+            });
+        });
+    });
+    if(!renderedSeats && attempt<8) requestAnimationFrame(()=>bindSeatmapInteractions(canvas,attempt+1));
+}
+
+function renderSeatmapStage(model){
+    const stageRoot=document.querySelector('#seatMapCanvas .seatmap-svg .stage');
+    if(!stageRoot) return;
+    const svgNamespace='http://www.w3.org/2000/svg';
+    const group=document.createElementNS(svgNamespace,'g');
+    group.setAttribute('class','seatmap-event-stage');
+    group.setAttribute('transform',`translate(${(model.stage.x-1)*96},${(model.stage.y-1)*115})`);
+    group.setAttribute('pointer-events','none');
+    const rect=document.createElementNS(svgNamespace,'rect');
+    rect.setAttribute('width','384');rect.setAttribute('height','52');rect.setAttribute('rx','16');
+    const text=document.createElementNS(svgNamespace,'text');
+    text.setAttribute('x','192');text.setAttribute('y','32');text.setAttribute('text-anchor','middle');
+    text.textContent=model.layout==='cinema'?'MÀN HÌNH':'SÂN KHẤU';
+    group.append(rect,text);
+    stageRoot.insertBefore(group,stageRoot.firstChild);
+}
+
+function isSeatSelectable(seat){
+    return valueOf(seat,'trangThai','TrangThai')===0 && valueOf(seat,'loaiVeDangBan','LoaiVeDangBan') && valueOf(seat,'trongThoiGianBan','TrongThoiGianBan') && valueOf(seat,'soVeConLai','SoVeConLai')>0;
+}
+
+function renderMap(seats){
+    const map = document.getElementById('seatMap');
+    map.innerHTML = '';
+    if(!seats.length){
+        document.getElementById('seatLoading').textContent = 'Sơ đồ chưa có ghế.';
+        return;
+    }
+
+    const allowedLayouts=['auditorium','theatre','cinema','concert','arena','custom'];
+    const savedLayout=valueOf(seats[0],'loaiSoDo','LoaiSoDo');
+    const layout=allowedLayouts.includes(savedLayout)?savedLayout:'custom';
+    map.className='map-scroll purchase-layout purchase-'+layout;
+    const savedStageX=Number(valueOf(seats[0],'sanKhauX','SanKhauX'));
+    const savedStageY=Number(valueOf(seats[0],'sanKhauY','SanKhauY'));
+    const hasCanvas=savedStageX>=1&&savedStageX<=9&&savedStageY>=1&&savedStageY<=12;
+    const stage={x:hasCanvas?savedStageX:5,y:hasCanvas?savedStageY:1};
+
+    const zones = new Map();
+    seats.forEach(seat => {
+        const zoneId = valueOf(seat,'khuVucId','KhuVucId');
+        const rowId = valueOf(seat,'hangGheId','HangGheId');
+        if(!zones.has(zoneId)) zones.set(zoneId, {
+            name:valueOf(seat,'tenKhuVuc','TenKhuVuc'),
+            color:valueOf(seat,'mauSac','MauSac') || '#7c3aed',
+            order:valueOf(seat,'thuTuKhuVuc','ThuTuKhuVuc') || 0,
+            x:valueOf(seat,'khuVucViTriX','KhuVucViTriX'),
+            y:valueOf(seat,'khuVucViTriY','KhuVucViTriY'),
+            ticket:valueOf(seat,'tenLoaiVe','TenLoaiVe'),
+            price:Number(valueOf(seat,'giaBan','GiaBan')),
+            rows:new Map()
+        });
+        const zone = zones.get(zoneId);
+        if(!zone.rows.has(rowId)) zone.rows.set(rowId,{name:valueOf(seat,'tenHang','TenHang'), order:valueOf(seat,'thuTuHang','ThuTuHang') || 0,seats:[]});
+        zone.rows.get(rowId).seats.push(seat);
+    });
+
+    const stageBlock=document.createElement('div');stageBlock.className='map-stage';stageBlock.style.gridColumn=stage.x+' / span 4';stageBlock.style.gridRow=stage.y;stageBlock.textContent=layout==='cinema'?'MÀN HÌNH':'SÂN KHẤU';map.appendChild(stageBlock);
+    [...zones.values()].sort((a,b)=>a.order-b.order).forEach((zone,index) => {
+        const position=resolveZonePosition(layout,zone.x,zone.y,index,hasCanvas);
+        const maxSeats=Math.max(1,...[...zone.rows.values()].map(row=>row.seats.length));
+        const spanX=Math.max(1,Math.min(12,Math.ceil(maxSeats/3)));
+        const spanY=Math.max(1,Math.min(12,Math.ceil(zone.rows.size/2)));
+        const block = document.createElement('div'); block.className='zone-block'; block.style.setProperty('--zone-color',zone.color); block.style.setProperty('--zone-column',position.x); block.style.setProperty('--zone-row',position.y);block.style.setProperty('--zone-span-x',spanX);block.style.setProperty('--zone-span-y',spanY);
+        const title = document.createElement('div'); title.className='zone-title'; title.style.color=zone.color; title.textContent=zone.name; block.appendChild(title);
+        const subtitle=document.createElement('div'); subtitle.className='zone-subtitle'; subtitle.textContent=zone.ticket+' · '+money(zone.price); block.appendChild(subtitle);
+        [...zone.rows.values()].sort((a,b)=>a.order-b.order).forEach(rowData => {
+            const row=document.createElement('div'); row.className='seat-row';
+            const label=document.createElement('span'); label.className='row-label'; label.textContent=rowData.name; row.appendChild(label);
+            rowData.seats.forEach(seat => row.appendChild(createSeatButton(seat,zone.color)));
+            block.appendChild(row);
+        });
+        map.appendChild(block);
+    });
+
+    document.getElementById('defaultScreen').hidden=true;
+    document.getElementById('seatLoading').hidden=true;
+    map.hidden=false;
+    document.getElementById('statusLegend').hidden=false;
+    renderTicketLegend([...zones.values()]);
+}
+
+function renderTicketLegend(zones){
+    const legend=document.getElementById('ticketLegend');
+    legend.innerHTML='';
+    zones.sort((a,b)=>a.order-b.order).forEach(zone=>{
+        const item=document.createElement('div');item.className='ticket-legend-item';
+        const name=document.createElement('div');name.className='ticket-name';
+        const dot=document.createElement('i');dot.className='dot';dot.style.background=zone.color;
+        name.append(dot,document.createTextNode(zone.ticket+' · '+zone.name));
+        const price=document.createElement('div');price.className='ticket-price';price.textContent=money(zone.price);
+        item.append(name,price);legend.appendChild(item);
+    });
+}
+
+function resolveZonePosition(layout, rawX, rawY, order, hasCanvas){
+    const x=Number(rawX), y=Number(rawY);
+    if(hasCanvas&&x>=1 && x<=12 && y>=1 && y<=12) return {x,y};
+    const presets={
+        auditorium:[[1,3],[5,3],[9,3]],
+        theatre:[[5,3],[1,7],[9,7],[5,10]],
+        cinema:[[2,3],[5,6],[2,10]],
+        concert:[[5,3],[1,7],[9,7],[5,11]],
+        arena:[[5,3],[1,6],[9,6],[5,10]]
+    };
+    const position=(presets[layout]||[])[order];
+    return position ? {x:position[0],y:position[1]} : {x:(order%3)*4+1,y:Math.floor(order/3)*5+3};
+}
+
+function createSeatButton(seat,color){
+    const id=valueOf(seat,'id','Id'), status=valueOf(seat,'trangThai','TrangThai');
+    const availableType=isSeatSelectable(seat);
+    const button=document.createElement('button'); button.type='button'; button.className='seat'; button.style.setProperty('--seat-color',color);
+    button.textContent=valueOf(seat,'soGhe','SoGhe');
+    if(status===1) button.classList.add('held'); else if(status===2) button.classList.add('sold'); else if(status===3) button.classList.add('locked'); else if(!availableType) button.classList.add('unavailable');
+    button.disabled=status!==0 || !availableType;
+    button.title=button.disabled ? (status===1?'Ghế đang được giữ':status===2?'Ghế đã bán':status===3?'Ghế bị khóa':'Loại vé chưa mở bán hoặc đã hết') : `${valueOf(seat,'tenLoaiVe','TenLoaiVe')} - ${money(valueOf(seat,'giaBan','GiaBan'))}`;
+    button.addEventListener('click',()=>toggleSeat(button,seat,color));
+    return button;
+}
+
+function toggleSeat(button,seat,color){
+    const id=valueOf(seat,'id','Id'), typeId=valueOf(seat,'loaiVeId','LoaiVeId');
+    if(selected.has(id)){
+        selected.delete(id); typeCounts.set(typeId,(typeCounts.get(typeId)||1)-1); button.classList.remove('selected');
+    }else{
+        const count=typeCounts.get(typeId)||0;
+        const max=Math.min(valueOf(seat,'gioiHanMoiDon','GioiHanMoiDon'),valueOf(seat,'soVeConLai','SoVeConLai'));
+        if(count>=max){ WuangUI.toast(`Loại vé ${valueOf(seat,'tenLoaiVe','TenLoaiVe')} được chọn tối đa ${max} ghế trong một đơn.`, 'error'); return; }
+        selected.set(id,{id,label:valueOf(seat,'soGhe','SoGhe'),zone:valueOf(seat,'tenKhuVuc','TenKhuVuc'),type:valueOf(seat,'tenLoaiVe','TenLoaiVe'),typeId,price:Number(valueOf(seat,'giaBan','GiaBan')),color});
+        typeCounts.set(typeId,count+1); button.classList.add('selected');
+    }
+    updateSummary();
+}
+
+function updateSummary(){
+    const values=[...selected.values()], list=document.getElementById('selectedList'), inputs=document.getElementById('seatInputs');
+    document.getElementById('seatCount').textContent=values.length;
+    document.getElementById('emptySelection').hidden=values.length>0; list.hidden=values.length===0;
+    list.innerHTML=''; inputs.innerHTML='';
+    values.forEach(item=>{
+        const row=document.createElement('div'); row.className='selected-item';
+        const left=document.createElement('div'); const seat=document.createElement('div'); seat.className='selected-seat'; seat.textContent='Ghế '+item.label;
+        const type=document.createElement('div'); type.className='selected-type'; type.textContent=item.zone+' · '+item.type; left.append(seat,type);
+        const price=document.createElement('strong'); price.textContent=money(item.price); row.append(left,price); list.appendChild(row);
+        const input=document.createElement('input'); input.type='hidden'; input.name='choNgoiIds'; input.value=item.id; inputs.appendChild(input);
+    });
+    document.getElementById('grandTotal').textContent=money(values.reduce((sum,item)=>sum+item.price,0));
+    document.getElementById('continueBtn').disabled=values.length===0;
+}
+
+loadSeats();
+</script>
+}

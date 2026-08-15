@@ -1,6 +1,7 @@
 ﻿@model DanhMuc
 
 @{
+    // GET hiện form; POST cùng tên nhận DanhMuc model, validation và INSERT.
     Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
     ViewData["Title"] = "Thêm danh mục";
 }
@@ -8,12 +9,11 @@
 <div class="portal-page-title mb-4">
     <span class="portal-kicker"><i class="fas fa-plus"></i> Danh mục</span>
     <h1>Thêm danh mục</h1>
-    <p>Nhập thông tin danh mục để hiển thị ở trang sự kiện.</p>
 </div>
 
 <div class="portal-card form-panel">
     <div class="portal-card-body">
-        <form method="post" action="/Admin/TaoMoiDanhMuc">
+        <form method="post" asp-controller="Admin" asp-action="TaoMoiDanhMuc">
             <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
             <div class="mb-3">
@@ -46,7 +46,7 @@
                 <button class="btn btn-primary" type="submit">
                     <i class="fas fa-floppy-disk me-1"></i> Lưu
                 </button>
-                <a class="btn btn-outline-secondary" href="/Admin/DanhMuc">Quay lại</a>
+                <a class="btn btn-outline-secondary" asp-controller="Admin" asp-action="DanhMuc">Quay lại</a>
             </div>
         </form>
     </div>

@@ -1,13 +1,15 @@
 ﻿@model NguoiDung
 
 @{
+    // GET /Admin/ChiTietNguoiDung/{id}; Model là NguoiDung đang xem.
+    // ViewBag chứa thống kê riêng theo VaiTro khách/BTC/Staff.
     Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
     ViewData["Title"] = "Chi tiết người dùng";
     var userRole = Model.VaiTro;
 }
 
 <div class="mb-4">
-    <a href="/Admin/NguoiDung" class="btn btn-link text-decoration-none p-0 text-secondary">
+    <a asp-controller="Admin" asp-action="NguoiDung" class="btn btn-link text-decoration-none p-0 text-secondary">
         <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
     </a>
 </div>
@@ -45,20 +47,20 @@
                     </div>
                     <div class="mb-3">
                         <label class="text-muted small d-block">Ngày đăng ký</label>
-                        <span class="fw-medium text-dark">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</span>
+                        <span class="fw-medium text-dark">@VietnamTime.FromUtc(Model.NgayTao).ToString("dd/MM/yyyy HH:mm")</span>
                     </div>
                     @if (Model.NgayCapNhat.HasValue)
                     {
                         <div class="mb-3">
                             <label class="text-muted small d-block">Cập nhật lần cuối</label>
-                            <span class="fw-medium text-dark">@Model.NgayCapNhat.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                            <span class="fw-medium text-dark">@VietnamTime.FromUtc(Model.NgayCapNhat.Value).ToString("dd/MM/yyyy HH:mm")</span>
                         </div>
                     }
                 </div>
                 @if (Model.VaiTro != 3)
                 {
                     <div class="d-grid mt-4">
-                        <form method="post" action="/Admin/KhoaMoKhoaNguoiDung/@Model.Id">
+                        <form method="post" asp-controller="Admin" asp-action="KhoaMoKhoaNguoiDung" asp-route-id="@Model.Id">
                             <button class="btn w-100 @(Model.TrangThai == 1 ? "btn-danger" : "btn-success")" type="submit">
                                 <i class="fas @(Model.TrangThai == 1 ? "fa-lock" : "fa-lock-open") me-1"></i>
                                 @(Model.TrangThai == 1 ? "Khóa tài khoản" : "Mở khóa tài khoản")
@@ -117,7 +119,7 @@
                                             <td><strong>@order.MaDonHang</strong></td>
                                             <td>@order.TenSuKien</td>
                                             <td>@order.TongThanhToan.ToString("N0")đ</td>
-                                            <td>@order.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@VietnamTime.FromUtc((DateTime)order.NgayTao).ToString("dd/MM/yyyy HH:mm")</td>
                                             <td>
                                                 <span class="badge @(order.TrangThai == 1 ? "bg-success" : "bg-secondary")">
                                                     @(order.TrangThai == 1 ? "Đã thanh toán" : "Hủy/Chờ")
@@ -228,7 +230,7 @@
                                     {
                                         <tr>
                                             <td><strong>@ev.TenSuKien</strong></td>
-                                            <td>@ev.NgayTao.ToString("dd/MM/yyyy")</td>
+                                            <td>@VietnamTime.FromUtc((DateTime)ev.NgayTao).ToString("dd/MM/yyyy")</td>
                                             <td>
                                                 <span class="badge @TrangThaiSuKienBg(ev.TrangThai)">
                                                     @TrangThaiSuKienText(ev.TrangThai)
@@ -273,7 +275,7 @@
                                         <tr>
                                             <td><strong>@sev.TenSuKien</strong></td>
                                             <td>@sev.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td>@sev.NgayThem.ToString("dd/MM/yyyy")</td>
+                                            <td>@VietnamTime.FromUtc((DateTime)sev.NgayThem).ToString("dd/MM/yyyy")</td>
                                         </tr>
                                     }
                                 }

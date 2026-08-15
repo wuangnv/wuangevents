@@ -1,10 +1,5 @@
-@* ============================================================
-   VIEW: Chi tiết sự kiện (ChiTiet)
-   Model nhận vào: SuKien (Đối tượng sự kiện cần hiển thị)
-   Giải thích:
-     - @model SuKien khai báo view này dùng dữ liệu của 1 sự kiện duy nhất
-     - ViewBag.LoaiVes chứa danh sách các loại vé của sự kiện này (được controller lấy ra)
-   ============================================================ *@
+@* Model là một SuKien; ViewBag.LoaiVes chứa các loại vé đang bán.
+   Form chọn vé POST tới BookingController.DatVe. *@
 @using System.Security.Claims
 @model SuKien
 
@@ -14,10 +9,25 @@
     var loaiVes = ViewBag.LoaiVes as List<LoaiVe> ?? new List<LoaiVe>();
 
     var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    bool daDangNhap = User.Identity?.IsAuthenticated == true;
+    string duongDanQuayLai = $"{Context.Request.Path}{Context.Request.QueryString}";
+    string duongDanDangNhap = Url.Action("DangNhap", "Account", new { returnUrl = duongDanQuayLai }) ?? "/Account/DangNhap";
     bool isOrganizerOfThisEvent = !string.IsNullOrEmpty(userIdString) && Guid.Parse(userIdString) == Model.NguoiToChucId;
+    var veConBan = loaiVes.Where(x => x.SoLuongKhaDung > 0).ToList();
+    decimal giaThapNhat = veConBan.Any() ? veConBan.Min(x => x.GiaBan) : 0;
+    int tongViTriCon = veConBan.Sum(x => x.SoLuongKhaDung);
+}
+
+@section Styles {
+<style>
+.ticket-purchase-card{position:sticky;top:92px;border:1px solid #e7e1f2!important;border-radius:20px!important;box-shadow:0 16px 42px rgba(44,28,88,.1)!important;overflow:hidden}.ticket-purchase-card h3{font-size:1.1rem!important}.ticket-offer-list{display:grid;gap:9px;margin-bottom:16px}.ticket-offer{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;padding:12px 13px;border:1px solid #ebe7f2;border-left:4px solid var(--ticket-color,#7c3aed);border-radius:12px;background:#fff}.ticket-offer-name{font-size:.86rem;font-weight:750;color:#25213d}.ticket-offer-price{font-size:.86rem;font-weight:850;color:#6d28d9}.ticket-offer-stock{grid-column:1/-1;color:#7b8495;font-size:.72rem}.purchase-price{display:flex;justify-content:space-between;align-items:end;padding:14px 1px 12px;border-top:1px solid #eeeaf5}.purchase-price span{color:#64748b;font-size:.78rem}.purchase-price strong{font-size:1.22rem;color:#1f153f}.buy-ticket-cta{width:100%;min-height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 9px 8px 18px;border:0;border-radius:14px;background:linear-gradient(135deg,#6d28d9,#9333ea);color:#fff!important;text-decoration:none;font-size:.95rem;font-weight:800;box-shadow:0 10px 25px rgba(124,58,237,.28);transition:transform .18s,box-shadow .18s}.buy-ticket-cta:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(124,58,237,.34)}.buy-ticket-cta .cta-arrow{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.16)}.buy-ticket-cta:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}.ticket-option-card{box-shadow:0 3px 12px rgba(30,23,55,.04)}
+@@media(max-width:991px){.ticket-purchase-card{position:static}}
+</style>
 }
 
 @* Phần Header ảnh bìa mờ ảo *@
+@* Model là một SuKien tìm bằng slug; ViewBag.LoaiVes là các vé được bán.
+   Form chọn số lượng POST BookingController.DatVe. *@
 <div style="width: 100%; height: 380px; position: relative; overflow: hidden; background: linear-gradient(135deg, #4c1d95, #6d28d9, #7c3aed); border-bottom: 2px solid var(--border-accent);">
     <div style="position: absolute; inset: 0; background: url('@(string.IsNullOrWhiteSpace(Model.AnhBia) ? "/images/default-event.svg" : Model.AnhBia)') no-repeat center center / cover; filter: blur(25px) opacity(0.2);"></div >
     <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(76,29,149,0.3) 0%, rgba(109,40,217,0.6) 100%);"></div>
@@ -51,10 +61,15 @@
                 <h3 class="h4 mb-3 text-primary" style="font-weight: 700;">
                     <i class="fas fa-info-circle me-2"></i> Chi tiết sự kiện
                 </h3>
-                <p class="text-muted">@Model.MoTaNgan</p>
                 <div class="event-details-content" style="font-size: 1.05rem; line-height: 1.8;">
-                    @* Render nội dung HTML mô tả chi tiết bằng lệnh Html.Raw *@
-                    @Html.Raw(Model.MoTaChiTiet)
+                    @if (!string.IsNullOrWhiteSpace(Model.MoTaChiTiet))
+                    {
+                        @Html.Raw(SafeHtml.Sanitize(Model.MoTaChiTiet))
+                    }
+                    else
+                    {
+                        <p>@Model.MoTaNgan</p>
+                    }
                 </div>
             </div>
 
@@ -70,8 +85,8 @@
                     <div>
                         <h4 class="h5 m-0" style="font-weight: 700;">@(Model.LoaiSuKien == 1 ? "Trực tuyến" : Model.TenDiaDiem ?? "Địa điểm trực tiếp")</h4>
                         <span class="text-muted small">
-                            @(Model.LoaiSuKien == 1 
-                                ? (!string.IsNullOrEmpty(Model.LinkOnline) ? Model.LinkOnline : "Đường dẫn trực tuyến sẽ được gửi cho bạn khi mua vé.") 
+                            @(Model.LoaiSuKien == 1
+                                ? "Đường dẫn tham dự chỉ hiển thị trong đơn đã thanh toán."
                                 : $"{Model.DiaChiDiaDiem}, {Model.QuanHuyenDiaDiem}, {Model.ThanhPhoDiaDiem}")
                         </span>
                     </div>
@@ -126,11 +141,11 @@
                         <div>
                             @{
                                 var format = "yyyyMMddTHHmmssZ";
-                                var startUtc = DateTime.SpecifyKind(Model.NgayBatDau, DateTimeKind.Utc).ToString(format);
-                                var endUtc = DateTime.SpecifyKind(Model.NgayKetThuc, DateTimeKind.Utc).ToString(format);
+                                var startUtc = VietnamTime.ToUtc(Model.NgayBatDau).ToString(format);
+                                var endUtc = VietnamTime.ToUtc(Model.NgayKetThuc).ToString(format);
                                 var gTitle = Uri.EscapeDataString(Model.TenSuKien);
                                 var gDesc = Uri.EscapeDataString(Model.MoTaNgan ?? "");
-                                var gLoc = Uri.EscapeDataString(Model.LoaiSuKien == 1 ? "Trực tuyến: " + (Model.LinkOnline ?? "") : $"{Model.TenDiaDiem}, {Model.DiaChiDiaDiem}, {Model.ThanhPhoDiaDiem}");
+                                var gLoc = Uri.EscapeDataString(Model.LoaiSuKien == 1 ? "Sự kiện trực tuyến" : $"{Model.TenDiaDiem}, {Model.DiaChiDiaDiem}, {Model.ThanhPhoDiaDiem}");
                                 var googleCalendarLink = $"https://calendar.google.com/calendar/render?action=TEMPLATE&text={gTitle}&dates={startUtc}/{endUtc}&details={gDesc}&location={gLoc}";
                             }
                             <a href="@googleCalendarLink" target="_blank" class="btn btn-outline-primary w-100 py-2.5 fw-bold" style="border-radius: 10px; font-size: 0.88rem; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
@@ -186,7 +201,19 @@
                 </div>
             </div>
 
-            <div class="card p-4 mb-4" style="position: sticky; top: 100px;">
+            <div class="card p-3 mb-4">
+                <h5 class="text-muted small mb-2 text-uppercase fw-bold">Chia sẻ sự kiện</h5>
+                <div class="d-flex gap-2">
+                    <a href="https://www.facebook.com/sharer/sharer.php?u=@(Uri.EscapeDataString(Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path))" target="_blank" class="btn btn-outline flex-fill py-2">
+                        <i class="fab fa-facebook-f me-1"></i> Facebook
+                    </a>
+                    <button type="button" onclick="copyEventLink()" class="btn btn-outline flex-fill py-2">
+                        <i class="fas fa-link me-1"></i> Copy link
+                    </button>
+                </div>
+            </div>
+
+            <div class="card p-4 mb-4 ticket-purchase-card">
                 <h3 class="h4 mb-3" style="font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem;">
                     <i class="fas fa-ticket-alt me-2 text-primary"></i> Thông tin vé
                 </h3>
@@ -202,11 +229,11 @@
                     </div>
                 </div>
 
-                @if (Model.TrangThai != 3 || DateTime.UtcNow > Model.NgayKetThuc)
+                @if (Model.TrangThai != 3 || VietnamTime.Now > Model.NgayKetThuc)
                 {
                         <div class="text-center py-4">
                             <div class="mb-3" style="font-size: 2.5rem;">
-                                @if (DateTime.UtcNow > Model.NgayKetThuc)
+                                @if (VietnamTime.Now > Model.NgayKetThuc)
                                 {
                                     <i class="fas fa-flag-checkered text-secondary"></i>
                                 }
@@ -223,7 +250,7 @@
                                     <i class="fas fa-exclamation-circle text-muted"></i>
                                 }
                             </div>
-                            @if (DateTime.UtcNow > Model.NgayKetThuc)
+                            @if (VietnamTime.Now > Model.NgayKetThuc)
                             {
                                 <h5 class="fw-bold text-secondary mb-2">Sự kiện đã kết thúc</h5>
                                 <p class="text-muted small mb-0">Sự kiện này đã kết thúc thời gian diễn ra và không còn mở bán vé.</p>
@@ -259,71 +286,69 @@
                     }
                     else
                     {
-                        <form method="post" action="/Booking/DatVe" id="bookingForm">
-                            <input type="hidden" name="suKienId" value="@Model.Id" />
-                            
-                            <div class="ticket-select-list mb-3" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                @for (int i = 0; i < loaiVes.Count; i++)
+                        @if (Model.CoSoDoChoNgoi)
+                        {
+                            <div class="ticket-offer-list">
+                                @foreach (var ve in loaiVes)
                                 {
-                                    var ve = loaiVes[i];
-                                    var conLai = ve.SoLuongTong - ve.SoLuongDaBan - ve.SoLuongGiuCho;
-                                    var isHetVe = conLai <= 0;
-                                    <div class="ticket-option-card p-3 @(isHetVe ? "opacity-50" : "")" onclick="@(isHetVe ? "" : $"selectTicket({ve.Id}, {ve.GioiHanMoiDon}, {conLai})")" id="ticket-card-@ve.Id" style="border: 2px solid var(--border-color); border-radius: 12px; cursor: @(isHetVe ? "not-allowed" : "pointer"); transition: all 0.2s; background: var(--bg-card);">
-                                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="ms-1">
-                                                    <div class="fw-bold text-dark" style="font-size: 0.92rem; line-height: 1.2;">@ve.TenLoaiVe</div>
-                                                    <div class="text-muted small mt-1" style="font-size: 0.78rem;">
-                                                        @if (isHetVe)
-                                                        {
-                                                            <span class="text-danger fw-bold">Hết vé</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>Còn lại: <span class="text-primary fw-bold">@conLai</span> vé</span>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="d-flex align-items-center gap-3 ms-auto ms-sm-0">
-                                                <div class="text-end">
-                                                    <div style="color: var(--primary); font-weight: 800; font-size: 0.95rem;">@(ve.GiaBan > 0 ? ve.GiaBan.ToString("N0") + "đ" : "Miễn phí")</div>
-                                                    <div class="text-muted" style="font-size: 0.72rem;">Tối đa: @ve.GioiHanMoiDon vé</div>
-                                                </div>
-                                                
-                                                @if (!isHetVe)
-                                                {
-                                                    @* Bộ chọn số lượng riêng biệt cho loại vé này *@
-                                                    <div class="d-flex align-items-center gap-1 bg-light p-1 rounded" style="border: 1px solid #e5e7eb;" onclick="event.stopPropagation();">
-                                                        <button type="button" class="btn btn-sm btn-outline-secondary p-0 d-flex align-items-center justify-content-center" onclick="changeQtyForTicket(@ve.Id, -1)" style="width: 24px; height: 24px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; line-height: 1;">-</button>
-                                                        <input type="number" name="veChon[@ve.Id]" id="qty-input-@ve.Id" value="0" min="0" max="@Math.Min(ve.GioiHanMoiDon, conLai)" readonly style="width: 28px; text-align: center; border: none; background: transparent; font-weight: bold; font-size: 0.9rem; color: #111; padding: 0;" />
-                                                        <button type="button" class="btn btn-sm btn-outline-secondary p-0 d-flex align-items-center justify-content-center" onclick="changeQtyForTicket(@ve.Id, 1)" style="width: 24px; height: 24px; border-radius: 6px; font-weight: bold; font-size: 0.8rem; line-height: 1;">+</button>
-                                                    </div>
-                                                }
-                                            </div>
-                                        </div>
+                                    var conLai = Math.Max(0, ve.SoLuongKhaDung);
+                                    <div class="ticket-offer" style="--ticket-color:@(ve.MauSac ?? "#7c3aed")">
+                                        <span class="ticket-offer-name">@ve.TenLoaiVe</span>
+                                        <strong class="ticket-offer-price">@(ve.GiaBan > 0 ? ve.GiaBan.ToString("N0") + "đ" : "Miễn phí")</strong>
+                                        <span class="ticket-offer-stock">@(conLai > 0 ? $"Còn {conLai} vị trí" : "Hết vé")</span>
                                     </div>
                                 }
                             </div>
- 
-                            <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold text-uppercase" style="border-radius: 10px; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(124,58,237,0.25); transition: all 0.2s;">
-                                <i class="fas fa-shopping-cart me-1.5"></i> Mua vé ngay
-                            </button>
-                        </form>
+                            <div class="purchase-price"><span>Giá vé từ</span><strong>@(giaThapNhat > 0 ? giaThapNhat.ToString("N0") + "đ" : "Miễn phí")</strong></div>
+                            @if (tongViTriCon > 0)
+                            {
+                                @if (daDangNhap)
+                                {
+                                    <a asp-controller="Booking" asp-action="ChonGhe" asp-route-suKienId="@Model.Id" class="buy-ticket-cta"><span><i class="fas fa-ticket me-2"></i>Mua vé</span><span class="cta-arrow"><i class="fas fa-arrow-right"></i></span></a>
+                                }
+                                else
+                                {
+                                    <a href="@duongDanDangNhap" class="buy-ticket-cta"><span><i class="fas fa-user me-2"></i>Đăng nhập để mua vé</span><span class="cta-arrow"><i class="fas fa-arrow-right"></i></span></a>
+                                }
+                            }
+                            else
+                            {
+                                <button type="button" class="buy-ticket-cta" disabled><span><i class="fas fa-ticket me-2"></i>Hết vé</span></button>
+                            }
+                        }
+                        else
+                        {
+                            @* Không có sơ đồ: người mua chọn số lượng theo từng loại vé. *@
+                            <form method="post" action="/Booking/DatVe" id="bookingForm">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="suKienId" value="@Model.Id" />
+                                <div class="ticket-select-list mb-3 d-flex flex-column gap-2">
+                                    @foreach (var ve in loaiVes)
+                                    {
+                                        var conLai = ve.SoLuongTong - ve.SoLuongDaBan - ve.SoLuongGiuCho;
+                                        var isHetVe = conLai <= 0;
+                                        <div class="ticket-option-card p-3 @(isHetVe ? "opacity-50" : "")" onclick="@(isHetVe ? "" : $"selectTicket({ve.Id}, {ve.GioiHanMoiDon}, {conLai})")" id="ticket-card-@ve.Id" style="border:2px solid var(--border-color);border-radius:12px;cursor:@(isHetVe ? "not-allowed" : "pointer");transition:.2s;background:var(--bg-card)">
+                                            <div class="d-flex justify-content-between align-items-center gap-2">
+                                                <div><div class="fw-bold" style="font-size:.9rem">@ve.TenLoaiVe</div><div class="text-muted mt-1" style="font-size:.74rem">@(isHetVe ? "Hết vé" : $"Còn {conLai} vé")</div></div>
+                                                <div class="text-end"><div class="text-primary fw-bold">@(ve.GiaBan > 0 ? ve.GiaBan.ToString("N0") + "đ" : "Miễn phí")</div>
+                                                @if (!isHetVe) { <div class="d-flex align-items-center gap-1 bg-light p-1 rounded mt-1" onclick="event.stopPropagation()"><button type="button" class="btn btn-sm btn-outline-secondary py-0" onclick="changeQtyForTicket(@ve.Id,-1)">−</button><input type="number" name="veChon[@ve.Id]" id="qty-input-@ve.Id" data-price="@ve.GiaBan" value="0" min="0" max="@Math.Min(ve.GioiHanMoiDon, conLai)" readonly style="width:30px;text-align:center;border:0;background:transparent;font-weight:800" /><button type="button" class="btn btn-sm btn-outline-secondary py-0" onclick="changeQtyForTicket(@ve.Id,1)">+</button></div> }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="d-flex justify-content-between border-top pt-3 mb-3"><span class="text-muted">Tạm tính</span><strong class="text-primary" id="ticketTotal">0đ</strong></div>
+                                @if (daDangNhap)
+                                {
+                                    <button type="submit" class="buy-ticket-cta"><span><i class="fas fa-ticket me-2"></i>Mua vé</span><span class="cta-arrow"><i class="fas fa-arrow-right"></i></span></button>
+                                }
+                                else
+                                {
+                                    <a href="@duongDanDangNhap" class="buy-ticket-cta"><span><i class="fas fa-user me-2"></i>Đăng nhập để mua vé</span><span class="cta-arrow"><i class="fas fa-arrow-right"></i></span></a>
+                                }
+                            </form>
+                        }
                     }
-                </div>
- 
-                <div class="mt-4 pt-3 border-top">
-                    <h5 class="text-muted small mb-2 text-uppercase fw-bold">Chia sẻ sự kiện</h5>
-                    <div class="d-flex gap-2">
-                        <a href="https://www.facebook.com/sharer/sharer.php?u=@(Uri.EscapeDataString(Context.Request.Scheme + "://" + Context.Request.Host + Context.Request.Path))" target="_blank" class="btn btn-outline flex-fill py-2">
-                            <i class="fab fa-facebook-f me-1"></i> Facebook
-                        </a>
-                        <button type="button" onclick="copyEventLink()" class="btn btn-outline flex-fill py-2">
-                            <i class="fas fa-link me-1"></i> Copy link
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -365,11 +390,21 @@
         qtyInp.value = current;
         
         updateCardStyle(id, current);
+        updateTicketTotal();
+    }
+
+    function updateTicketTotal() {
+        let total = 0;
+        document.querySelectorAll('input[name^="veChon"]').forEach(inp => {
+            total += (parseInt(inp.value) || 0) * (parseFloat(inp.dataset.price) || 0);
+        });
+        const output = document.getElementById('ticketTotal');
+        if (output) output.textContent = new Intl.NumberFormat('vi-VN').format(total) + 'đ';
     }
  
     function copyEventLink() {
         navigator.clipboard.writeText(window.location.href);
-        alert("Đã sao chép liên kết sự kiện.");
+        WuangUI.toast("Đã sao chép liên kết sự kiện.", "success");
     }
  
     // Kiểm tra trước khi gửi form đặt vé
@@ -383,7 +418,7 @@
                 });
                 if (total === 0) {
                     e.preventDefault();
-                    alert("Vui lòng chọn số lượng cho ít nhất một loại vé.");
+                    WuangUI.toast("Vui lòng chọn ít nhất một loại vé.", "error");
                 }
             });
         }

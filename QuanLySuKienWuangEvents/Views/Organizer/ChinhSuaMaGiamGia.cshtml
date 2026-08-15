@@ -1,6 +1,8 @@
 ﻿@model MaGiamGia
 
 @{
+    // GET lấy một MaGiamGia thuộc sự kiện của BTC; form POST lưu chỉnh sửa.
+    // Controller kiểm tra loại giảm, giá trị, ngày và quyền sở hữu trước UPDATE.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Sửa mã giảm giá";
 }
@@ -26,7 +28,7 @@
 
 <!-- Breadcrumb -->
 <div class="d-flex align-items-center gap-2 mb-3">
-    <a href="/Organizer/MaGiamGia?suKienId=@Model.SuKienId" class="btn btn-sm btn-light border text-secondary" style="border-radius:8px;">
+    <a asp-controller="Organizer" asp-action="MaGiamGia" asp-route-suKienId="@Model.SuKienId" class="btn btn-sm btn-light border text-secondary" style="border-radius:8px;">
         <i class="fas fa-arrow-left me-1"></i> Quay lại
     </a>
     <span class="text-muted small">/</span>
@@ -36,10 +38,9 @@
 <div class="edit-coupon-form">
     <div class="edit-coupon-header">
         <h1><i class="fas fa-pen-to-square me-2"></i>Chỉnh sửa mã giảm giá</h1>
-        <p>Cập nhật quy tắc giảm giá, thời gian và số lượt dùng cho mã khuyễn mãi.</p>
     </div>
     <div class="edit-coupon-body">
-        <form method="post">
+        <form method="post" asp-controller="Organizer" asp-action="ChinhSuaMaGiamGia">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="SuKienId" />
             
@@ -108,7 +109,7 @@
                 <button class="btn btn-success fw-bold px-4 py-2" type="submit" style="border-radius: 8px;">
                     <i class="fas fa-save me-1"></i> Lưu thay đổi
                 </button>
-                <a class="btn btn-outline-secondary px-4 py-2" href="/Organizer/MaGiamGia?suKienId=@Model.SuKienId" style="border-radius: 8px;">
+                <a class="btn btn-outline-secondary px-4 py-2" asp-controller="Organizer" asp-action="MaGiamGia" asp-route-suKienId="@Model.SuKienId" style="border-radius: 8px;">
                     Hủy bỏ
                 </a>
             </div>

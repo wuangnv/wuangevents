@@ -1,5 +1,5 @@
 ﻿// HOME CONTROLLER
-// Chức năng: Trang chủ, xem danh sách sự kiện, xem chi tiết
+// Trang công khai: lọc sự kiện và xem chi tiết; View nằm trong Views/Home.
 
 using Microsoft.AspNetCore.Mvc;
 using QuanLySuKienWuangEvents.Models;
@@ -8,12 +8,9 @@ namespace QuanLySuKienWuangEvents.Controllers;
 
 public class HomeController : Controller
 {
-    // TRANG CHỦ - Hiển thị danh sách sự kiện đang mở bán
-    // URL: GET /Home/Index  hoặc  GET /
-    // Tham số:
-    //   q         = từ khoá tìm kiếm (ví dụ: "rock việt")
-    //   danhMucId = lọc theo danh mục (ví dụ: 1 = Âm nhạc)
-    public async Task<IActionResult> Index(string? q, int? danhMucId, string? thanhPho)
+    // GET / hoặc /Home/Index: lọc theo từ khóa, danh mục, thành phố và hình thức.
+    public async Task<IActionResult> Index(
+        string? q, int? danhMucId, string? thanhPho, string loaiSuKien = "tat-ca")
     {
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -21,6 +18,9 @@ public class HomeController : Controller
             if (User.IsInRole("Nhân viên soát vé")) return Redirect("/Staff/Index");
         }
 
+        loaiSuKien = ChuanHoaLoaiSuKien(loaiSuKien);
+        byte? loaiSuKienValue = LayGiaTriLoaiSuKien(loaiSuKien);
+
         // Lấy danh sách danh mục hiển thị trên thanh lọc
         string sqlDanhMuc = @"
             SELECT *
@@ -31,16 +31,17 @@ public class HomeController : Controller
         ViewBag.DanhMucs   = await Db.LayDanhSach<DanhMuc>(sqlDanhMuc);
         ViewBag.TuKhoa     = q;
         ViewBag.DanhMucId  = danhMucId;
+        ViewBag.LoaiSuKien = loaiSuKien;
 
-        // Lấy danh sách các tỉnh thành đang có sự kiện (để làm bộ lọc)
+        // Bộ lọc thành phố dùng cả sự kiện sắp tới và sự kiện đã diễn ra.
         string sqlCities = @"
             SELECT DISTINCT ThanhPhoDiaDiem
             FROM SuKien
             WHERE ThanhPhoDiaDiem IS NOT NULL 
               AND ThanhPhoDiaDiem != '' 
               AND HienThiCongKhai = 1 
-              AND TrangThai = 3
-              AND NgayKetThuc > GETUTCDATE()
+              AND TrangThai IN (3, 5)
+            ORDER BY ThanhPhoDiaDiem
         ";
         var citiesList = await Db.LayDanhSach<string>(sqlCities);
         ViewBag.Cities = citiesList;
@@ -52,10 +53,11 @@ public class HomeController : Controller
             FROM SuKien
             WHERE HienThiCongKhai = 1
               AND TrangThai = 3
-              AND NgayKetThuc > GETUTCDATE()
+              AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE())
               AND (@q = '' OR TenSuKien LIKE '%' + @q + '%')
               AND (@danhMucId IS NULL OR DanhMucId = @danhMucId)
               AND (@thanhPho IS NULL OR @thanhPho = '' OR ThanhPhoDiaDiem = @thanhPho)
+              AND (@loaiSuKienValue IS NULL OR LoaiSuKien = @loaiSuKienValue)
             ORDER BY NgayBatDau ASC
         ";
 
@@ -63,16 +65,34 @@ public class HomeController : Controller
         {
             q         = q ?? "",
             danhMucId = danhMucId,
-            thanhPho  = thanhPho ?? ""
+            thanhPho  = thanhPho ?? "",
+            loaiSuKienValue
         });
+
+        // Trang chủ có thêm một dải sự kiện cũ để khách có thể xem lại.
+        ViewBag.SuKienDaQua = await Db.LayDanhSach<SuKien>(@"
+            SELECT TOP (6) *
+            FROM SuKien
+            WHERE HienThiCongKhai = 1
+              AND TrangThai IN (3, 5)
+              AND NgayKetThuc <= DATEADD(HOUR, 7, GETUTCDATE())
+              AND (@loaiSuKienValue IS NULL OR LoaiSuKien = @loaiSuKienValue)
+            ORDER BY NgayBatDau DESC", new { loaiSuKienValue });
 
         return View(danhSachSuKien);
     }
 
     // DANH SÁCH SỰ KIỆN - Bộ lọc nâng cao theo từ khóa, danh mục, thành phố
     // URL: GET /Home/SuKien
-    public async Task<IActionResult> SuKien(string? q, int? danhMucId, string? thanhPho)
+    public async Task<IActionResult> SuKien(
+        string? q, int? danhMucId, string? thanhPho,
+        string thoiGian = "sap-dien-ra", string loaiSuKien = "tat-ca")
     {
+        string[] boLocHopLe = ["sap-dien-ra", "da-dien-ra", "tat-ca"];
+        if (!boLocHopLe.Contains(thoiGian)) thoiGian = "sap-dien-ra";
+        loaiSuKien = ChuanHoaLoaiSuKien(loaiSuKien);
+        byte? loaiSuKienValue = LayGiaTriLoaiSuKien(loaiSuKien);
+
         // Lấy danh sách danh mục hiển thị trên thanh lọc
         string sqlDanhMuc = @"
             SELECT *
@@ -84,48 +104,74 @@ public class HomeController : Controller
         ViewBag.TuKhoa     = q;
         ViewBag.DanhMucId  = danhMucId;
 
-        // Lấy danh sách các tỉnh thành đang có sự kiện (để làm bộ lọc)
+        // Thành phố được lấy từ toàn bộ kho sự kiện công khai.
         string sqlCities = @"
             SELECT DISTINCT ThanhPhoDiaDiem
             FROM SuKien
             WHERE ThanhPhoDiaDiem IS NOT NULL 
               AND ThanhPhoDiaDiem != '' 
               AND HienThiCongKhai = 1 
-              AND TrangThai = 3
-              AND NgayKetThuc > GETUTCDATE()
+              AND TrangThai IN (3, 5)
+            ORDER BY ThanhPhoDiaDiem
         ";
         var citiesList = await Db.LayDanhSach<string>(sqlCities);
         ViewBag.Cities = citiesList;
         ViewBag.SelectedCity = thanhPho;
+        ViewBag.ThoiGian = thoiGian;
+        ViewBag.LoaiSuKien = loaiSuKien;
 
-        // Lấy danh sách sự kiện công khai, đang bán vé (TrangThai = 3)
+        // Lọc ba nhóm: sắp diễn ra, đã diễn ra hoặc toàn bộ.
         string sqlSuKien = @"
             SELECT *
             FROM SuKien
             WHERE HienThiCongKhai = 1
-              AND TrangThai = 3
-              AND NgayKetThuc > GETUTCDATE()
+              AND TrangThai IN (3, 5)
+              AND (
+                    (@thoiGian = 'sap-dien-ra' AND TrangThai = 3 AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE()))
+                 OR (@thoiGian = 'da-dien-ra' AND (TrangThai = 5 OR NgayKetThuc <= DATEADD(HOUR, 7, GETUTCDATE())))
+                 OR (@thoiGian = 'tat-ca')
+              )
               AND (@q = '' OR TenSuKien LIKE '%' + @q + '%')
               AND (@danhMucId IS NULL OR DanhMucId = @danhMucId)
               AND (@thanhPho IS NULL OR @thanhPho = '' OR ThanhPhoDiaDiem = @thanhPho)
-            ORDER BY NgayBatDau ASC
+              AND (@loaiSuKienValue IS NULL OR LoaiSuKien = @loaiSuKienValue)
+            ORDER BY
+                CASE WHEN TrangThai = 3 AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE()) THEN 0 ELSE 1 END,
+                CASE WHEN TrangThai = 3 AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE()) THEN NgayBatDau END ASC,
+                NgayBatDau DESC
         ";
 
         var danhSachSuKien = await Db.LayDanhSach<SuKien>(sqlSuKien, new
         {
             q         = q ?? "",
             danhMucId = danhMucId,
-            thanhPho  = thanhPho ?? ""
+            thanhPho  = thanhPho ?? "",
+            thoiGian,
+            loaiSuKienValue
         });
 
         return View(danhSachSuKien);
     }
 
+    private static string ChuanHoaLoaiSuKien(string? value) => value switch
+    {
+        "truc-tiep" => "truc-tiep",
+        "truc-tuyen" => "truc-tuyen",
+        _ => "tat-ca"
+    };
+
+    private static byte? LayGiaTriLoaiSuKien(string value) => value switch
+    {
+        "truc-tiep" => 0,
+        "truc-tuyen" => 1,
+        _ => null
+    };
+
     // CHI TIẾT SỰ KIỆN - Xem thông tin 1 sự kiện + loại vé
     // URL: GET /Home/ChiTiet?id={slug hoặc Id}
     public async Task<IActionResult> ChiTiet(string id)
     {
-        // Tự động giải phóng các đơn hàng quá hạn 15 phút chưa thanh toán để cập nhật vé trống
+        // Tự động giải phóng đơn chờ quá 10 phút để cập nhật lại vé/ghế trống.
         await BookingController.GiaiPhongDonHangHetHan();
 
         // Tìm sự kiện theo slug hoặc Id
@@ -147,7 +193,8 @@ public class HomeController : Controller
         if (suKien.HienThiCongKhai == false || suKien.TrangThai == 0 || suKien.TrangThai == 1 || suKien.TrangThai == 7)
         {
             var userClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            Guid userId = userClaim != null ? Guid.Parse(userClaim.Value) : Guid.Empty;
+            Guid userId = userClaim != null && Guid.TryParse(userClaim.Value, out Guid parsedUserId)
+                ? parsedUserId : Guid.Empty;
             bool laAdmin = User.IsInRole("Quản trị viên");
             bool laChuSoHuu = suKien.NguoiToChucId == userId;
 
@@ -160,13 +207,29 @@ public class HomeController : Controller
 
         // Lấy danh sách loại vé đang mở bán của sự kiện này
         string sqlLoaiVe = @"
-            SELECT *
-            FROM LoaiVe
-            WHERE SuKienId = @suKienId
-              AND TrangThai = 1
-            ORDER BY ThuTuHienThi, Id
+            SELECT lv.*,
+                   CASE
+                       WHEN @coSoDo = 1 AND ISNULL(g.SoGheTrong, 0) < (lv.SoLuongTong - lv.SoLuongDaBan - lv.SoLuongGiuCho)
+                           THEN ISNULL(g.SoGheTrong, 0)
+                       ELSE lv.SoLuongTong - lv.SoLuongDaBan - lv.SoLuongGiuCho
+                   END AS SoLuongKhaDung
+            FROM LoaiVe lv
+            OUTER APPLY (
+                SELECT COUNT(*) AS SoGheTrong
+                FROM ChoNgoi cn
+                JOIN HangGhe hg ON hg.Id = cn.HangGheId
+                JOIN KhuVuc kv ON kv.Id = hg.KhuVucId
+                JOIN SoDoChoNgoi sd ON sd.Id = kv.SoDoChoNgoiId
+                WHERE sd.SuKienId = lv.SuKienId
+                  AND kv.LoaiVeId = lv.Id
+                  AND cn.TrangThai = 0
+            ) g
+            WHERE lv.SuKienId = @suKienId
+              AND lv.TrangThai = 1
+            ORDER BY lv.ThuTuHienThi, lv.Id
         ";
-        var danhSachLoaiVe = await Db.LayDanhSach<LoaiVe>(sqlLoaiVe, new { suKienId = suKien.Id });
+        var danhSachLoaiVe = await Db.LayDanhSach<LoaiVe>(sqlLoaiVe,
+            new { suKienId = suKien.Id, coSoDo = suKien.CoSoDoChoNgoi });
 
         // Gửi danh sách loại vé sang View qua ViewBag
         ViewBag.LoaiVes = danhSachLoaiVe;
@@ -175,6 +238,7 @@ public class HomeController : Controller
     }
 
     [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Quản trị viên")]
+    [HttpPost]
     public async Task<IActionResult> CleanSlugs()
     {
         var list = await Db.LayDanhSach<SuKien>("SELECT Id, TenSuKien FROM SuKien");

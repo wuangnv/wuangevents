@@ -1,4 +1,6 @@
 @{
+    // GET nạp ViewBag.DanhMucs; form multipart POST TaoMoiSuKien.
+    // name của input phải khớp tham số action; JavaScript điều khiển form nhiều bước.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Tạo sự kiện";
     var danhMucs = ViewBag.DanhMucs as List<DanhMuc> ?? new();
@@ -251,6 +253,7 @@
 </div>
 
 <form method="post" action="/Organizer/TaoMoiSuKien" id="wizardForm" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
     <!-- Validations -->
     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
@@ -415,12 +418,12 @@
                         <input class="form-control" type="datetime-local" name="ngayKetThuc" id="ngayKetThuc" required />
                         <span class="text-muted small d-block mt-1"><i class="fas fa-circle-info text-primary me-1"></i>Sự kiện có thể diễn ra trong vài tiếng cùng ngày.</span>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 offline-checkin-field">
                         <label class="form-label">Thời gian bắt đầu check-in (Tùy chọn)</label>
                         <input class="form-control" type="datetime-local" name="batDauCheckIn" id="batDauCheckIn" />
                         <span class="text-muted small">Mặc định là thời điểm sự kiện bắt đầu nếu bỏ trống.</span>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 offline-checkin-field">
                         <label class="form-label">Thời gian kết thúc check-in (Tùy chọn)</label>
                         <input class="form-control" type="datetime-local" name="ketThucCheckIn" id="ketThucCheckIn" />
                         <span class="text-muted small">Mặc định là thời điểm sự kiện kết thúc nếu bỏ trống.</span>
@@ -601,6 +604,7 @@
         const btnOnline = document.getElementById("btnOnline");
         const offlineSec = document.getElementById("offlineSection");
         const onlineSec = document.getElementById("onlineSection");
+        const checkinFields = document.querySelectorAll(".offline-checkin-field");
 
         if (type === 0) {
             btnOffline.classList.add("active");
@@ -613,6 +617,7 @@
             document.getElementById("phuongXaSelect").setAttribute("required", "required");
             document.getElementById("soNhaDuong").setAttribute("required", "required");
             document.getElementById("linkOnline").removeAttribute("required");
+            checkinFields.forEach(field => field.style.display = "block");
         } else {
             btnOffline.classList.remove("active");
             btnOnline.classList.add("active");
@@ -624,6 +629,9 @@
             document.getElementById("phuongXaSelect").removeAttribute("required");
             document.getElementById("soNhaDuong").removeAttribute("required");
             document.getElementById("linkOnline").setAttribute("required", "required");
+            checkinFields.forEach(field => field.style.display = "none");
+            document.getElementById("batDauCheckIn").value = "";
+            document.getElementById("ketThucCheckIn").value = "";
         }
     }
 
@@ -631,10 +639,16 @@
     function previewImage(inputId, previewId) {
         const url = document.getElementById(inputId).value;
         const container = document.getElementById(previewId);
+        container.replaceChildren();
         if (url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/"))) {
-            container.innerHTML = `<img src="${url}" alt="Preview" onerror="this.src=''; this.parentNode.innerHTML='<span>Đường dẫn ảnh lỗi</span>';" style="max-width:100%; max-height:100%; object-fit:cover;" />`;
+            const image = document.createElement('img');
+            image.src = url;
+            image.alt = 'Xem trước ảnh bìa';
+            image.style.cssText = 'max-width:100%;max-height:100%;object-fit:cover';
+            image.onerror = () => { container.textContent = 'Đường dẫn ảnh không hợp lệ'; };
+            container.appendChild(image);
         } else {
-            container.innerHTML = `<span>Xem trước</span>`;
+            container.textContent = 'Xem trước';
         }
     }
 
@@ -644,11 +658,15 @@
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                container.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width:100%; max-height:100%; object-fit:cover;" />`;
+                const image = document.createElement('img');
+                image.src = e.target.result;
+                image.alt = 'Xem trước ảnh bìa';
+                image.style.cssText = 'max-width:100%;max-height:100%;object-fit:cover';
+                container.replaceChildren(image);
             }
             reader.readAsDataURL(input.files[0]);
         } else {
-            container.innerHTML = `<span>Chưa tải ảnh lên</span>`;
+            container.textContent = 'Chưa tải ảnh lên';
         }
     }
 
@@ -760,7 +778,7 @@
         });
 
         if (!valid) {
-            alert("Vui lòng điền đầy đủ các thông tin bắt buộc (*) trước khi tiếp tục.");
+            WuangUI.toast("Vui lòng điền đầy đủ các thông tin bắt buộc trước khi tiếp tục.", "error");
         }
         return valid;
     }

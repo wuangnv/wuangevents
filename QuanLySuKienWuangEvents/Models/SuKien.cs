@@ -1,90 +1,88 @@
-﻿namespace QuanLySuKienWuangEvents.Models;
+namespace QuanLySuKienWuangEvents.Models;
 
+// MODEL trung tâm ánh xạ bảng SuKien.
+// Home đọc để bán vé; Organizer tạo/sửa; Admin duyệt; Staff check-in.
 public class SuKien
 {
+    // Khóa chính và hai khóa ngoại chỉ chủ sở hữu/danh mục.
     public Guid Id { get; set; }
     public Guid NguoiToChucId { get; set; }
     public int DanhMucId { get; set; }
+
+    // Slug là chuỗi thân thiện dùng trên URL thay cho Guid.
     public string TenSuKien { get; set; } = "";
     public string Slug { get; set; } = "";
     public string? MoTaNgan { get; set; }
     public string? MoTaChiTiet { get; set; }
     public string? AnhBia { get; set; }
     public string? AnhThumbnail { get; set; }
+
+    // Ngày kết thúc phải sau ngày bắt đầu; Controller tạo/sửa kiểm tra điều này.
     public DateTime NgayBatDau { get; set; }
     public DateTime NgayKetThuc { get; set; }
+
+    // 0 offline, 1 online. Online cần LinkOnline; offline dùng địa điểm.
     public byte LoaiSuKien { get; set; }
     public string? LinkOnline { get; set; }
     public bool CoSoDoChoNgoi { get; set; }
+
+    // Quy ước thực tế: 0 nháp, 1 chờ duyệt, 2 tạm dừng,
+    // 3 đang bán, 6 đã hủy, 7 bị từ chối.
     public byte TrangThai { get; set; }
     public string? LyDoTuChoi { get; set; }
     public bool HienThiCongKhai { get; set; }
     public DateTime NgayTao { get; set; }
     public DateTime? NgayCapNhat { get; set; }
+
+    // Nếu null, check-in thường dùng khoảng thời gian của sự kiện.
     public DateTime? BatDauCheckIn { get; set; }
     public DateTime? KetThucCheckIn { get; set; }
 
-    // Thông tin địa điểm được gộp trực tiếp vào sự kiện
+    // Thông tin địa điểm được gộp trực tiếp vào bảng SuKien.
     public string? TenDiaDiem { get; set; }
     public string? DiaChiDiaDiem { get; set; }
     public string? ThanhPhoDiaDiem { get; set; }
     public string? QuanHuyenDiaDiem { get; set; }
     public int? SucChuaDiaDiem { get; set; }
 
-    // Thông tin thống kê bổ sung (không lưu DB)
+    // Property thống kê bổ sung, không phải cột bảng SuKien.
+    // SQL phải SELECT alias cùng tên để Dapper gán khi màn hình cần dùng.
     public int VeDaBan { get; set; }
     public decimal DoanhThu { get; set; }
     public int TongVe { get; set; }
 
-    // Danh sách 30 ảnh banner thực tế có sẵn trong wwwroot/uploads/banners/professional/
-    private static readonly string[] BannersThucTe = new string[]
+    // Ảnh chụp thật dự phòng đang có trong wwwroot/uploads/banners/professional/.
+    private static readonly string[] BannersThucTe =
     {
-        "/uploads/banners/professional/vinhverse-concert.jpg",
-        "/uploads/banners/professional/ben-thanh-concert-phuong-linh-x-phan-manh-quynh.jpg",
-        "/uploads/banners/professional/gama-music-racing-festival.jpg",
-        "/uploads/banners/professional/saigon-midnight-run-2026.jpg",
-        "/uploads/banners/professional/vietnam-game-connect-2026.jpg",
-        "/uploads/banners/professional/metashow-cham-vao-anh-sang.jpg",
-        "/uploads/banners/professional/chef-s-table-modern-vietnamese-dinner.jpg",
-        "/uploads/banners/professional/ai-va-future-business-strategy.jpg",
-        "/uploads/banners/professional/chao-show-am-sac-viet-nam.jpg",
-        "/uploads/banners/professional/le-hieu-va-vu-acoustic-night.jpg",
-        "/uploads/banners/professional/sketch-a-rose-visual-concert-experience.jpg",
-        "/uploads/banners/professional/anh-tu-special-guest-dong-nhi.jpg",
-        "/uploads/banners/professional/cong-dien-mua-he.jpg",
-        "/uploads/banners/professional/gitex-vietnam-2026.jpg",
-        "/uploads/banners/professional/power-bi-from-data-to-insights.jpg",
-        "/uploads/banners/professional/build-better-hcmc-2026.jpg",
-        "/uploads/banners/professional/asian-sky-forum-2026-ho-chi-minh-city.jpg",
-        "/uploads/banners/professional/charity-gala-one-night-for-children.jpg",
-        "/uploads/banners/professional/ho-tram-beach-triathlon.jpg",
-        "/uploads/banners/professional/city-yoga-va-wellness-day.jpg",
-        "/uploads/banners/professional/dalat-coffee-farm-experience.jpg",
-        "/uploads/banners/professional/saigon-street-food-night-walk.jpg",
-        "/uploads/banners/professional/hue-100-flavors-michelin-starred-chefs-united.jpg",
-        "/uploads/banners/professional/the-viet-margarita-festival-2026.jpg",
-        "/uploads/banners/professional/a-o-show-saigon-opera-house.jpg",
-        "/uploads/banners/professional/teh-dar-the-highlands-story.jpg",
-        "/uploads/banners/professional/art-jamming-va-natural-wine.jpg",
-        "/uploads/banners/professional/candle-lab-scent-design-workshop.jpg",
-        "/uploads/banners/professional/flower-1969-craft-weekend.jpg",
-        "/uploads/banners/professional/the-alma-show-tinh-hoa-viet-nam.jpg"
+        "/uploads/banners/professional/real-art-gallery.jpg",
+        "/uploads/banners/professional/real-jazz-stage.jpg",
+        "/uploads/banners/professional/real-saigon-basketball.jpg",
+        "/uploads/banners/professional/real-tech-conference.jpg",
+        "/uploads/banners/professional/real-trade-expo.jpg",
+        "/uploads/banners/professional/real-vietnam-craft-workshop.jpg",
+        "/uploads/banners/professional/real-vietnam-food-festival.jpg",
+        "/uploads/banners/professional/real-vietnam-lantern-festival.jpg",
+        "/uploads/banners/professional/real-vietnam-running.jpg",
+        "/uploads/banners/professional/real-vietnamese-performing-arts.jpg",
+        "/uploads/banners/professional/real-vn-concert.jpg"
     };
 
+    // Property tính toán dùng trong View; không phải cột database vì chỉ có get.
     public string LayAnhBiaHienThi
     {
         get
         {
-            if (!string.IsNullOrWhiteSpace(AnhBia) && 
-                !AnhBia.Contains("unsplash") && 
+            // Database đã có đường dẫn local hợp lệ thì dùng chính ảnh đó.
+            if (!string.IsNullOrWhiteSpace(AnhBia) &&
+                !AnhBia.Contains("unsplash") &&
                 !AnhBia.Equals("/images/default-event.svg", StringComparison.OrdinalIgnoreCase))
             {
                 return AnhBia;
             }
 
+            // Nếu thiếu ảnh, hash Id giúp cùng sự kiện luôn nhận cùng ảnh dự phòng.
             int index = Math.Abs(Id.GetHashCode()) % BannersThucTe.Length;
             return BannersThucTe[index];
         }
     }
 }
-

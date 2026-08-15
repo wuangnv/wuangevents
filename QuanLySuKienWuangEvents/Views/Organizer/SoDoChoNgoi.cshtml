@@ -1,510 +1,328 @@
-﻿@model SoDoChoNgoi
-@using QuanLySuKienWuangEvents.Models
+@model SoDoChoNgoi
+@using System.Text.Json
+@inject IConfiguration Configuration
 @{
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
-    ViewData["Title"] = "Thiết lập sơ đồ chỗ ngồi";
+    ViewData["Title"] = "Sơ đồ chỗ ngồi";
     var suKienId = (Guid)ViewBag.SuKienId;
-    var loaiVes = ViewBag.LoaiVes as List<LoaiVe> ?? new List<LoaiVe>();
-    var ghe = ViewBag.Ghe as List<ChoNgoi> ?? new List<ChoNgoi>();
-    var hang = ViewBag.Hang as Dictionary<int, string> ?? new Dictionary<int, string>();
-    int soTrong = ghe.Count(g => g.TrangThai == 0);
-    int daBan = ghe.Count(g => g.TrangThai == 2);
-    int daKhoa = ghe.Count(g => g.TrangThai == 3);
-    int daChon = ghe.Count(g => g.TrangThai == 1);
-}
-@section Styles {
-<style>
-.seat-hero {
-    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-    border-radius: 20px;
-    padding: 24px 28px;
-    color: #fff;
-    margin-bottom: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-.seat-hero h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 4px; }
-.seat-hero p { opacity: .85; margin: 0; font-size: .9rem; }
-.seat-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-.seat-stat { background: #fff; border-radius: 14px; padding: 16px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.07); }
-.seat-stat .snum { font-size: 1.8rem; font-weight: 800; line-height: 1; }
-.seat-stat .slbl { font-size: .75rem; color: #888; margin-top: 3px; }
-.s-empty .snum { color: #7c3aed }
-.s-chose .snum { color: #d97706 }
-.s-sold .snum { color: #dc2626 }
-.s-lock .snum { color: #6b7280 }
-.seatmap-wrap { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 24px; overflow-x: auto; }
-.stage-bar {
-    text-align: center;
-    background: linear-gradient(90deg, #7c3aed, #a855f7);
-    color: #fff;
-    padding: 10px 24px;
-    border-radius: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    margin-bottom: 28px;
-    font-size: .9rem;
-}
-.seat-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; min-width: max-content; }
-.seat-row-label { width: 28px; font-weight: 700; color: #666; font-size: .85rem; text-align: center; flex-shrink: 0; }
-.seat-btn { width: 38px; height: 34px; border-radius: 7px; border: none; cursor: pointer; font-size: .72rem; font-weight: 700; transition: .15s; position: relative; }
-.seat-btn:hover { transform: scale(1.1); z-index: 1; }
-.seat-empty { background: #ede9fe; color: #5b21b6; border: 2px solid #c4b5fd }
-.seat-empty:hover { background: #7c3aed; color: #fff }
-.seat-sold { background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; cursor: not-allowed; }
-.seat-lock { background: #e5e7eb; color: #6b7280; border: 2px solid #d1d5db }
-.seat-lock:hover { background: #4b5563; color: #fff }
-.seat-chose { background: #fef9c3; color: #92400e; border: 2px solid #fde68a; cursor: not-allowed; }
-.legend-bar { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
-.legend-item { display: flex; align-items: center; gap: 6px; font-size: .82rem; color: #555; }
-.legend-dot { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; }
-.action-bar { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-@@media(max-width:600px) {
-    .seat-stats { grid-template-columns: repeat(2, 1fr) }
-    .seat-hero { flex-direction: column }
+    var loaiVes = ViewBag.LoaiVes as List<LoaiVe> ?? new();
+    var ghe = ViewBag.Ghe as List<ChoNgoi> ?? new();
+    var hang = ViewBag.Hang as Dictionary<int, string> ?? new();
+    var khuVucTheoHang = ViewBag.KhuVucTheoHang as Dictionary<int, KhuVuc> ?? new();
+    var cacKhuVuc = khuVucTheoHang.Values.GroupBy(x => x.Id).Select(x => x.First()).OrderBy(x => x.ThuTu).ToList();
+    var cacBoCuc = new[] { "auditorium", "theatre", "cinema", "concert", "arena", "custom" };
+    string boCucDaLuu = cacBoCuc.Contains(Model.LoaiSoDo) ? Model.LoaiSoDo : "custom";
+    int soTrong = ghe.Count(x => x.TrangThai == 0), dangGiu = ghe.Count(x => x.TrangThai == 1);
+    int daBan = ghe.Count(x => x.TrangThai == 2), daKhoa = ghe.Count(x => x.TrangThai == 3);
+    bool isExpired = ViewBag.NgayKetThucSuKien != null && VietnamTime.Now > (DateTime)ViewBag.NgayKetThucSuKien;
+    bool isLocked = ViewBag.TrangThaiSuKien is not (0 or 2 or 7) || isExpired;
+    string loaiVeJson = JsonSerializer.Serialize(loaiVes.Select(x => new { id=x.Id,name=x.TenLoaiVe,price=x.GiaBan,total=x.SoLuongTong,color=x.MauSac ?? "#7c3aed" }));
+    string tenSuKienJson = JsonSerializer.Serialize((string?)ViewBag.TenSuKien ?? "");
+    bool suDungKeoTha = Configuration.GetValue<bool?>("SeatMapEditor:EnableDragDrop") ?? true;
 }
 
-/* Styles cho tab chọn mẫu */
-.tpl-container { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.08); padding: 28px; }
-.tpl-tabs { display: flex; gap: 10px; border-bottom: 2px solid #f3f4f6; padding-bottom: 12px; margin-bottom: 24px; overflow-x: auto; }
-.tpl-tab-btn { background: #f3f4f6; color: #4b5563; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: .15s; }
-.tpl-tab-btn:hover { background: #e5e7eb; }
-.tpl-tab-btn.active { background: #7c3aed; color: #fff; }
-.tpl-content { display: none; }
-.tpl-content.active { display: block; }
-.tpl-card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #f9fafb; }
-.tpl-card h3 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-.tpl-card p { color: #666; font-size: .88rem; margin-bottom: 16px; }
-.zone-row { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-.btn-remove-zone { background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; font-size: .8rem; font-weight: 600; cursor: pointer; }
-.btn-remove-zone:hover { background: #fca5a5; }
-.btn-add-zone { background: #ede9fe; color: #5b21b6; border: none; padding: 8px 16px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; margin-top: 10px; }
-.btn-add-zone:hover { background: #ddd6fe; }
+@section Styles {
+<style>
+.seat-admin{max-width:1250px;margin:auto}.hero-seat{background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border-radius:19px;padding:23px 26px;display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px}.hero-seat h1{font-size:1.45rem;font-weight:850;margin:0 0 5px;color:#fff!important}.hero-seat p{margin:0;color:#ddd6fe;font-size:.85rem}.danger-light{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.1);color:#fff;border-radius:10px;padding:9px 12px;font-weight:750}.danger-light:disabled{opacity:.45}.alert-x{border-radius:13px;padding:13px 16px;margin-bottom:17px;font-weight:650;font-size:.86rem}.alert-error{background:#fff1f2;border:1px solid #fecdd3;color:#be123c}.alert-ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#047857}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{background:#fff;border:1px solid #ebe7f3;border-radius:14px;padding:16px;text-align:center}.stat strong{display:block;font-size:1.55rem;color:#6d28d9}.stat span{font-size:.75rem;color:#64748b}.map-box,.builder{background:#fff;border:1px solid #e8e5f2;border-radius:18px;box-shadow:0 8px 28px rgba(49,35,82,.06);padding:23px}.stage{max-width:760px;margin:0 auto 28px;text-align:center;background:linear-gradient(90deg,#ddd6fe,#7c3aed,#ddd6fe);color:#fff;border-radius:50% 50% 10px 10px;padding:9px;font-size:.75rem;font-weight:850;letter-spacing:3px}.map-scroll{overflow:auto}.seat-row{display:flex;justify-content:center;align-items:center;gap:6px;margin:7px 0;min-width:max-content}.row-label{width:32px;text-align:center;color:#94a3b8;font-size:.76rem;font-weight:850}.seat-btn{width:44px;height:36px;border-radius:9px;border:2px solid #c4b5fd;background:#f5f3ff;color:#6d28d9;font-size:.65rem;font-weight:800}.seat-btn:not(:disabled){cursor:pointer}.seat-btn:not(:disabled):hover{background:#7c3aed;color:white}.seat-held{background:#fef3c7;border-color:#f59e0b;color:#92400e}.seat-sold{background:#fee2e2;border-color:#fca5a5;color:#b91c1c}.seat-locked{background:#e2e8f0;border-color:#cbd5e1;color:#64748b}.legend{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;border-top:1px solid #eeeaf5;margin-top:19px;padding-top:16px;font-size:.78rem;color:#64748b}.legend i{width:14px;height:14px;border-radius:4px;display:inline-block;margin-right:5px}.builder-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.builder h2{font-size:1.18rem;font-weight:850;color:#211c3d;margin:0}.template-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin-bottom:20px}.seat-template{position:relative;min-width:0;display:grid;grid-template-columns:42px minmax(0,1fr);gap:11px;align-items:center;text-align:left;border:1px solid #e2dbea;background:#fff;color:#312e81;border-radius:14px;padding:12px;transition:.16s}.seat-template:hover{border-color:#a78bfa;transform:translateY(-2px);box-shadow:0 8px 20px rgba(76,29,149,.09)}.seat-template.active{border:2px solid #7c3aed;background:#faf5ff;padding:11px}.template-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:#ede9fe;color:#7c3aed;font-size:1rem}.seat-template strong{display:block;font-size:.8rem}.seat-template small{display:block;color:#7c8495;font-size:.67rem;margin-top:2px}.seat-template.active:after{content:'✓';position:absolute;top:7px;right:9px;width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:#7c3aed;color:#fff;font-size:.65rem;font-weight:900}.zone-list{display:grid;gap:12px}.zone-card{border:1px solid #e8e5f2;border-left:5px solid var(--zone-color);border-radius:14px;padding:16px}.zone-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.zone-head strong{color:#312e81}.remove-zone{border:0;background:#fff1f2;color:#be123c;border-radius:8px;padding:6px 9px;font-size:.75rem;font-weight:750}.zone-fields{display:grid;grid-template-columns:1.4fr 1.2fr .65fr .65fr .5fr;gap:10px}.field label{display:block;color:#64748b;font-size:.7rem;font-weight:750;margin-bottom:5px}.field input,.field select{width:100%;border:1px solid #d8d4e5;border-radius:9px;padding:9px;font-size:.82rem;background:white}.builder-actions{display:flex;justify-content:space-between;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid #eeeaf5}.add-zone{border:1px solid #ddd6fe;background:#fff;color:#6d28d9;border-radius:10px;padding:10px 13px;font-weight:800}.save-map{border:0;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border-radius:11px;padding:11px 17px;font-weight:850}.none-box{margin-top:18px;padding:14px;border:1px dashed #fca5a5;border-radius:13px;background:#fff7f7;display:flex;justify-content:space-between;gap:12px;align-items:center}.none-box span{font-size:.8rem;color:#7f1d1d}.none-box button{border:1px solid #ef4444;background:#fff;color:#dc2626;border-radius:9px;padding:8px 11px;font-weight:750}@@media(max-width:950px){.template-grid{grid-template-columns:1fr 1fr}}@@media(max-width:850px){.zone-fields{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}.builder-head{display:block}.builder-actions,.none-box{display:block}.save-map,.add-zone,.none-box button{width:100%;margin-top:8px}}@@media(max-width:520px){.template-grid{grid-template-columns:1fr}}
+.template-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.template-preview{width:42px;height:42px;padding:7px;display:grid;gap:3px;border-radius:12px;background:#ede9fe}
+.template-preview i{display:block;background:#8b5cf6;border-radius:3px}
+.preview-auditorium{grid-template-rows:repeat(3,1fr)}
+.preview-theatre{grid-template-rows:repeat(3,1fr);justify-items:center}.preview-theatre i:nth-child(1){width:55%}.preview-theatre i:nth-child(2){width:78%}.preview-theatre i:nth-child(3){width:100%}
+.preview-cinema{grid-template-columns:1fr 1.35fr 1fr;align-items:stretch}.preview-cinema i:nth-child(2){background:#6d28d9}
+.preview-concert{grid-template-columns:1fr 1.35fr 1fr;grid-template-rows:1fr 1fr}.preview-concert i:first-child{grid-column:1 / 4;height:45%;align-self:end}.preview-concert i:nth-child(2){background:#6d28d9}.preview-concert i:nth-child(3){background:#7c3aed}
+.preview-arena{grid-template-columns:1fr 1fr;gap:8px}.preview-arena i{border-radius:8px 3px 3px 8px}.preview-arena i:last-child{border-radius:3px 8px 8px 3px}
+.preview-custom{border:2px dashed #a78bfa;background:#faf5ff;place-items:center;color:#7c3aed;font-weight:900;font-size:1.1rem}
+.layout-preview{margin:0 0 20px;padding:18px;border:1px solid #e8e5f2;border-radius:16px;background:linear-gradient(180deg,#faf9ff,#fff)}
+.layout-preview-title{font-size:.72rem;font-weight:850;letter-spacing:.08em;color:#64748b;text-transform:uppercase;margin-bottom:12px}
+.preview-stage-live{width:62%;margin:0 auto 18px;padding:6px;text-align:center;border-radius:50% 50% 8px 8px;background:linear-gradient(90deg,#ddd6fe,#7c3aed,#ddd6fe);color:#fff;font-size:.62rem;font-weight:850;letter-spacing:2px}
+.preview-zones{max-width:720px;margin:auto;display:grid;gap:10px;align-items:stretch}
+.preview-zone{min-height:58px;padding:10px;border:2px solid var(--preview-color);border-radius:11px;background:color-mix(in srgb,var(--preview-color) 10%,white);display:grid;place-items:center;text-align:center;color:#312e81}
+.preview-zone strong{display:block;font-size:.76rem}.preview-zone small{display:block;margin-top:3px;color:#64748b;font-size:.65rem}
+.layout-auditorium{grid-template-columns:repeat(3,minmax(0,1fr))}.layout-auditorium .preview-zone{min-height:68px}
+.layout-theatre{grid-template-columns:repeat(3,minmax(0,1fr))}.layout-theatre .preview-zone:first-child{grid-column:2;grid-row:1;border-radius:45% 45% 11px 11px}.layout-theatre .preview-zone:nth-child(2){grid-column:1;grid-row:2}.layout-theatre .preview-zone:nth-child(3){grid-column:3;grid-row:2}.layout-theatre .preview-zone:nth-child(4){grid-column:1 / 4;grid-row:3}
+.layout-cinema{grid-template-columns:repeat(3,minmax(0,1fr))}.layout-cinema .preview-zone:first-child{grid-column:1 / 4;grid-row:1}.layout-cinema .preview-zone:nth-child(2){grid-column:2;grid-row:2;border-radius:26px 26px 10px 10px}.layout-cinema .preview-zone:nth-child(3){grid-column:1 / 4;grid-row:3}
+.layout-concert{grid-template-columns:repeat(3,minmax(0,1fr))}.layout-concert .preview-zone:first-child{grid-column:2;grid-row:1;border-radius:28px 28px 10px 10px}.layout-concert .preview-zone:nth-child(2){grid-column:1;grid-row:2}.layout-concert .preview-zone:nth-child(3){grid-column:3;grid-row:2}.layout-concert .preview-zone:nth-child(4){grid-column:1 / 4;grid-row:3}
+.layout-arena{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(62px,auto));gap:12px}.layout-arena:before{content:'KHU TRUNG TÂM';grid-column:2;grid-row:2;display:grid;place-items:center;border:2px dashed #c4b5fd;border-radius:50%;font-size:.62rem;font-weight:850;color:#7c3aed}.layout-arena .preview-zone:nth-child(1){grid-column:2;grid-row:1;border-radius:28px 28px 8px 8px}.layout-arena .preview-zone:nth-child(2){grid-column:1;grid-row:2;border-radius:28px 8px 8px 28px}.layout-arena .preview-zone:nth-child(3){grid-column:3;grid-row:2;border-radius:8px 28px 28px 8px}.layout-arena .preview-zone:nth-child(4){grid-column:2;grid-row:3;border-radius:8px 8px 28px 28px}
+.layout-custom{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))}.layout-custom .preview-zone{border-style:dashed}
+.saved-layout{display:grid;gap:18px;align-items:start;min-width:0}.saved-zone{min-width:0;padding:16px 12px;border:2px solid var(--saved-zone-color,#7c3aed);border-radius:16px;background:color-mix(in srgb,var(--saved-zone-color,#7c3aed) 7%,white)}.saved-zone-title{text-align:center;color:var(--saved-zone-color,#7c3aed);font-size:.78rem;font-weight:850;letter-spacing:.05em;margin-bottom:12px}.saved-zone-scroll{overflow:auto;padding:2px 0 8px}.saved-auditorium,.saved-theatre{grid-template-columns:1fr}.saved-theatre .saved-zone:first-child{width:68%;justify-self:center;border-radius:40% 40% 16px 16px}.saved-cinema{grid-template-columns:1fr 1.35fr 1fr}.saved-cinema .saved-zone:first-child{grid-column:2;grid-row:1}.saved-cinema .saved-zone:nth-child(2){grid-column:1;grid-row:2}.saved-cinema .saved-zone:nth-child(3){grid-column:3;grid-row:2}.saved-arena{grid-template-columns:1fr 1fr;column-gap:70px}.saved-arena .saved-zone:nth-child(odd){border-radius:28px 10px 10px 28px}.saved-arena .saved-zone:nth-child(even){border-radius:10px 28px 28px 10px}.saved-custom{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.saved-custom .saved-zone{border-style:dashed}
+.saved-auditorium{grid-template-columns:repeat(3,minmax(0,1fr))}.saved-auditorium .saved-zone{min-height:160px}
+.saved-theatre{grid-template-columns:repeat(3,minmax(0,1fr))}.saved-theatre .saved-zone:first-child{width:auto;grid-column:2;grid-row:1;border-radius:40% 40% 16px 16px}.saved-theatre .saved-zone:nth-child(2){grid-column:1;grid-row:2}.saved-theatre .saved-zone:nth-child(3){grid-column:3;grid-row:2}.saved-theatre .saved-zone:nth-child(4){grid-column:1 / 4;grid-row:3}
+.saved-cinema{grid-template-columns:repeat(3,minmax(0,1fr))}.saved-cinema .saved-zone:first-child{grid-column:1 / 4;grid-row:1}.saved-cinema .saved-zone:nth-child(2){grid-column:2;grid-row:2;border-radius:28px 28px 14px 14px}.saved-cinema .saved-zone:nth-child(3){grid-column:1 / 4;grid-row:3}
+.saved-arena{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(150px,auto));gap:16px}.saved-arena:before{content:'KHU TRUNG TÂM';grid-column:2;grid-row:2;display:grid;place-items:center;border:2px dashed #c4b5fd;border-radius:50%;font-size:.72rem;font-weight:850;color:#7c3aed}.saved-arena .saved-zone:nth-child(1){grid-column:2;grid-row:1;border-radius:28px 28px 12px 12px}.saved-arena .saved-zone:nth-child(2){grid-column:1;grid-row:2;border-radius:28px 12px 12px 28px}.saved-arena .saved-zone:nth-child(3){grid-column:3;grid-row:2;border-radius:12px 28px 28px 12px}.saved-arena .saved-zone:nth-child(4){grid-column:2;grid-row:3;border-radius:12px 12px 28px 28px}
+@@media(max-width:1150px){.template-grid{grid-template-columns:repeat(3,1fr)}}
+@@media(max-width:950px){.template-grid{grid-template-columns:1fr 1fr}}
+@@media(max-width:520px){.template-grid{grid-template-columns:1fr}}
+@@media(max-width:850px){.saved-layout{grid-template-columns:1fr!important;column-gap:18px}.saved-layout .saved-zone{grid-column:auto!important;grid-row:auto!important;width:100%!important;border-radius:16px!important}}
+.zone-fields{grid-template-columns:1.3fr 1.1fr .58fr .62fr .58fr .48fr .48fr}@@media(max-width:1100px){.zone-fields{grid-template-columns:1fr 1fr 1fr 1fr}}.map-box{overflow:auto}.saved-layout{grid-template-columns:repeat(3,minmax(230px,1fr));grid-auto-rows:auto;gap:18px 20px;min-width:760px}.saved-layout .saved-zone{grid-column:var(--zone-column);grid-row:var(--zone-row);width:100%;max-height:510px;overflow:auto}.saved-layout .saved-zone-scroll{overflow:auto}.saved-zone .seat-btn:not(.seat-held):not(.seat-sold):not(.seat-locked){border-color:var(--saved-zone-color);color:var(--saved-zone-color);background:color-mix(in srgb,var(--saved-zone-color) 12%,white)}.saved-custom .saved-zone{border-style:dashed}
+ .draw-toolbar{display:flex;align-items:end;gap:10px;margin:0 0 14px}.draw-toolbar .field{min-width:260px}.tool-btn{height:38px;border:1px solid #ddd6fe;background:#fff;color:#6d28d9;border-radius:10px;padding:0 12px;font-size:.8rem;font-weight:800}.tool-btn.active{border-color:#7c3aed;background:#f3e8ff}.drag-layout{max-width:none;min-width:840px;grid-template-columns:repeat(12,minmax(62px,1fr));grid-template-rows:repeat(12,42px);gap:4px;padding:10px;border:1px dashed #c4b5fd;border-radius:14px;background:#fafaff;position:relative}.drag-layout .drop-slot{min-height:42px;border:1px dashed #e9e4f4;border-radius:6px;background:rgba(255,255,255,.72);transition:.15s}.drag-layout.drawing .drop-slot{border-color:#d8b4fe}.drag-layout .preview-zone,.drag-layout .preview-stage{position:relative;z-index:2;min-width:0;min-height:0;overflow:hidden;cursor:grab;box-shadow:0 8px 18px color-mix(in srgb,var(--preview-color) 16%,transparent);user-select:none}.drag-layout.template-locked .preview-zone,.drag-layout.template-locked .preview-stage{cursor:default}.drag-layout .preview-zone{padding:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.drag-layout .preview-zone:active,.drag-layout .preview-stage:active{cursor:grabbing}.drag-layout.template-locked .preview-zone:active,.drag-layout.template-locked .preview-stage:active{cursor:default}.drag-layout .preview-zone.dragging,.drag-layout .preview-stage.dragging{opacity:.55}.preview-zone-name{font-size:.67rem!important;line-height:1.1;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mini-seat-grid{display:grid;grid-template-columns:repeat(var(--mini-cols),minmax(6px,1fr));gap:3px;width:min(100%,180px);padding:2px 4px;flex:1;align-content:center}.mini-seat{height:7px;border-radius:3px;border:1px solid var(--preview-color);background:color-mix(in srgb,var(--preview-color) 18%,white);display:block}.drag-layout .preview-zone small{font-size:.59rem;line-height:1}.preview-stage{display:grid;place-items:center;border-radius:16px 16px 7px 7px;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#5b21b6);color:#fff;font-size:.64rem;font-weight:900;letter-spacing:.13em;text-align:center;padding:5px}.preview-stage i{font-size:.66rem}.zone-card{padding:11px 14px}.zone-card .zone-fields{grid-template-columns:1.25fr 1fr 110px}.template-zone-card{padding:10px 14px;background:#fbfaff}.template-zone-card .zone-head{margin:0}.zone-capacity{font-size:.78rem;color:#64748b;display:flex;align-items:center}.zone-list{margin-top:14px}.map-scroll{overflow:auto}.saved-layout{display:grid!important;grid-template-columns:repeat(12,minmax(62px,1fr))!important;grid-template-rows:repeat(12,48px)!important;gap:5px!important;min-width:840px!important;padding:10px}.saved-layout .saved-zone{grid-column:var(--zone-column) / span var(--zone-span-x)!important;grid-row:var(--zone-row) / span var(--zone-span-y)!important;width:100%!important;max-height:none!important;height:100%;overflow:auto}.saved-stage{display:grid;place-items:center;border-radius:16px 16px 7px 7px;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#5b21b6);color:#fff;font-size:.68rem;font-weight:900;letter-spacing:.14em;text-align:center;padding:5px;z-index:1}.saved-custom .saved-zone{border-style:dashed}.layout-preview-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.layout-preview-head .layout-preview-title{margin:0}.map-zoom-controls{display:flex;align-items:center;gap:6px}.map-zoom-controls button{width:30px;height:30px;border:1px solid #ddd6fe;background:#fff;border-radius:8px;color:#6d28d9;font-weight:900}.map-zoom-controls button:hover{background:#f3e8ff}.map-zoom-controls output{min-width:42px;text-align:center;color:#64748b;font-size:.74rem;font-weight:800}.map-design-surface{overflow:auto;border-radius:14px}.map-ticket-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.map-ticket-key{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #ece7f7;border-radius:999px;background:#fff;color:#4b5563;font-size:.72rem;font-weight:750}.map-ticket-key i{width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--ticket-color)}.template-customize{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;padding:11px 13px;border:1px solid #ddd6fe;border-radius:12px;background:#faf7ff}.template-customize span{color:#5b21b6;font-size:.78rem;font-weight:800}.template-customize button{border:0;border-radius:9px;background:#6d28d9;color:#fff;padding:8px 11px;font-size:.76rem;font-weight:850}.tool-group{display:flex;gap:8px;flex-wrap:wrap}.tool-btn{display:inline-flex;align-items:center;justify-content:center;gap:4px}.drag-layout.custom-tool-stage .drop-slot{border-color:#c4b5fd;background:#faf5ff}.drag-layout.custom-tool-stage{cursor:copy}.drag-layout.custom-tool-stage .preview-stage{outline:3px solid rgba(124,58,237,.18)}@@media(max-width:850px){.draw-toolbar{display:block}.draw-toolbar .field,.tool-btn{width:100%;margin-bottom:8px}.tool-group{display:grid;grid-template-columns:1fr 1fr}.map-zoom-controls{flex-shrink:0}.template-customize{display:block}.template-customize button{width:100%;margin-top:9px}.saved-layout{min-width:760px!important;grid-template-columns:repeat(12,minmax(54px,1fr))!important}.saved-layout .saved-zone{grid-column:var(--zone-column) / span var(--zone-span-x)!important;grid-row:var(--zone-row) / span var(--zone-span-y)!important;border-radius:14px!important}}
+/* Canvas thiết kế trực quan: hiển thị ghế, chọn khu, kéo di chuyển/đổi kích thước. */
+.layout-preview-title-wrap{display:flex;align-items:center;gap:9px;min-width:0}.map-summary{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#f4f0ff;color:#6d28d9;font-size:.72rem;font-weight:800;white-space:nowrap}.map-summary i{font-size:.68rem}.designer-mode{display:flex;align-items:center;gap:7px;margin:0 0 12px}.designer-mode span{font-size:.74rem;color:#64748b;font-weight:750}.designer-mode strong{font-size:.78rem;color:#312e81}.drag-layout .preview-zone{justify-content:flex-start;padding:20px 9px 9px;gap:5px;border-width:2px;transition:transform .15s,box-shadow .15s,outline .15s}.drag-layout .preview-zone:hover{transform:translateY(-1px);box-shadow:0 12px 24px color-mix(in srgb,var(--preview-color) 26%,transparent)}.drag-layout .preview-zone.selected-zone{outline:3px solid #6d28d9;outline-offset:2px;box-shadow:0 0 0 5px rgba(124,58,237,.14),0 12px 24px color-mix(in srgb,var(--preview-color) 24%,transparent)}.drag-handle{position:absolute;top:5px;left:6px;width:20px;height:20px;display:grid;place-items:center;border-radius:6px;background:rgba(255,255,255,.82);color:#5b21b6;font-size:.58rem;z-index:3}.resize-handle{position:absolute;right:5px;bottom:5px;width:18px;height:18px;border:0;border-radius:5px;background:#fff;color:#5b21b6;font-size:.63rem;display:grid;place-items:center;cursor:nwse-resize;box-shadow:0 2px 7px rgba(49,46,129,.18);z-index:4}.resize-handle:hover{background:#ede9fe}.mini-seat-grid{width:min(100%,230px);padding:3px 5px;gap:4px}.mini-seat{height:10px;border-radius:5px 5px 3px 3px;border:1px solid var(--preview-color);background:color-mix(in srgb,var(--preview-color) 20%,white);box-shadow:inset 0 2px 0 color-mix(in srgb,var(--preview-color) 48%,white),0 1px 1px rgba(15,23,42,.08);position:relative}.mini-seat:after{content:"";position:absolute;left:18%;right:18%;bottom:-3px;height:3px;border-radius:0 0 3px 3px;background:var(--preview-color);opacity:.68}.drag-layout .preview-zone small{margin-top:auto;font-size:.66rem;font-weight:800;background:rgba(255,255,255,.66);padding:2px 6px;border-radius:999px}.preview-zone-name{font-size:.72rem!important;font-weight:850}.zone-inspector{margin:0 0 14px;padding:15px 16px;border:1px solid #ded4ff;border-radius:15px;background:linear-gradient(135deg,#fbfaff,#f6f3ff);box-shadow:0 8px 18px rgba(76,29,149,.05)}.zone-inspector-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.zone-inspector-head strong{color:#312e81;font-size:.88rem}.zone-inspector-head span{color:#64748b;font-size:.74rem;font-weight:750}.zone-inspector-grid{display:grid;grid-template-columns:minmax(180px,1.2fr) minmax(180px,1fr) auto;gap:10px;align-items:end}.zone-stepper{display:flex;align-items:center;gap:6px;height:40px;border:1px solid #ddd6fe;border-radius:10px;background:#fff;padding:4px 5px}.zone-stepper button{width:29px;height:29px;border:0;border-radius:7px;background:#f3e8ff;color:#6d28d9;font-weight:900}.zone-stepper button:hover{background:#ddd6fe}.zone-stepper strong{flex:1;text-align:center;font-size:.78rem;color:#312e81}.inspector-actions{display:flex;gap:7px;flex-wrap:wrap}.inspector-actions button{height:40px;border-radius:10px;padding:0 11px;font-size:.76rem;font-weight:800}.duplicate-zone{border:1px solid #c4b5fd;background:#fff;color:#6d28d9}.remove-selected-zone{border:1px solid #fecaca;background:#fff;color:#dc2626}.zone-list-title{display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px;color:#475569;font-size:.76rem;font-weight:850}.zone-card.selected-card{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(124,58,237,.1)}.zone-card{cursor:pointer}.zone-card .zone-head strong:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--zone-color,#7c3aed);margin-right:7px}.tool-btn.select-tool{background:#fff}.tool-btn.select-tool.active{background:#ede9fe}.drag-layout.custom-tool-select .drop-slot{cursor:default}.drag-layout.custom-tool-draw .drop-slot{cursor:crosshair}.drag-layout.custom-tool-stage .drop-slot{cursor:copy}@@media(max-width:850px){.layout-preview-head{align-items:flex-start}.layout-preview-title-wrap{display:block}.map-summary{margin-top:6px}.zone-inspector-grid{grid-template-columns:1fr}.inspector-actions{display:grid;grid-template-columns:1fr 1fr}.designer-mode{display:block}.designer-mode strong{display:block;margin-top:3px}.mini-seat{height:8px}.mini-seat-grid{gap:3px}}
 </style>
 }
 
-@{
-    bool isExpired = ViewBag.NgayKetThucSuKien != null && DateTime.UtcNow > (DateTime)ViewBag.NgayKetThucSuKien;
-    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6 || isExpired;
-    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG BÁN VÉ" : "ĐÃ BỊ HỦY BỎ";
-}
+<main class="seat-admin">
+    @if (isLocked) { <div class="alert-x alert-error"><i class="fas fa-lock me-2"></i>Sự kiện đang khóa nghiệp vụ hoặc đã kết thúc; không thể thay đổi sơ đồ.</div> }
+    @if (TempData["Error"] != null) { <div class="alert-x alert-error"><i class="fas fa-circle-exclamation me-2"></i>@TempData["Error"]</div> }
+    @if (TempData["Message"] != null) { <div class="alert-x alert-ok"><i class="fas fa-circle-check me-2"></i>@TempData["Message"]</div> }
 
-@if (isLocked)
-{
-    <div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
-        <i class="fas fa-exclamation-triangle fs-4"></i>
-        <div>
-            <strong>Cảnh báo:</strong> Sự kiện này hiện tại đang 
-            <strong>@lockReason</strong>. 
-            Mọi tính năng cấu hình sơ đồ ghế, mở/khóa ghế đã bị vô hiệu hóa.
-        </div>
+    <div class="hero-seat"><div><h1><i class="fas fa-chair me-2"></i>Sơ đồ chỗ ngồi</h1><p>@ViewBag.TenSuKien</p></div>
+        @if(Model.Id != 0){<form method="post" action="/Organizer/XoaSoDo" data-confirm="Xóa toàn bộ sơ đồ ghế của sự kiện?" data-confirm-title="Xóa sơ đồ ghế" data-confirm-button="Xóa sơ đồ">@Html.AntiForgeryToken()<input type="hidden" name="suKienId" value="@suKienId" /><button class="danger-light" disabled="@(isLocked || dangGiu > 0 || daBan > 0)" title="Không thể xóa khi đã có đơn/vé" type="submit"><i class="fas fa-trash me-1"></i>Xóa sơ đồ</button></form>}
     </div>
-}
 
-<div class="seat-hero">
-    <div>
-        <h1><i class="fas fa-chair"></i> Sơ đồ chỗ ngồi</h1>
-        <p>@ViewBag.TenSuKien</p>
-    </div>
     @if (Model.Id != 0)
     {
-        <form method="post" action="/Organizer/XoaSoDo" onsubmit="return confirm('Xóa sơ đồ này? Tất cả ghế sẽ bị xóa!')">
-            <input type="hidden" name="suKienId" value="@suKienId" />
-            <button class="btn btn-outline" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)" type="submit">
-                <i class="fas fa-trash"></i> Xóa sơ đồ
-            </button>
-        </form>
-    }
-</div>
-
-@if (TempData["Message"] != null)
-{
-    <div class="alert alert-success mb-4"><i class="fas fa-circle-check"></i> @TempData["Message"]</div>
-}
-
-@if (Model.Id != 0)
-{
-    <div class="seat-stats">
-        <div class="seat-stat s-empty"><div class="snum">@soTrong</div><div class="slbl">Ghế trống</div></div>
-        <div class="seat-stat s-chose"><div class="snum">@daChon</div><div class="slbl">Đã đặt</div></div>
-        <div class="seat-stat s-sold"><div class="snum">@daBan</div><div class="slbl">Đã bán</div></div>
-        <div class="seat-stat s-lock"><div class="snum">@daKhoa</div><div class="slbl">Bị khóa</div></div>
-    </div>
-
-    <div class="action-bar">
-        <a href="/Organizer/LoaiVe?suKienId=@suKienId" class="btn btn-outline-primary btn-sm" style="border-radius: 8px;">
-            <i class="fas fa-ticket me-1"></i> Quản lý loại vé
-        </a>
-        <span style="color:#888;align-self:center;font-size:.85rem">
-            <i class="fas fa-info-circle me-1"></i> Click vào ghế trống/khóa để khóa hoặc mở khóa vị trí.
-        </span>
-    </div>
-
-    <div class="seatmap-wrap">
-        <div class="stage-bar"><i class="fas fa-star"></i> SÂN KHẤU / MÀN HÌNH <i class="fas fa-star"></i></div>
-        @foreach (var row in ghe.GroupBy(x => x.HangGheId))
-        {
-            <div class="seat-row">
-                <span class="seat-row-label">@hang.GetValueOrDefault(row.Key)</span>
-                @foreach (var seat in row)
+        <div class="stats"><div class="stat"><strong>@soTrong</strong><span>Ghế trống</span></div><div class="stat"><strong style="color:#d97706">@dangGiu</strong><span>Đang giữ</span></div><div class="stat"><strong style="color:#dc2626">@daBan</strong><span>Đã bán</span></div><div class="stat"><strong style="color:#64748b">@daKhoa</strong><span>Đã khóa</span></div></div>
+        <section class="map-box"><div class="map-scroll">
+            <div class="saved-layout saved-@boCucDaLuu">
+                @{
+                    bool coToaDoCanvas = Model.SanKhauX is >= 1 and <= 9 && Model.SanKhauY is >= 1 and <= 12;
+                    int sanKhauX = coToaDoCanvas ? Model.SanKhauX!.Value : 5;
+                    int sanKhauY = coToaDoCanvas ? Model.SanKhauY!.Value : 1;
+                    string nhanSanKhau = boCucDaLuu == "cinema" ? "MÀN HÌNH" : "SÂN KHẤU";
+                }
+                <div class="saved-stage" style="grid-column:@sanKhauX / span 4;grid-row:@sanKhauY">@nhanSanKhau</div>
+                @foreach (var zone in cacKhuVuc)
                 {
-                    <form method="post" action="/Organizer/DoiTrangThaiGhe" style="margin:0">
-                        <input type="hidden" name="suKienId" value="@suKienId" />
-                        <input type="hidden" name="seatId" value="@seat.Id" />
-                        @{
-                            string cls = seat.TrangThai switch {
-                                2 => "seat-btn seat-sold",
-                                3 => "seat-btn seat-lock",
-                                1 => "seat-btn seat-chose",
-                                _ => "seat-btn seat-empty"
-                            };
-                            string title = seat.TrangThai switch {
-                                2 => "Đã bán – không thể thay đổi",
-                                3 => "Đang bị khóa – Click để mở khóa",
-                                1 => "Đã đặt trước",
-                                _ => "Ghế trống – Click để khóa"
-                            };
-                            bool disabled = seat.TrangThai == 2 || seat.TrangThai == 1 || isLocked;
-                        }
-                        <button class="@cls" title="@title" @(disabled ? "disabled" : "") type="@(disabled ? "button" : "submit")">@seat.SoGhe</button>
-                    </form>
+                    var zoneRows = ghe.GroupBy(x => x.HangGheId)
+                        .Where(row => khuVucTheoHang.GetValueOrDefault(row.Key)?.Id == zone.Id)
+                        .ToList();
+                    int soGheMoiHang = zoneRows.Select(row => row.Count()).DefaultIfEmpty(1).Max();
+                    int soHangKhu = zoneRows.Count;
+                    int zoneRong = Math.Clamp((int)Math.Ceiling(soGheMoiHang / 3d), 1, 12);
+                    int zoneCao = Math.Clamp((int)Math.Ceiling(soHangKhu / 2d), 1, 12);
+                    int zoneColumn = coToaDoCanvas && zone.ViTriX is >= 1 and <= 12
+                        ? zone.ViTriX.Value : ((zone.ThuTu - 1) % 3) * 4 + 1;
+                    int zoneRow = coToaDoCanvas && zone.ViTriY is >= 1 and <= 12
+                        ? zone.ViTriY.Value : ((zone.ThuTu - 1) / 3) * 5 + 3;
+                    <section class="saved-zone" style="--saved-zone-color:@(zone.MauSac ?? "#7c3aed");--zone-column:@zoneColumn;--zone-row:@zoneRow;--zone-span-x:@zoneRong;--zone-span-y:@zoneCao">
+                        <div class="saved-zone-title">@zone.TenKhuVuc</div>
+                        <div class="saved-zone-scroll">
+                            @foreach (var row in zoneRows)
+                            {
+                                <div class="seat-row"><span class="row-label">@hang.GetValueOrDefault(row.Key)</span>@foreach(var seat in row){
+                                    string cls=seat.TrangThai==1?"seat-btn seat-held":seat.TrangThai==2?"seat-btn seat-sold":seat.TrangThai==3?"seat-btn seat-locked":"seat-btn";
+                                    bool disabled=isLocked || seat.TrangThai is 1 or 2;
+                                    <form method="post" action="/Organizer/DoiTrangThaiGhe" style="margin:0">@Html.AntiForgeryToken()<input type="hidden" name="suKienId" value="@suKienId" /><input type="hidden" name="seatId" value="@seat.Id" /><button class="@cls" type="@(disabled?"button":"submit")" disabled="@disabled" title="@(seat.TrangThai==0?"Bấm để khóa":seat.TrangThai==3?"Bấm để mở khóa":seat.TrangThai==1?"Đang được khách giữ":"Đã bán")">@seat.SoGhe</button></form>
+                                }</div>
+                            }
+                        </div>
+                    </section>
                 }
             </div>
-        }
-        <div class="legend-bar">
-            <div class="legend-item"><div class="legend-dot" style="background:#ede9fe;border:2px solid #c4b5fd"></div> Trống (@soTrong)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:2px solid #fde68a"></div> Đã đặt (@daChon)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:2px solid #fca5a5"></div> Đã bán (@daBan)</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#e5e7eb;border:2px solid #d1d5db"></div> Khóa (@daKhoa)</div>
-        </div>
-    </div>
-}
-else
-{
-    <div class="tpl-container">
-        <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:16px;color:#1a1a2e">Cấu hình sơ đồ chỗ ngồi cho sự kiện</h2>
-        
-        @if (!loaiVes.Any())
-        {
-            <div class="alert alert-warning">
-                <i class="fas fa-exclamation-triangle me-1"></i> Vui lòng tạo ít nhất 1 loại vé trước khi thiết lập sơ đồ chỗ ngồi.
+            <div class="legend"><span><i style="background:#f5f3ff;border:1px solid #c4b5fd"></i>Trống</span><span><i style="background:#fef3c7;border:1px solid #f59e0b"></i>Đang giữ</span><span><i style="background:#fee2e2;border:1px solid #fca5a5"></i>Đã bán</span><span><i style="background:#e2e8f0;border:1px solid #cbd5e1"></i>Đã khóa</span></div>
+        </section>
+    }
+    else if (!loaiVes.Any())
+    {
+        <div class="alert-x alert-error">Vui lòng <a href="/Organizer/LoaiVe?suKienId=@suKienId">tạo loại vé</a> trước khi thiết lập sơ đồ.</div>
+    }
+    else
+    {
+        <section class="builder">
+            <div class="builder-head"><div><h2>Mẫu bố trí</h2></div></div>
+            <div class="template-grid">
+                <button type="button" class="seat-template active" data-template="auditorium" onclick="applyTemplate('auditorium')"><span class="template-preview preview-auditorium"><i></i><i></i><i></i></span><span><strong>Hội nghị / hội trường</strong><small>Ba khối ghế và lối đi giữa</small></span></button>
+                <button type="button" class="seat-template" data-template="theatre" onclick="applyTemplate('theatre')"><span class="template-preview preview-theatre"><i></i><i></i><i></i></span><span><strong>Nhà hát</strong><small>Tầng trệt, hai cánh, ban công</small></span></button>
+                <button type="button" class="seat-template" data-template="cinema" onclick="applyTemplate('cinema')"><span class="template-preview preview-cinema"><i></i><i></i><i></i></span><span><strong>Rạp chiếu phim</strong><small>Màn hình, VIP trung tâm, hàng sau</small></span></button>
+                <button type="button" class="seat-template" data-template="concert" onclick="applyTemplate('concert')"><span class="template-preview preview-concert"><i></i><i></i><i></i></span><span><strong>Concert có ghế ngồi</strong><small>VIP gần sân khấu, CAT hai bên</small></span></button>
+                <button type="button" class="seat-template" data-template="custom" onclick="applyCustomLayout()"><span class="template-preview preview-custom">+</span><span><strong>Tùy chỉnh</strong><small>Tự vẽ bố cục ghế</small></span></button>
             </div>
-        }
-        else
-        {
-            <div class="tpl-tabs">
-                <button class="tpl-tab-btn active" onclick="switchTab('tab-cinema')"><i class="fas fa-film me-1"></i> Rạp chiếu phim</button>
-                <button class="tpl-tab-btn" onclick="switchTab('tab-theater')"><i class="fas fa-masks-theater me-1"></i> Nhà hát / Hội trường</button>
-                <button class="tpl-tab-btn" onclick="switchTab('tab-music')"><i class="fas fa-music me-1"></i> Show ca nhạc</button>
-                <button class="tpl-tab-btn" onclick="switchTab('tab-simple')"><i class="fas fa-border-all me-1"></i> Sơ đồ đơn giản</button>
-                <button class="tpl-tab-btn" onclick="switchTab('tab-custom')"><i class="fas fa-sliders me-1"></i> Tùy chỉnh Zones</button>
-                <button class="tpl-tab-btn" style="border:1.5px solid #dc3545;color:#dc3545;background:#fff" onclick="switchTab('tab-none')">
-                    <i class="fas fa-times-circle me-1"></i> Không sử dụng sơ đồ
-                </button>
+            <div class="layout-preview">
+                <div class="layout-preview-head"><div class="layout-preview-title-wrap"><div class="layout-preview-title">Bố trí sơ đồ</div><span id="mapSummary" class="map-summary"><i class="fas fa-chair"></i>0 ghế</span></div><div class="map-zoom-controls" aria-label="Thu phóng sơ đồ"><button type="button" id="zoomOut" title="Thu nhỏ" aria-label="Thu nhỏ">−</button><output id="zoomValue">100%</output><button type="button" id="zoomIn" title="Phóng to" aria-label="Phóng to">+</button></div></div>
+                <div class="map-design-surface"><div id="previewZones" class="preview-zones layout-auditorium"></div></div>
+                <div id="mapTicketLegend" class="map-ticket-legend"></div>
+                <div id="templateCustomize" class="template-customize"><span><i class="fas fa-lock me-1"></i>Mẫu chuẩn</span><button type="button" id="cloneTemplate"><i class="fas fa-copy me-1"></i>Dùng làm bản tùy chỉnh</button></div>
             </div>
+            <form method="post" action="/Organizer/TaoSoDo" id="mapForm">
+                @Html.AntiForgeryToken()<input type="hidden" name="suKienId" value="@suKienId" /><input type="hidden" name="loaiSoDo" id="mapType" value="auditorium" /><input type="hidden" name="sanKhauX" id="stageX" value="5" /><input type="hidden" name="sanKhauY" id="stageY" value="1" />
+                <div class="field mb-3" style="max-width:460px"><label>Tên sơ đồ</label><input id="mapName" name="tenSoDo" value="Hội trường - @ViewBag.TenSuKien" maxlength="200" required /></div>
+                <div class="draw-toolbar" id="drawToolbar"><div class="field"><label>Loại vé đang vẽ</label><select id="drawingTicket"></select></div><div class="tool-group"><button type="button" class="tool-btn select-tool" id="selectTool"><i class="fas fa-arrow-pointer me-1"></i>Chọn khu</button><button type="button" class="tool-btn active" id="drawTool"><i class="fas fa-pen-ruler me-1"></i>Vẽ khu ghế</button><button type="button" class="tool-btn" id="stageTool"><i class="fas fa-arrows-up-down-left-right me-1"></i>Đặt sân khấu</button></div></div>
+                <div id="zoneInspector" class="zone-inspector" hidden></div>
+                <div class="zone-list-title" id="zoneListTitle" hidden><span>Danh sách khu vực</span><span id="zoneCount"></span></div><div id="zoneList" class="zone-list"></div>
+                <div class="builder-actions"><button type="button" class="add-zone" onclick="addZone()"><i class="fas fa-plus me-1"></i>Thêm khu vực</button><button type="submit" class="save-map" disabled="@isLocked"><i class="fas fa-save me-1"></i>Tạo sơ đồ</button></div>
+            </form>
+            <div class="none-box"><span><strong>Hình thức bán vé</strong></span><form method="post" action="/Organizer/TaoSoDo">@Html.AntiForgeryToken()<input type="hidden" name="suKienId" value="@suKienId" /><input type="hidden" name="tenSoDo" value="Không dùng sơ đồ" /><input type="hidden" name="loaiSoDo" value="none" /><button type="submit" disabled="@isLocked">Bán vé không chọn ghế</button></form></div>
+        </section>
+    }
+</main>
 
-            <!-- 1. RAP CHIEU PHIM -->
-            <div class="tpl-content active" id="tab-cinema">
-                <form method="post" action="/Organizer/TaoSoDo">
-                    <input type="hidden" name="suKienId" value="@suKienId" />
-                    <input type="hidden" name="loaiSoDo" value="cinema" />
-                    <input type="hidden" name="tenSoDo" value="Rạp chiếu phim tiêu chuẩn" />
-                    <div class="tpl-card">
-                        <h3><i class="fas fa-film" style="color:#7c3aed"></i> Rạp chiếu phim tiêu chuẩn</h3>
-                        <p>Sơ đồ gồm 2 khu vực: <strong>Standard</strong> (hiệu lực từ hàng A–D, mỗi hàng 12 ghế) và <strong>VIP</strong> (từ hàng E–H, mỗi hàng 14 ghế).</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Gán loại vé cho khu Standard</label>
-                                <select class="form-select" name="cinemaNormalLoaiVeId">
-                                    @foreach (var lv in loaiVes)
-                                    {
-                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Gán loại vé cho khu VIP</label>
-                                <select class="form-select" name="cinemaVipLoaiVeId">
-                                    @foreach (var lv in loaiVes)
-                                    {
-                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Áp dụng mẫu Rạp phim</button>
-                </form>
-            </div>
-
-            <!-- 2. NHA HAT / HOI TRUONG -->
-            <div class="tpl-content" id="tab-theater">
-                <form method="post" action="/Organizer/TaoSoDo">
-                    <input type="hidden" name="suKienId" value="@suKienId" />
-                    <input type="hidden" name="loaiSoDo" value="theater" />
-                    <input type="hidden" name="tenSoDo" value="Sơ đồ Nhà hát / Hội trường" />
-                    <div class="tpl-card">
-                        <h3><i class="fas fa-masks-theater" style="color:#7c3aed"></i> Nhà hát / Hội trường</h3>
-                        <p>Gồm 2 khu vực: <strong>VIP Front</strong> (hàng A–C sát sân khấu, mỗi hàng 10 ghế) và <strong>Standard Back</strong> (hàng D–J, mỗi hàng 12 ghế).</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Gán loại vé cho khu Standard</label>
-                                <select class="form-select" name="theaterNormalLoaiVeId">
-                                    @foreach (var lv in loaiVes)
-                                    {
-                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Gán loại vé cho khu VIP Front</label>
-                                <select class="form-select" name="theaterVipLoaiVeId">
-                                    @foreach (var lv in loaiVes)
-                                    {
-                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Áp dụng mẫu Nhà hát</button>
-                </form>
-            </div>
-
-            <!-- 3. SHOW CA NHAC -->
-            <div class="tpl-content" id="tab-music">
-                <form method="post" action="/Organizer/TaoSoDo">
-                    <input type="hidden" name="suKienId" value="@suKienId" />
-                    <input type="hidden" name="loaiSoDo" value="music" />
-                    <input type="hidden" name="tenSoDo" value="Sơ đồ Show ca nhạc" />
-                    <div class="tpl-card">
-                        <h3><i class="fas fa-music" style="color:#7c3aed"></i> Show ca nhạc / Sân vận động mini</h3>
-                        <p>Gồm 2 khu vực: <strong>VIP Fanzone</strong> (hàng A–D, mỗi hàng 8 ghế sát sân khấu) và <strong>Standard Seating</strong> (hàng E–L phía sau, mỗi hàng 14 ghế).</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Gán loại vé cho Standard Seating</label>
-                                <select class="form-select" name="musicNormalLoaiVeId">
-                                    @foreach (var lv in loaiVes)
-                                    {
-                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Gán loại vé cho VIP Fanzone</label>
-                                <select class="form-select" name="musicVipLoaiVeId">
-                                    @foreach (var lv in loaiVes)
-                                    {
-                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Áp dụng mẫu Show ca nhạc</button>
-                </form>
-            </div>
-
-            <!-- 4. SO DO DON GIAN (1 ZONE) -->
-            <div class="tpl-content" id="tab-simple">
-                <form method="post" action="/Organizer/TaoSoDo">
-                    <input type="hidden" name="suKienId" value="@suKienId" />
-                    <input type="hidden" name="loaiSoDo" value="simple" />
-                    <div class="tpl-card">
-                        <h3><i class="fas fa-border-all" style="color:#7c3aed"></i> Sơ đồ đơn giản (Một khu vực)</h3>
-                        <p>Khởi tạo một khu vực ghế duy nhất với số lượng hàng và số ghế mỗi hàng tùy ý.</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Tên sơ đồ</label>
-                                <input class="form-control" name="tenSoDo" value="Sơ đồ chính" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Loại vé áp dụng</label>
-                                <select class="form-select" name="simpleLoaiVeId">
-                                    @foreach (var lv in loaiVes)
-                                    {
-                                        <option value="@lv.Id">@lv.TenLoaiVe (@lv.GiaBan.ToString("N0") VND)</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Số hàng (A–Z, tối đa 26)</label>
-                                <input class="form-control" type="number" name="simpleSoHang" min="1" max="26" value="6" />
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Số ghế mỗi hàng (tối đa 50)</label>
-                                <input class="form-control" type="number" name="simpleSoGheMoiHang" min="1" max="50" value="10" />
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Khởi tạo sơ đồ</button>
-                </form>
-            </div>
-
-            <!-- 5. TUY CHINH ZONES (MULTI-ZONE DONG) -->
-            <div class="tpl-content" id="tab-custom">
-                <form method="post" action="/Organizer/TaoSoDo">
-                    <input type="hidden" name="suKienId" value="@suKienId" />
-                    <input type="hidden" name="loaiSoDo" value="custom" />
-                    <div class="tpl-card">
-                        <h3><i class="fas fa-sliders" style="color:#7c3aed"></i> Tùy chỉnh nhiều khu vực (Multi-Zone)</h3>
-                        <p>Tự thiết lập từng khu vực với loại vé và số lượng ghế riêng biệt. Các hàng sẽ tự động được đánh số kế tiếp nhau.</p>
-                        
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Tên sơ đồ tổng thể</label>
-                            <input class="form-control" style="max-width:300px" name="tenSoDo" value="Sơ đồ tùy chỉnh" required />
-                        </div>
-
-                        <div id="customZonesContainer">
-                            <!-- Zone 1 default -->
-                            <div class="zone-row" id="zone-idx-0">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <strong style="color:#7c3aed">Khu vực #1</strong>
-                                    <button type="button" class="btn-remove-zone" onclick="removeCustomZone(0)" style="display:none">Xóa</button>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label small fw-semibold">Tên khu vực</label>
-                                        <input class="form-control form-control-sm" name="zoneTen[0]" value="Khu VIP" required />
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label small fw-semibold">Gán loại vé</label>
-                                        <select class="form-select form-select-sm" name="zoneLoaiVeId[0]">
-                                            @foreach (var lv in loaiVes)
-                                            {
-                                                <option value="@lv.Id">@lv.TenLoaiVe</option>
-                                            }
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label small fw-semibold">Số hàng</label>
-                                        <input class="form-control form-control-sm" type="number" name="zoneSoHang[0]" min="1" max="20" value="3" />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label small fw-semibold">Ghế/hàng</label>
-                                        <input class="form-control form-control-sm" type="number" name="zoneSoGheMoiHang[0]" min="1" max="30" value="8" />
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label small fw-semibold">Màu sắc</label>
-                                        <input class="form-control form-control-sm" type="color" name="zoneMauSac[0]" value="#dc3545" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="button" class="btn-add-zone" onclick="addCustomZone()"><i class="fas fa-plus me-1"></i> Thêm khu vực</button>
-                    </div>
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-magic me-1"></i> Khởi tạo sơ đồ tùy chỉnh</button>
-                </form>
-            </div>
-
-            <!-- 6. KHONG SU DUNG SO DO -->
-            <div class="tpl-content" id="tab-none">
-                <form method="post" action="/Organizer/TaoSoDo">
-                    <input type="hidden" name="suKienId" value="@suKienId" />
-                    <input type="hidden" name="loaiSoDo" value="none" />
-                    <div class="tpl-card" style="border-color:#fca5a5;background:#fff5f5">
-                        <h3 style="color:#c53030"><i class="fas fa-exclamation-circle"></i> Không sử dụng sơ đồ chỗ ngồi</h3>
-                        <p style="color:#742a2a">Sự kiện của bạn sẽ <strong>không hiển thị sơ đồ chọn ghế</strong> lúc đặt vé. Khách mua vé sẽ tự động nhận vé đứng tự do (Standing) hoặc hệ thống tự xếp ngẫu nhiên mà không cần chọn chỗ ngồi.</p>
-                        <p style="color:#742a2a;margin-bottom:0"><i>* Nếu đã có sơ đồ cũ trên hệ thống, sơ đồ đó sẽ bị xóa hoàn toàn khỏi cơ sở dữ liệu.</i></p>
-                    </div>
-                    <button class="btn btn-danger" type="submit"><i class="fas fa-ban me-1"></i> Hủy bỏ sơ đồ ghế – dùng vé đứng/ngẫu nhiên</button>
-                </form>
-            </div>
-        }
-    </div>
-}
-
+@if(Model.Id == 0 && loaiVes.Any()){
 @section Scripts {
 <script>
-function switchTab(tabId){
-    document.querySelectorAll('.tpl-tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tpl-content').forEach(c => c.classList.remove('active'));
-    
-    const targetBtn = Array.from(document.querySelectorAll('.tpl-tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
-    if(targetBtn) targetBtn.classList.add('active');
-    
-    document.getElementById(tabId).classList.add('active');
+const ticketTypes=@Html.Raw(loaiVeJson);
+const eventName=@Html.Raw(tenSuKienJson);
+const dragDropEditorEnabled=@(suDungKeoTha ? "true" : "false");
+const canvasColumns=12, canvasRows=12, stageWidth=4;
+let zones=[], stage={x:5,y:1}, stagePlacementMode=false, activeTool='draw', previewZoom=1, selectedZoneIndex=-1;
+const seatTemplates={auditorium:{label:'Hội nghị / hội trường'},theatre:{label:'Nhà hát'},cinema:{label:'Rạp chiếu phim'},concert:{label:'Concert có ghế ngồi'}};
+const ticketById=id=>ticketTypes.find(ticket=>Number(ticket.id)===Number(id));
+const zoneWidth=zone=>Math.max(1,Math.min(canvasColumns,Math.ceil(Number(zone.cols)/3)));
+const zoneHeight=zone=>Math.max(1,Math.min(canvasRows,Math.ceil(Number(zone.rows)/2)));
+const zoneCapacity=zone=>Number(zone.rows)*Number(zone.cols);
+const usedSeats=ticketId=>zones.filter(zone=>Number(zone.ticketId)===Number(ticketId)).reduce((sum,zone)=>sum+zoneCapacity(zone),0);
+const overlap=(a,b)=>a.x<=b.x+b.w-1&&a.x+a.w-1>=b.x&&a.y<=b.y+b.h-1&&a.y+a.h-1>=b.y;
+function fitZone(name,ticket,x,y,w,h,allocated){
+    const available=Number(ticket.total)-(allocated.get(ticket.id)||0);if(available<1)return null;
+    const maxCols=w*3,maxRows=h*2,capacity=Math.min(available,maxCols*maxRows);
+    const idealCols=Math.round(Math.sqrt(capacity*maxCols/maxRows));
+    const cols=Math.max(1,Math.min(maxCols,idealCols));
+    const rows=Math.max(1,Math.min(maxRows,Math.floor(capacity/cols)));
+    const zone={name,ticketId:ticket.id,rows,cols,color:ticket.color||'#7c3aed',x,y};
+    allocated.set(ticket.id,(allocated.get(ticket.id)||0)+zoneCapacity(zone));
+    return zone;
 }
-
-let zoneIndex = 1;
-const loaiVesOptions = `@Html.Raw(string.Join("", loaiVes.Select(lv => $"<option value='{lv.Id}'>{lv.TenLoaiVe}</option>")))`;
-
-function addCustomZone(){
-    const container = document.getElementById('customZonesContainer');
-    const idx = zoneIndex++;
-    const div = document.createElement('div');
-    div.className = 'zone-row';
-    div.id = 'zone-idx-' + idx;
-    div.innerHTML = `
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <strong style="color:#7c3aed">Khu vực #${idx + 1}</strong>
-            <button type="button" class="btn-remove-zone" onclick="removeCustomZone(${idx})">Xóa</button>
-        </div>
-        <div class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold">Tên khu vực</label>
-                <input class="form-control form-control-sm" name="zoneTen[${idx}]" value="Khu mới" required />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small fw-semibold">Gán loại vé</label>
-                <select class="form-select form-select-sm" name="zoneLoaiVeId[${idx}]">
-                    ${loaiVesOptions}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-semibold">Số hàng</label>
-                <input class="form-control form-control-sm" type="number" name="zoneSoHang[${idx}]" min="1" max="20" value="4" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-semibold">Ghế/hàng</label>
-                <input class="form-control form-control-sm" type="number" name="zoneSoGheMoiHang[${idx}]" min="1" max="30" value="10" />
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-semibold">Màu sắc</label>
-                <input class="form-control form-control-sm" type="color" name="zoneMauSac[${idx}]" value="#198754" />
-            </div>
-        </div>
-    `;
-    container.appendChild(div);
-    updateRemoveButtons();
+function canvasPosition(event){const rect=document.getElementById('previewZones').getBoundingClientRect();return {x:Math.max(1,Math.min(canvasColumns,Math.floor((event.clientX-rect.left)/rect.width*canvasColumns)+1)),y:Math.max(1,Math.min(canvasRows,Math.floor((event.clientY-rect.top)/rect.height*canvasRows)+1))};}
+function isFree(x,y,w,h,ignoreIndex=-1,ignoreStage=false){
+    if(x<1||y<1||x+w-1>canvasColumns||y+h-1>canvasRows)return false;
+    if(!ignoreStage&&overlap({x,y,w,h},{x:stage.x,y:stage.y,w:stageWidth,h:1}))return false;
+    return !zones.some((zone,index)=>index!==ignoreIndex&&overlap({x,y,w,h},{x:Number(zone.x),y:Number(zone.y),w:zoneWidth(zone),h:zoneHeight(zone)}));
 }
-
-function removeCustomZone(idx){
-    const el = document.getElementById('zone-idx-' + idx);
-    if(el) el.remove();
-    updateRemoveButtons();
+function isFreeInTemplate(result,x,y,w,h){
+    if(x<1||y<1||x+w-1>canvasColumns||y+h-1>canvasRows)return false;
+    if(overlap({x,y,w,h},{x:stage.x,y:stage.y,w:stageWidth,h:1}))return false;
+    return !result.some(zone=>overlap({x,y,w,h},{x:Number(zone.x),y:Number(zone.y),w:zoneWidth(zone),h:zoneHeight(zone)}));
 }
-
-function updateRemoveButtons(){
-    const rows = document.querySelectorAll('#customZonesContainer .zone-row');
-    rows.forEach((row, i) => {
-        row.querySelector('strong').textContent = 'Khu vực #' + (i + 1);
-        const btn = row.querySelector('.btn-remove-zone');
-        if(rows.length <= 1){
-            btn.style.display = 'none';
-        } else {
-            btn.style.display = 'block';
-        }
+function fillTicketChoices(){const select=document.getElementById('drawingTicket');select.innerHTML='';ticketTypes.forEach(ticket=>{const option=document.createElement('option');option.value=ticket.id;option.textContent=ticket.name+' · '+new Intl.NumberFormat('vi-VN').format(ticket.price)+'đ';select.appendChild(option);});}
+function templateZone(result,allocated,name,ticket,x,y,w,h){if(!ticket||result.length>=20)return;const zone=fitZone(name+' · '+ticket.name,ticket,x,y,w,h,allocated);if(zone&&isFreeInTemplate(result,zone.x,zone.y,zoneWidth(zone),zoneHeight(zone)))result.push(zone);}
+function buildPreset(key){
+    const tickets=[...ticketTypes].sort((a,b)=>Number(b.price)-Number(a.price));
+    const premium=tickets[0],upper=tickets[1]||premium,middle=tickets[2]||upper,standard=tickets[tickets.length-1]||premium,sweetbox=tickets.find(ticket=>/(sweet|cặp|doi|đôi)/i.test(ticket.name))||middle,allocated=new Map(),result=[];
+    if(!premium)return result;
+    if(key==='auditorium'){
+        templateZone(result,allocated,'Khối A - trái',standard,1,4,3,6);templateZone(result,allocated,'Khối B - trung tâm',premium,5,4,4,4);templateZone(result,allocated,'Khối C - phải',upper,10,4,3,6);templateZone(result,allocated,'Khối ghế phía sau',middle,4,11,6,2);
+    }else if(key==='theatre'){
+        templateZone(result,allocated,'Tầng trệt - trung tâm',premium,5,3,4,3);templateZone(result,allocated,'Tầng trệt - trái',upper,1,7,3,3);templateZone(result,allocated,'Tầng trệt - phải',middle,10,7,3,3);templateZone(result,allocated,'Ban công',standard,4,11,6,2);
+    }else if(key==='cinema'){
+        templateZone(result,allocated,'Ghế thường - gần màn hình',standard,2,3,10,2);templateZone(result,allocated,'Ghế VIP - trung tâm',premium,4,6,6,3);templateZone(result,allocated,'Hàng ghế sau - trái',upper,2,10,5,3);templateZone(result,allocated,'Hàng ghế sau - phải',sweetbox,7,10,5,3);
+    }else if(key==='concert'){
+        templateZone(result,allocated,'Khu SVIP / VIP - trung tâm',premium,4,3,6,3);templateZone(result,allocated,'Khu CAT A - trái',upper,1,7,3,3);templateZone(result,allocated,'Khu CAT B - phải',middle,10,7,3,3);templateZone(result,allocated,'Khán đài phía sau',standard,4,11,6,2);
+    }
+    return result;
+}
+function applyTemplate(key){
+    const template=seatTemplates[key]||seatTemplates.auditorium;stage={x:5,y:1};zones=buildPreset(key);selectedZoneIndex=-1;activeTool='draw';document.getElementById('mapType').value=key;document.getElementById('mapName').value=template.label+' - '+eventName;document.querySelectorAll('.seat-template').forEach(button=>button.classList.toggle('active',button.dataset.template===key));renderZones();
+}
+function applyCustomLayout(){stage={x:5,y:1};zones=[];selectedZoneIndex=-1;activeTool='draw';document.getElementById('mapType').value='custom';document.getElementById('mapName').value='Sơ đồ tùy chỉnh - '+eventName;document.querySelectorAll('.seat-template').forEach(button=>button.classList.toggle('active',button.dataset.template==='custom'));renderZones();}
+function cloneTemplateToCustom(){
+    if(document.getElementById('mapType').value==='custom')return;
+    zones=zones.map(zone=>({...zone,name:(zone.name||'Khu vực').split(' · ')[0]}));
+    selectedZoneIndex=zones.length?0:-1;activeTool='select';document.getElementById('mapType').value='custom';document.getElementById('mapName').value='Bản tùy chỉnh - '+eventName;
+    document.querySelectorAll('.seat-template').forEach(button=>button.classList.toggle('active',button.dataset.template==='custom'));
+    renderZones();WuangUI.toast('Đã tạo bản tùy chỉnh từ mẫu đã chọn.', 'success');
+}
+function addZone(){
+    const ticket=ticketById(document.getElementById('drawingTicket').value)||ticketTypes[0];
+    if(usedSeats(ticket.id)>=Number(ticket.total)){WuangUI.toast(`Loại vé ${ticket.name} không còn ghế để bố trí.`, 'error');return;}
+    const allocated=new Map([[ticket.id,usedSeats(ticket.id)]]);
+    for(let y=1;y<=canvasRows-1;y++)for(let x=1;x<=canvasColumns-2;x++)if(isFree(x,y,3,2)){const zone=fitZone('Khu vực '+(zones.length+1),ticket,x,y,3,2,allocated);if(zone){zones.push(zone);selectedZoneIndex=zones.length-1;renderZones();return;}}
+    WuangUI.toast('Không còn khoảng trống cho khu ghế mới.', 'error');
+}
+function removeZone(index){zones.splice(index,1);selectedZoneIndex=zones.length?Math.min(index,zones.length-1):-1;renderZones();}
+function updateZone(index,key,value){
+    const zone=zones[index];if(!zone)return;
+    if(key==='ticketId'){
+        const ticket=ticketById(value),capacity=zoneCapacity(zone),others=zones.filter((item,itemIndex)=>itemIndex!==index&&Number(item.ticketId)===Number(value)).reduce((sum,item)=>sum+zoneCapacity(item),0);
+        if(!ticket||others+capacity>Number(ticket.total)){WuangUI.toast('Loại vé được chọn không còn đủ số lượng để gán cho khu này.', 'error');return;}
+        zone.ticketId=Number(value);zone.color=ticket.color||'#7c3aed';
+    }else zone[key]=value;
+    renderZones();
+}
+function setZoneDimensions(index,rows,cols){
+    const zone=zones[index],ticket=zone&&ticketById(zone.ticketId);if(!zone||!ticket)return;
+    rows=Math.max(1,Math.min(canvasRows*2,Number(rows)));cols=Math.max(1,Math.min(canvasColumns*3,Number(cols)));
+    const width=Math.ceil(cols/3),height=Math.ceil(rows/2),x=Math.min(Number(zone.x),canvasColumns-width+1),y=Math.min(Number(zone.y),canvasRows-height+1);
+    const others=zones.filter((item,itemIndex)=>itemIndex!==index&&Number(item.ticketId)===Number(zone.ticketId)).reduce((sum,item)=>sum+zoneCapacity(item),0);
+    if(others+rows*cols>Number(ticket.total)){WuangUI.toast(`Loại vé ${ticket.name} không đủ số lượng cho kích thước này.`, 'error');return;}
+    if(!isFree(x,y,width,height,index)){WuangUI.toast('Kích thước mới đang chồng lên sân khấu hoặc khu khác.', 'error');return;}
+    zone.rows=rows;zone.cols=cols;zone.x=x;zone.y=y;selectedZoneIndex=index;renderZones();
+}
+function duplicateSelectedZone(){
+    const source=zones[selectedZoneIndex],ticket=source&&ticketById(source.ticketId);if(!source||!ticket)return;
+    const width=zoneWidth(source),height=zoneHeight(source),capacity=zoneCapacity(source);
+    if(usedSeats(source.ticketId)+capacity>Number(ticket.total)){WuangUI.toast(`Loại vé ${ticket.name} không còn đủ ghế để nhân bản khu vực.`, 'error');return;}
+    for(let y=1;y<=canvasRows-height+1;y++)for(let x=1;x<=canvasColumns-width+1;x++)if(isFree(x,y,width,height)){
+        zones.push({...source,name:source.name+' (bản sao)',x,y});selectedZoneIndex=zones.length-1;renderZones();return;
+    }
+    WuangUI.toast('Không còn khoảng trống để nhân bản khu vực.', 'error');
+}
+function createPreviewZone(zone,index,editable){
+    const block=document.createElement('div');block.className='preview-zone'+(index===selectedZoneIndex?' selected-zone':'');block.style.setProperty('--preview-color',zone.color);block.style.gridColumn=zone.x+' / span '+zoneWidth(zone);block.style.gridRow=zone.y+' / span '+zoneHeight(zone);
+    if(editable){
+        const handle=document.createElement('span');handle.className='drag-handle';handle.innerHTML='<i class="fas fa-arrows-up-down-left-right"></i>';block.append(handle);
+        const resize=document.createElement('button');resize.type='button';resize.className='resize-handle';resize.title='Kéo để đổi kích thước';resize.setAttribute('aria-label','Kéo để đổi kích thước khu vực');resize.innerHTML='<i class="fas fa-up-right-and-down-left-from-center"></i>';block.append(resize);
+        bindPointerMove(block,(x,y)=>moveZoneTo(index,x,y),()=>{selectedZoneIndex=index;});bindResize(resize,index);
+    }
+    const name=document.createElement('strong');name.className='preview-zone-name';name.textContent=zone.name;
+    const seats=document.createElement('div');seats.className='mini-seat-grid';const visualRows=Math.min(6,Math.max(1,Number(zone.rows))),visualCols=Math.min(12,Math.max(1,Number(zone.cols)));seats.style.setProperty('--mini-cols',visualCols);
+    for(let row=0;row<visualRows;row++)for(let col=0;col<visualCols;col++){const seat=document.createElement('i');seat.className='mini-seat';seats.appendChild(seat);}
+    const size=document.createElement('small');size.textContent=zoneCapacity(zone)+' ghế';block.append(name,seats,size);return block;
+}
+function stageTitle(){return document.getElementById('mapType').value==='cinema'?'MÀN HÌNH':'SÂN KHẤU';}
+function createStage(editable){const block=document.createElement('div');block.className='preview-stage';block.style.gridColumn=stage.x+' / span '+stageWidth;block.style.gridRow=stage.y;block.innerHTML=(editable?'<i class="fas fa-arrows-up-down-left-right"></i> ':'')+stageTitle();if(editable)bindPointerMove(block,(x,y)=>moveStageTo(x,y));return block;}
+function bindPointerMove(element,onDrop,onStart){element.addEventListener('pointerdown',event=>{if(event.button!==0||event.target.closest('.resize-handle'))return;event.preventDefault();event.stopPropagation();const startX=event.clientX,startY=event.clientY;onStart?.();element.classList.add('dragging');const finish=up=>{document.removeEventListener('pointerup',finish);element.classList.remove('dragging');if(Math.hypot(up.clientX-startX,up.clientY-startY)<8){if(onStart)renderZones();return;}const point=canvasPosition(up);onDrop(point.x,point.y);};document.addEventListener('pointerup',finish);});}
+function bindResize(handle,index){handle.addEventListener('pointerdown',event=>{if(event.button!==0)return;event.preventDefault();event.stopPropagation();const finish=up=>{document.removeEventListener('pointerup',finish);const zone=zones[index];if(!zone)return;const point=canvasPosition(up);setZoneDimensions(index,Math.max(1,(point.y-Number(zone.y)+1)*2),Math.max(1,(point.x-Number(zone.x)+1)*3));};document.addEventListener('pointerup',finish);});}
+function moveZoneTo(index,x,y){const zone=zones[index],w=zoneWidth(zone),h=zoneHeight(zone);x=Math.min(x,canvasColumns-w+1);y=Math.min(y,canvasRows-h+1);if(!isFree(x,y,w,h,index)){WuangUI.toast('Vị trí này đang được sử dụng.', 'error');return;}zone.x=x;zone.y=y;selectedZoneIndex=index;renderZones();}
+function moveStageTo(x,y){x=Math.min(x,canvasColumns-stageWidth+1);if(!isFree(x,y,stageWidth,1,-1,true)){WuangUI.toast('Sân khấu không được chồng lên khu ghế.', 'error');return;}stage={x,y};setActiveTool('select',false);renderZones();}
+function drawZone(start,end){const x=Math.min(start.x,end.x),y=Math.min(start.y,end.y),w=Math.abs(start.x-end.x)+1,h=Math.abs(start.y-end.y)+1;if(!isFree(x,y,w,h)){WuangUI.toast('Vùng này đang chồng lên sân khấu hoặc khu ghế khác.', 'error');return;}const ticket=ticketById(document.getElementById('drawingTicket').value)||ticketTypes[0],capacity=w*h*6;if(usedSeats(ticket.id)+capacity>Number(ticket.total)){WuangUI.toast(`Loại vé ${ticket.name} chỉ còn ${Math.max(0,Number(ticket.total)-usedSeats(ticket.id))} ghế để bố trí.`, 'error');return;}zones.push({name:'Khu vực '+(zones.length+1),ticketId:ticket.id,rows:h*2,cols:w*3,color:ticket.color||'#7c3aed',x,y});selectedZoneIndex=zones.length-1;setActiveTool('select',false);renderZones();}
+function renderPreview(){
+    const preview=document.getElementById('previewZones');preview.innerHTML='';document.getElementById('stageX').value=stage.x;document.getElementById('stageY').value=stage.y;
+    const editable=document.getElementById('mapType').value==='custom';
+    preview.style.zoom=String(previewZoom);
+    if(!dragDropEditorEnabled){preview.className='preview-zones layout-'+document.getElementById('mapType').value;zones.forEach((zone,index)=>preview.appendChild(createPreviewZone(zone,index,editable)));return;}
+    preview.className='preview-zones drag-layout'+(editable?' custom-tool-'+activeTool:' template-locked');
+    for(let y=1;y<=canvasRows;y++)for(let x=1;x<=canvasColumns;x++){const slot=document.createElement('div');slot.className='drop-slot';slot.style.gridColumn=x;slot.style.gridRow=y;preview.appendChild(slot);}
+    preview.appendChild(createStage(editable));zones.forEach((zone,index)=>preview.appendChild(createPreviewZone(zone,index,editable)));
+    preview.onpointerdown=editable?event=>{if(!event.target.closest('.drop-slot'))return;const start=canvasPosition(event);if(stagePlacementMode){moveStageTo(start.x,start.y);return;}if(activeTool!=='draw')return;preview.classList.add('drawing');const finish=up=>{document.removeEventListener('pointerup',finish);preview.classList.remove('drawing');drawZone(start,canvasPosition(up));};document.addEventListener('pointerup',finish);}:null;
+}
+function hiddenInput(parent,name,value){const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;parent.appendChild(input);}
+function renderZones(){
+    const list=document.getElementById('zoneList');list.innerHTML='';
+    const editable=document.getElementById('mapType').value==='custom';if(!editable){activeTool='draw';selectedZoneIndex=-1;}if(selectedZoneIndex>=zones.length)selectedZoneIndex=zones.length-1;
+    stagePlacementMode=activeTool==='stage';document.getElementById('drawToolbar').hidden=!editable;document.querySelector('.add-zone').hidden=!editable;document.getElementById('zoneListTitle').hidden=!editable;document.getElementById('zoneCount').textContent=zones.length+' khu';syncEditorChrome();renderZoneInspector(editable);
+    zones.forEach((zone,index)=>{
+        const ticket=ticketById(zone.ticketId),card=document.createElement('div');card.className='zone-card'+(editable?'':' template-zone-card')+(index===selectedZoneIndex?' selected-card':'');card.style.setProperty('--zone-color',zone.color);
+        const head=document.createElement('div');head.className='zone-head';const title=document.createElement('strong');title.textContent=editable?(zone.name||'Khu vực '+(index+1)):zone.name;const caption=document.createElement('span');caption.className='zone-capacity';caption.textContent=(ticket?.name||'Loại vé')+' · '+zoneCapacity(zone)+' ghế';head.append(title,caption);card.append(head);
+        if(editable)card.onclick=()=>{selectedZoneIndex=index;setActiveTool('select',false);renderZones();};
+        hiddenInput(card,'zoneTen',zone.name);hiddenInput(card,'zoneLoaiVeId',zone.ticketId);hiddenInput(card,'zoneSoHang',zone.rows);hiddenInput(card,'zoneSoGheMoiHang',zone.cols);hiddenInput(card,'zoneMauSac',zone.color);hiddenInput(card,'zoneViTriX',zone.x);hiddenInput(card,'zoneViTriY',zone.y);list.appendChild(card);
     });
+    const total=zones.reduce((sum,zone)=>sum+zoneCapacity(zone),0),summary=document.getElementById('mapSummary');summary.innerHTML='<i class="fas fa-chair"></i>'+total+' ghế · '+zones.length+' khu';renderMapLegend();renderPreview();
 }
+function renderZoneInspector(editable){
+    const inspector=document.getElementById('zoneInspector');inspector.innerHTML='';
+    if(!editable||!zones.length){inspector.hidden=true;return;}
+    if(selectedZoneIndex<0)selectedZoneIndex=0;const index=selectedZoneIndex,zone=zones[index],ticket=ticketById(zone.ticketId);inspector.hidden=false;
+    const head=document.createElement('div');head.className='zone-inspector-head';const heading=document.createElement('strong');heading.textContent='Khu đang chỉnh: '+(zone.name||'Khu vực '+(index+1));const capacity=document.createElement('span');capacity.textContent=zoneCapacity(zone)+' ghế · '+(ticket?.name||'');head.append(heading,capacity);
+    const grid=document.createElement('div');grid.className='zone-inspector-grid';
+    const nameInput=document.createElement('input');nameInput.value=zone.name;nameInput.maxLength=100;nameInput.required=true;nameInput.addEventListener('change',event=>updateZone(index,'name',event.target.value.trim()||'Khu vực '+(index+1)));grid.append(wrap('Tên khu vực',nameInput));
+    const ticketSelect=document.createElement('select');ticketTypes.forEach(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=item.name+' · '+new Intl.NumberFormat('vi-VN').format(item.price)+'đ';option.selected=Number(item.id)===Number(zone.ticketId);ticketSelect.append(option);});ticketSelect.addEventListener('change',event=>updateZone(index,'ticketId',event.target.value));grid.append(wrap('Loại vé',ticketSelect));
+    const actions=document.createElement('div');actions.className='inspector-actions';const duplicate=document.createElement('button');duplicate.type='button';duplicate.className='duplicate-zone';duplicate.innerHTML='<i class="fas fa-copy me-1"></i>Nhân bản';duplicate.onclick=duplicateSelectedZone;const remove=document.createElement('button');remove.type='button';remove.className='remove-selected-zone';remove.innerHTML='<i class="fas fa-trash me-1"></i>Xóa khu';remove.onclick=()=>removeZone(index);actions.append(duplicate,remove);grid.append(actions);
+    const rows=makeStepper('Hàng ghế',zone.rows,value=>setZoneDimensions(index,value,zone.cols));const cols=makeStepper('Ghế mỗi hàng',zone.cols,value=>setZoneDimensions(index,zone.rows,value));const steps=document.createElement('div');steps.className='designer-mode';steps.append(rows,cols);inspector.append(head,grid,steps);
+}
+function makeStepper(label,value,change){const field=document.createElement('div');field.className='field';const labelNode=document.createElement('label');labelNode.textContent=label;const control=document.createElement('div');control.className='zone-stepper';const decrease=document.createElement('button');decrease.type='button';decrease.textContent='−';decrease.setAttribute('aria-label','Giảm '+label);decrease.onclick=()=>change(Number(value)-1);const display=document.createElement('strong');display.textContent=value;const increase=document.createElement('button');increase.type='button';increase.textContent='+';increase.setAttribute('aria-label','Tăng '+label);increase.onclick=()=>change(Number(value)+1);control.append(decrease,display,increase);field.append(labelNode,control);return field;}
+function wrap(label,input){const div=document.createElement('div');div.className='field';const lab=document.createElement('label');lab.textContent=label;div.append(lab,input);return div;}
+function textField(label,name,value,onchange){const input=document.createElement('input');input.name=name;input.value=value;input.required=true;input.maxLength=100;input.oninput=e=>onchange(e.target.value);return wrap(label,input);}
+function selectField(label,name,value,onchange){const select=document.createElement('select');select.name=name;ticketTypes.forEach(ticket=>{const option=document.createElement('option');option.value=ticket.id;option.textContent=ticket.name+' ('+new Intl.NumberFormat('vi-VN').format(ticket.price)+'đ · '+ticket.total+' vé)';option.selected=ticket.id===Number(value);select.appendChild(option);});select.onchange=e=>onchange(e.target.value);return wrap(label,select);}
+function syncEditorChrome(){
+    const editable=document.getElementById('mapType').value==='custom';
+    document.getElementById('templateCustomize').hidden=editable;
+    document.getElementById('selectTool').classList.toggle('active',activeTool==='select');
+    document.getElementById('drawTool').classList.toggle('active',activeTool==='draw');
+    document.getElementById('stageTool').classList.toggle('active',activeTool==='stage');
+}
+function setActiveTool(tool,shouldRender=true){activeTool=tool;stagePlacementMode=tool==='stage';syncEditorChrome();if(shouldRender)renderPreview();}
+function renderMapLegend(){
+    const legend=document.getElementById('mapTicketLegend');legend.innerHTML='';
+    ticketTypes.forEach(ticket=>{const item=document.createElement('span');item.className='map-ticket-key';item.style.setProperty('--ticket-color',ticket.color||'#7c3aed');item.innerHTML='<i></i>'+ticket.name+' · '+new Intl.NumberFormat('vi-VN').format(ticket.price)+'đ';legend.appendChild(item);});
+}
+function setPreviewZoom(value){previewZoom=Math.max(.7,Math.min(1.3,value));document.getElementById('zoomValue').textContent=Math.round(previewZoom*100)+'%';document.getElementById('previewZones').style.zoom=String(previewZoom);}
+document.getElementById('selectTool').addEventListener('click',()=>setActiveTool('select'));
+document.getElementById('drawTool').addEventListener('click',()=>setActiveTool('draw'));
+document.getElementById('stageTool').addEventListener('click',()=>setActiveTool(activeTool==='stage'?'draw':'stage'));
+document.getElementById('cloneTemplate').addEventListener('click',cloneTemplateToCustom);
+document.getElementById('zoomOut').addEventListener('click',()=>setPreviewZoom(previewZoom-.1));
+document.getElementById('zoomIn').addEventListener('click',()=>setPreviewZoom(previewZoom+.1));
+document.getElementById('mapForm').addEventListener('submit',event=>{const use=new Map();let total=0;if(!zones.length){event.preventDefault();WuangUI.toast('Hãy tạo ít nhất một khu ghế.', 'error');return;}for(const zone of zones){const count=zoneCapacity(zone);total+=count;use.set(Number(zone.ticketId),(use.get(Number(zone.ticketId))||0)+count);if(!isFree(Number(zone.x),Number(zone.y),zoneWidth(zone),zoneHeight(zone),zones.indexOf(zone))){event.preventDefault();WuangUI.toast('Có khu ghế chồng lên nhau hoặc lên sân khấu.', 'error');return;}}if(total>5000){event.preventDefault();WuangUI.toast('Một sơ đồ được tối đa 5.000 ghế.', 'error');return;}for(const [id,count] of use){const ticket=ticketById(id);if(!ticket||count>ticket.total){event.preventDefault();WuangUI.toast(`Loại vé ${ticket?.name||id} chỉ có ${ticket?.total||0} vé nhưng đang được gán ${count} ghế.`, 'error');return;}}});
+fillTicketChoices();applyTemplate('auditorium');
 </script>
-@if (isLocked)
-{
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll(".tpl-container form, .seat-hero form").forEach(form => {
-                form.querySelectorAll("input, select, textarea, button").forEach(el => {
-                    el.disabled = true;
-                });
-            });
-            document.querySelectorAll(".tpl-tabs button").forEach(btn => {
-                btn.disabled = true;
-            });
-        });
-    </script>
-}
-}
+}}

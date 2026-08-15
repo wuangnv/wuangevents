@@ -1,12 +1,14 @@
 ﻿@model List<MaGiamGia>
 
 @{
+    // MaGiamGia(suKienId) trả List<MaGiamGia> sau khi kiểm tra chủ sự kiện.
+    // Form tạo POST TaoMoiMaGiamGia; nút sửa GET; nút xóa POST XoaMaGiamGia.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Mã giảm giá";
     var suKienId = (Guid)ViewBag.SuKienId;
-    bool isExpired = ViewBag.NgayKetThucSuKien != null && DateTime.UtcNow > (DateTime)ViewBag.NgayKetThucSuKien;
-    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6 || isExpired;
-    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG" : "ĐÃ HỦY";
+    bool isExpired = ViewBag.NgayKetThucSuKien != null && VietnamTime.Now > (DateTime)ViewBag.NgayKetThucSuKien;
+    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 5 || ViewBag.TrangThaiSuKien == 6 || isExpired;
+    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 5 ? "ĐÃ KẾT THÚC" : "ĐÃ HỦY";
 }
 
 <style>
@@ -84,7 +86,6 @@
             <div style="background:#fff;border-radius:14px;padding:60px 24px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.07);color:#9ca3af;">
                 <i class="fas fa-tags" style="font-size:3rem;margin-bottom:16px;display:block;"></i>
                 <h5 style="color:#374151;font-weight:700;">Chưa có mã giảm giá nào</h5>
-                <p class="small mb-0">Tạo mã khuyến mãi ở khung bên phải để thu hút khách hàng.</p>
             </div>
         }
         else
@@ -92,7 +93,7 @@
             <div class="d-flex flex-column gap-3">
                 @foreach (var item in Model)
                 {
-                    bool isDiscountExpired = item.NgayKetThuc < DateTime.UtcNow;
+                    bool isDiscountExpired = item.NgayKetThuc < VietnamTime.Now;
                     int usedPct = item.SoLuongTong > 0 ? (item.SoLuongDaDung * 100 / item.SoLuongTong) : 0;
                     <div class="coupon-card">
                         <div class="d-flex align-items-center justify-content-between">
@@ -128,7 +129,7 @@
                                     <a class="btn btn-sm btn-outline-primary" href="/Organizer/ChinhSuaMaGiamGia/@item.Id" style="border-radius:7px;" title="Chỉnh sửa">
                                         <i class="fas fa-pen"></i>
                                     </a>
-                                    <form class="d-inline" method="post" action="/Organizer/MaGiamGia/Xoa/@item.Id" onsubmit="return confirm('Xóa mã giảm giá này?')">
+                                    <form class="d-inline" method="post" asp-controller="Organizer" asp-action="XoaMaGiamGia" asp-route-id="@item.Id" data-confirm="Xóa mã giảm giá này?" data-confirm-title="Xóa mã giảm giá" data-confirm-button="Xóa mã">
                                         <button class="btn btn-sm btn-outline-danger" type="submit" style="border-radius:7px;" title="Xóa">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -170,7 +171,7 @@
                 <i class="fas fa-plus-circle me-2"></i> Tạo mã giảm giá mới
             </div>
             <div class="add-coupon-body">
-                <form method="post" action="/Organizer/MaGiamGia/TaoMoi">
+                <form method="post" asp-controller="Organizer" asp-action="TaoMoiMaGiamGia">
                     <input type="hidden" name="SuKienId" value="@suKienId" />
                     <div class="mb-3">
                         <label class="fl">Mã code <span class="text-danger">*</span></label>

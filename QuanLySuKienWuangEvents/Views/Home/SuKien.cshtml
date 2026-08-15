@@ -6,8 +6,12 @@
     var selectedCity = ViewBag.SelectedCity as string;
     var selectedDanhMucId = ViewBag.DanhMucId as int?;
     var keywords = ViewBag.TuKhoa as string;
+    var thoiGian = ViewBag.ThoiGian as string ?? "sap-dien-ra";
+    var loaiSuKien = ViewBag.LoaiSuKien as string ?? "tat-ca";
 }
 
+@* GET nhận q/danhMucId/thanhPho; Controller trả List<SuKien>.
+   ViewBag chứa danh mục/lựa chọn lọc; foreach vẽ card sự kiện. *@
 <div class="container my-5" style="min-height: 700px;">
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
@@ -17,12 +21,25 @@
         </ol>
     </nav>
 
-    <!-- Header Section -->
-    <div class="mb-5">
+    <div class="mb-4">
         <h1 class="font-heading display-6 fw-bold" style="color: #1a1a2e;">
             Danh sách sự kiện
         </h1>
-        <p class="text-muted">Tìm kiếm và khám phá các sự kiện giải trí, giáo dục, âm nhạc hàng đầu.</p>
+    </div>
+
+    <div class="event-time-tabs mb-4" role="navigation" aria-label="Lọc sự kiện theo thời gian">
+        <a class="event-time-tab @(thoiGian == "sap-dien-ra" ? "active" : "")"
+           asp-action="SuKien" asp-route-q="@keywords" asp-route-danhMucId="@selectedDanhMucId"
+           asp-route-thanhPho="@selectedCity" asp-route-thoiGian="sap-dien-ra"
+           asp-route-loaiSuKien="@loaiSuKien">Sắp diễn ra</a>
+        <a class="event-time-tab @(thoiGian == "da-dien-ra" ? "active" : "")"
+           asp-action="SuKien" asp-route-q="@keywords" asp-route-danhMucId="@selectedDanhMucId"
+           asp-route-thanhPho="@selectedCity" asp-route-thoiGian="da-dien-ra"
+           asp-route-loaiSuKien="@loaiSuKien">Đã diễn ra</a>
+        <a class="event-time-tab @(thoiGian == "tat-ca" ? "active" : "")"
+           asp-action="SuKien" asp-route-q="@keywords" asp-route-danhMucId="@selectedDanhMucId"
+           asp-route-thanhPho="@selectedCity" asp-route-thoiGian="tat-ca"
+           asp-route-loaiSuKien="@loaiSuKien">Tất cả</a>
     </div>
 
     <div class="row">
@@ -34,12 +51,30 @@
                 </h3>
 
                 <form method="get" action="/Home/SuKien" id="filterForm">
+                    <input type="hidden" name="thoiGian" value="@thoiGian" />
+                    <input type="hidden" name="loaiSuKien" id="selectedLoaiSuKien" value="@loaiSuKien" />
                     <!-- Tìm theo từ khóa -->
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Từ khóa</label>
                         <div class="input-group" style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; background: #f9fafb;">
                             <span class="input-group-text border-0 bg-transparent text-muted"><i class="fas fa-search"></i></span>
                             <input type="text" name="q" value="@keywords" class="form-control border-0 bg-transparent py-2.5 shadow-none" placeholder="Tìm tên sự kiện..." />
+                        </div>
+                    </div>
+
+                    <!-- Lọc theo hình thức tổ chức -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px; display:block; margin-bottom:10px;">Hình thức tổ chức</label>
+                        <div class="event-format-choices">
+                            <button type="button" onclick="setEventType('tat-ca')" class="event-format-choice @(loaiSuKien == "tat-ca" ? "active" : "")">
+                                <i class="fas fa-border-all"></i><span>Tất cả</span>
+                            </button>
+                            <button type="button" onclick="setEventType('truc-tiep')" class="event-format-choice @(loaiSuKien == "truc-tiep" ? "active" : "")">
+                                <i class="fas fa-location-dot"></i><span>Trực tiếp</span>
+                            </button>
+                            <button type="button" onclick="setEventType('truc-tuyen')" class="event-format-choice @(loaiSuKien == "truc-tuyen" ? "active" : "")">
+                                <i class="fas fa-video"></i><span>Trực tuyến</span>
+                            </button>
                         </div>
                     </div>
 
@@ -88,7 +123,7 @@
                         <button type="submit" class="btn btn-primary py-2.5 fw-bold" style="border-radius: 10px;">
                             <i class="fas fa-check me-2"></i>Áp dụng
                         </button>
-                        <a href="/Home/SuKien" class="btn btn-light py-2.5 fw-bold text-muted" style="border-radius: 10px; border: 1px solid #e5e7eb;">
+                        <a asp-action="SuKien" asp-route-thoiGian="@thoiGian" class="btn btn-light py-2.5 fw-bold text-muted" style="border-radius: 10px; border: 1px solid #e5e7eb;">
                             <i class="fas fa-undo me-2"></i>Thiết lập lại
                         </a>
                     </div>
@@ -109,9 +144,8 @@
                         <i class="far fa-calendar-times"></i>
                     </div>
                     <h3 class="h5 fw-bold text-dark">Không tìm thấy sự kiện nào</h3>
-                    <p class="text-muted mx-auto mb-4" style="max-width: 400px;">Thử thay đổi bộ lọc, tìm kiếm bằng từ khóa khác hoặc xóa bớt tiêu chí lọc.</p>
-                    <a href="/Home/SuKien" class="btn btn-primary px-4 py-2 mx-auto fw-bold" style="border-radius: 10px; width: fit-content;">
-                        Xem tất cả sự kiện
+                    <a asp-action="SuKien" asp-route-thoiGian="@thoiGian" class="btn btn-primary px-4 py-2 mx-auto mt-3 fw-bold" style="border-radius: 10px; width: fit-content;">
+                        Xóa bộ lọc
                     </a>
                 </div>
             }
@@ -120,10 +154,12 @@
                 <div class="row g-4 row-cols-md-2 row-cols-1">
                     @foreach (var item in Model)
                     {
+                        bool daDienRa = item.TrangThai == 5 || item.NgayKetThuc <= VietnamTime.Now;
                         <div class="col animate-hover-up">
                             <div class="card h-100 rounded overflow-hidden border-0" style="box-shadow: 0 4px 20px rgba(0,0,0,0.06); background: #fff;">
                                 <div class="position-relative overflow-hidden" style="height: 180px;">
                                     <img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.src='/images/default-event.svg';" />
+                                    <span class="event-format-badge position-absolute top-0 end-0 m-3"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot") me-1"></i>@(item.LoaiSuKien == 1 ? "Trực tuyến" : "Trực tiếp")</span>
                                 </div>
 
                                 <div class="card-body p-4 d-flex flex-column justify-content-between">
@@ -135,15 +171,23 @@
                                             @item.TenSuKien
                                         </h3>
                                         <div class="d-flex align-items-center gap-2 text-muted small mb-4">
-                                            <i class="fas fa-map-marker-alt text-danger"></i>
+                                            <i class="fas @(item.LoaiSuKien == 1 ? "fa-video text-primary" : "fa-map-marker-alt text-danger")"></i>
                                             <span class="text-truncate" style="max-width: 250px;" title="@(item.LoaiSuKien == 1 ? "Trực tuyến" : $"{item.TenDiaDiem}, {item.ThanhPhoDiaDiem}")">
                                                 @(item.LoaiSuKien == 1 ? "Trực tuyến" : (!string.IsNullOrEmpty(item.ThanhPhoDiaDiem) ? $"{item.TenDiaDiem} ({item.ThanhPhoDiaDiem})" : item.TenDiaDiem ?? "Trực tiếp"))
                                             </span>
                                         </div>
                                     </div>
                                     <div class="border-top pt-3 d-flex justify-content-between align-items-center">
-                                        <span class="text-success small fw-bold"><i class="fas fa-circle-check me-1"></i>Đang bán vé</span>
-                                        <a href="/Home/ChiTiet/@item.Slug" class="btn btn-primary px-4 py-2 rounded fw-bold small"><i class="fas fa-ticket me-1.5"></i>Mua vé ngay</a>
+                                        @if (daDienRa)
+                                        {
+                                            <span class="text-secondary small fw-bold"><i class="fas fa-clock-rotate-left me-1"></i>Đã diễn ra</span>
+                                            <a href="/Home/ChiTiet/@item.Slug" class="btn btn-outline-primary px-4 py-2 rounded fw-bold small">Xem sự kiện</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-success small fw-bold"><i class="fas fa-circle-check me-1"></i>Đang bán vé</span>
+                                            <a href="/Home/ChiTiet/@item.Slug" class="btn btn-primary px-4 py-2 rounded fw-bold small"><i class="fas fa-ticket me-1.5"></i>Mua vé</a>
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -156,6 +200,23 @@
 </div>
 
 <style>
+.event-time-tabs {
+    display: inline-flex;
+    gap: 6px;
+    padding: 5px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+}
+.event-time-tab {
+    padding: 9px 18px;
+    border-radius: 9px;
+    color: #4b5563;
+    font-weight: 700;
+    text-decoration: none;
+}
+.event-time-tab:hover { background: #f5f3ff; color: #6d28d9; }
+.event-time-tab.active { background: #7c3aed; color: #fff; }
 .category-filter-item {
     display: flex;
     align-items: center;
@@ -182,11 +243,37 @@
 .cf-icon {
     font-size: 1.1rem;
 }
+.event-format-choices {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+}
+.event-format-choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+    color: #4b5563;
+    font-size: .9rem;
+    font-weight: 650;
+    text-align: left;
+}
+.event-format-choice:hover { border-color: #c4b5fd; background: #faf5ff; color: #6d28d9; }
+.event-format-choice.active { border-color: #8b5cf6; background: #f3e8ff; color: #6d28d9; box-shadow: 0 0 0 2px rgba(139,92,246,.08); }
+.event-format-choice i { width: 18px; text-align: center; color: #7c3aed; }
 </style>
 
 <script>
 function setCategory(id) {
     document.getElementById('selectedDanhMucId').value = id;
+    document.getElementById('filterForm').submit();
+}
+function setEventType(value) {
+    document.getElementById('selectedLoaiSuKien').value = value;
     document.getElementById('filterForm').submit();
 }
 </script>

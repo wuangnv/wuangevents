@@ -1,6 +1,8 @@
 ﻿@model DanhMuc
 
 @{
+    // GET action trả một DanhMuc vào Model; form POST action cùng tên.
+    // asp-for tạo input name trùng property để MVC dựng lại DanhMuc model.
     Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
     ViewData["Title"] = "Sửa danh mục";
 }
@@ -8,12 +10,11 @@
 <div class="portal-page-title mb-4">
     <span class="portal-kicker"><i class="fas fa-pen"></i> Danh mục</span>
     <h1>Sửa danh mục</h1>
-    <p>Cập nhật thông tin danh mục đang có trong database.</p>
 </div>
 
 <div class="portal-card form-panel">
     <div class="portal-card-body">
-        <form method="post" action="/Admin/ChinhSuaDanhMuc">
+        <form method="post" asp-controller="Admin" asp-action="ChinhSuaDanhMuc">
             <input type="hidden" asp-for="Id" />
             <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
@@ -47,7 +48,7 @@
                 <button class="btn btn-primary" type="submit">
                     <i class="fas fa-floppy-disk me-1"></i> Lưu
                 </button>
-                <a class="btn btn-outline-secondary" href="/Admin/DanhMuc">Quay lại</a>
+                <a class="btn btn-outline-secondary" asp-controller="Admin" asp-action="DanhMuc">Quay lại</a>
             </div>
         </form>
     </div>

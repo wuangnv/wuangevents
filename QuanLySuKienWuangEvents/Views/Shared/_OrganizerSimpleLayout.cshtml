@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+@* Layout BTC chứa sidebar/CSS; quyền thật nằm ở Authorize và kiểm tra NguoiToChucId. *@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,6 +13,7 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="portal-body">
+    @await Html.PartialAsync("_UiNotifications")
     <style>
         .active-event-card {
             background: #1e1e2d;
@@ -77,7 +79,7 @@
                 }
                 else
                 {
-                    <span class="nav-label">Chức năng chính</span>
+                    <span class="nav-label">Quản lý</span>
                     <a class="org-nav-item" href="/Organizer/Index"><i class="fas fa-chart-simple"></i><span>Thống kê hoạt động</span></a>
                     <a class="org-nav-item" href="/Organizer/SuKien"><i class="fas fa-calendar-days"></i><span>Sự kiện của tôi</span></a>
                     <a class="org-nav-item" href="/Organizer/NhanVienStaff"><i class="fas fa-user-gear"></i><span>Quản lý nhân sự soát vé</span></a>
@@ -86,20 +88,20 @@
                 <span class="nav-label">Tài khoản</span>
                 <a class="org-nav-item" href="/Account/HoSo"><i class="fas fa-user"></i><span>Hồ sơ cá nhân</span></a>
                 <a class="org-nav-item" href="/"><i class="fas fa-house"></i><span>Trang chủ</span></a>
-                <a class="org-nav-item" href="/Account/DangXuat"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></a>
+                <form method="post" asp-controller="Account" asp-action="DangXuat"><button type="submit" class="org-nav-item border-0 w-100 text-start"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></button></form>
             </nav>
         </aside>
         <div class="org-main">
-            <header class="org-header"><div><strong>Trang ban tổ chức</strong><div class="text-muted small">Tạo và vận hành sự kiện của bạn</div></div><div class="account-chip"><i class="fas fa-user"></i><span>@User.Identity?.Name</span></div></header>
+            <header class="org-header"><div><strong>Trang ban tổ chức</strong></div><div class="account-chip"><i class="fas fa-user"></i><span>@User.Identity?.Name</span></div></header>
             <main class="org-content-body">
-                @if (TempData["Message"] != null) { <div class="alert alert-success">@TempData["Message"]</div> }
                 @RenderBody()
             </main>
-            <footer class="org-footer"><small>&copy; @DateTime.Now.Year WuangEvents Student MVC</small></footer>
+            <footer class="org-footer"><small>&copy; @DateTime.Now.Year WuangEvents</small></footer>
         </div>
     </div>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         const orgPath = window.location.pathname.toLowerCase();
         const urlParams = new URLSearchParams(window.location.search);

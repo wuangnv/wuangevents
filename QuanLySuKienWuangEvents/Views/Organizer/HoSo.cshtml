@@ -1,6 +1,8 @@
 ﻿@model NguoiDung
 
 @{
+    // LƯU Ý: OrganizerController.HoSo() hiện đã vô hiệu hóa và redirect Index.
+    // File View này hiện không được render; form POST cũng chưa có action xử lý.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Tài khoản thanh toán";
 }
@@ -8,10 +10,10 @@
 <div class="portal-page-title mb-4">
     <span class="portal-kicker"><i class="fas fa-building"></i> Hồ sơ</span>
     <h1>Tài khoản thanh toán</h1>
-    <p>Cập nhật thông tin liên hệ và tài khoản ngân hàng nhận doanh thu bán vé.</p>
 </div>
 
 <form method="post">
+    @Html.AntiForgeryToken()
     <div class="row g-3">
         <div class="col-xl-7">
             <div class="portal-card h-100">

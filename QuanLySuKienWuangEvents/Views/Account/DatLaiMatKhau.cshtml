@@ -2,6 +2,8 @@
     ViewData["Title"] = "Đặt lại mật khẩu";
 }
 
+@* GET nhận token trên URL; form POST token + mật khẩu mới.
+   Controller kiểm tra token, băm BCrypt rồi UPDATE NguoiDung. *@
 <div class="container page-section">
     <div class="auth-container">
         <div class="auth-header">
@@ -12,6 +14,7 @@
             <div class="alert alert-danger">@ViewBag.Error</div>
         }
         <form method="post">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="token" value="@ViewBag.Token" />
             <div class="form-group">
                 <label>Mật khẩu mới</label>

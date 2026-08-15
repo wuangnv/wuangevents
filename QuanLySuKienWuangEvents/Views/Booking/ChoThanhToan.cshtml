@@ -1,0 +1,45 @@
+@model ChoThanhToanViewModel
+@{
+    ViewData["Title"] = "Đơn đang chờ thanh toán";
+    string tenCong = Model.DonHang.PhuongThucThanhToan == 3 ? "MoMo" : Model.DonHang.PhuongThucThanhToan == 4 ? "ZaloPay" : "VNPAY";
+}
+@section Styles {
+<style>
+.pending-page{max-width:900px;margin:auto;padding:40px 18px 80px}.pending-hero{text-align:center;margin-bottom:24px}.clock-icon{width:74px;height:74px;border-radius:24px;background:#fff7ed;color:#ea580c;display:grid;place-items:center;font-size:1.9rem;margin:0 auto 15px;border:1px solid #fed7aa;box-shadow:0 12px 25px rgba(234,88,12,.1)}.pending-hero h1{font-size:1.65rem;font-weight:850;color:#1e1b4b}.pending-hero p{color:#64748b}.timer{font-variant-numeric:tabular-nums;font-size:2rem;font-weight:900;color:#ea580c;letter-spacing:.05em}.pending-card{background:#fff;border:1px solid #e8e5f2;border-radius:20px;box-shadow:0 12px 35px rgba(41,31,77,.07);padding:24px;margin-bottom:18px}.pending-card h2{font-size:1.03rem;font-weight:850;color:#211c3d;margin:0 0 16px}.order-top{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.order-code{font-size:.78rem;color:#64748b}.order-code strong{display:block;color:#312e81;font-size:1rem;margin-top:3px}.badge-pending-x{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;border-radius:999px;padding:7px 11px;font-size:.76rem;font-weight:800}.event-name{font-weight:850;color:#1f2937}.meta{color:#64748b;font-size:.8rem;margin-top:5px}.ticket-line{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #f0edf6;font-size:.84rem}.seat-list{color:#64748b;font-size:.76rem;margin-top:3px}.total{display:flex;justify-content:space-between;align-items:end;border-top:1px solid #e8e5f2;margin-top:10px;padding-top:16px}.total strong{font-size:1.3rem;color:#7c3aed}.notice{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:13px;padding:13px 15px;font-size:.82rem;line-height:1.5;margin-bottom:17px}.actions{display:grid;grid-template-columns:1fr auto;gap:10px}.primary-action,.cancel-action{border-radius:13px;padding:14px 18px;font-weight:850;border:0}.primary-action{width:100%;background:linear-gradient(135deg,#7c3aed,#9333ea);color:white;box-shadow:0 8px 20px rgba(124,58,237,.2)}.cancel-action{background:#fff1f2;color:#be123c;border:1px solid #fecdd3}@@media(max-width:600px){.actions{grid-template-columns:1fr}.order-top{display:block}.badge-pending-x{display:inline-block;margin-top:10px}}
+</style>
+}
+
+<main class="pending-page">
+    <div class="pending-hero"><div class="clock-icon"><i class="fas fa-hourglass-half"></i></div><h1>Đơn đang giữ chỗ</h1><p>@tenCong</p><div class="timer" id="timer">--:--</div></div>
+    @if (TempData["Error"] != null) { <div class="notice"><i class="fas fa-circle-exclamation me-2"></i>@TempData["Error"]</div> }
+    <section class="pending-card">
+        <div class="order-top"><div class="order-code">Mã đơn<strong>@Model.DonHang.MaDonHang</strong></div><span class="badge-pending-x"><i class="fas fa-clock me-1"></i>Chờ thanh toán</span></div>
+        <hr />
+        <div class="event-name">@Model.SuKien.TenSuKien</div><div class="meta"><i class="far fa-calendar me-1"></i>@Model.SuKien.NgayBatDau.ToString("dd/MM/yyyy HH:mm") · <i class="fas fa-location-dot ms-1 me-1"></i>@(Model.SuKien.LoaiSuKien == 1 ? "Trực tuyến" : Model.SuKien.TenDiaDiem)</div>
+    </section>
+    <section class="pending-card"><h2><i class="fas fa-ticket me-2" style="color:#7c3aed"></i>Vé và ghế đang giữ</h2>
+        @foreach (var group in Model.ChiTiet.GroupBy(x => new { x.LoaiVeId, x.TenLoaiVe, x.GiaVe }))
+        {
+            <div class="ticket-line"><div><strong>@group.Key.TenLoaiVe × @group.Count()</strong>@if(group.Any(x=>!string.IsNullOrWhiteSpace(x.SoGhe))){<div class="seat-list">Ghế: @string.Join(", ", group.Where(x=>!string.IsNullOrWhiteSpace(x.SoGhe)).Select(x=>x.SoGhe))</div>}</div><strong>@((group.Key.GiaVe * group.Count()).ToString("N0")) VND</strong></div>
+        }
+        <div class="total"><span>Tổng thanh toán</span><strong>@Model.DonHang.TongThanhToan.ToString("N0") VND</strong></div>
+    </section>
+    <div class="actions">
+        <form method="post" action="/Booking/TiepTucThanhToan">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.DonHang.Id" /><button class="primary-action" id="continuePayment" type="submit"><i class="fas fa-arrow-up-right-from-square me-1"></i>Tiếp tục thanh toán qua @tenCong</button></form>
+        <form method="post" action="/Booking/HuyDonHang" data-confirm="Hủy đơn và trả lại các ghế đang giữ?" data-confirm-title="Hủy đơn hàng" data-confirm-button="Hủy đơn">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.DonHang.Id" /><button class="cancel-action" type="submit">Hủy đơn</button></form>
+    </div>
+</main>
+
+@section Scripts {
+<script>
+const expiresAt = new Date('@Model.HetHanLucUtc.ToString("yyyy-MM-ddTHH:mm:ss.fff")Z').getTime();
+const timer = document.getElementById('timer');
+const button = document.getElementById('continuePayment');
+function tick(){
+    const remain=expiresAt-Date.now();
+    if(remain<=0){timer.textContent='ĐÃ HẾT HẠN';button.disabled=true;button.textContent='Đơn đã hết hạn';setTimeout(()=>location.href='/Booking/DonHangCuaToi',1200);return;}
+    const minutes=Math.floor(remain/60000),seconds=Math.floor((remain%60000)/1000);timer.textContent=String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');setTimeout(tick,1000);
+}
+tick();
+</script>
+}

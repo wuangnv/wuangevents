@@ -1,6 +1,8 @@
 ﻿@model List<LoaiVe>
 
 @{
+    // BaoCao(suKienId) kiểm tra chủ sự kiện và gửi List<LoaiVe> vào Model.
+    // Các tổng số đơn/vé/check-in/doanh thu đi qua ViewBag; link tải gọi XuatBaoCaoCsv.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Báo cáo sự kiện";
     var suKienId = (Guid)ViewBag.SuKienId;

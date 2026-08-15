@@ -2,7 +2,17 @@
 
 @{
     ViewData["Title"] = "Đơn hàng của tôi";
+    // Action JOIN DonHang + SuKien và chỉ lấy NguoiMuaId đang đăng nhập.
+    // Model dynamic vì SELECT có thêm TenSuKien/AnhBia ngoài DonHang.
     Layout = "~/Views/Shared/_Layout.cshtml";
+    int paymentTimeoutMinutes = ViewBag.PaymentTimeoutMinutes ?? 10;
+    var statusCounts = new Dictionary<byte, int>();
+    foreach (var order in Model)
+    {
+        byte status = Convert.ToByte(order.TrangThai);
+        statusCounts[status] = statusCounts.GetValueOrDefault(status) + 1;
+    }
+    int CountStatus(byte status) => statusCounts.GetValueOrDefault(status);
 }
 
 @section Styles {
@@ -13,14 +23,17 @@
 .orders-hero p { opacity: .82; margin: 0; font-size: .95rem; }
 
 /* Tab lọc */
-.orders-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
-.tab-btn { background: #f3f4f6; color: #4b5563; border: none; padding: 8px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: .88rem; transition: .2s; }
+.orders-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+.tab-btn { flex: 0 0 auto; white-space: nowrap; background: #f3f4f6; color: #4b5563; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: .86rem; transition: .2s; }
 .tab-btn:hover { background: #e5e7eb; }
 .tab-btn.active { background: #7c3aed; color: #fff; }
+.tab-count { margin-left: 5px; padding: 1px 7px; border-radius: 10px; background: rgba(0,0,0,.08); font-size: .75rem; }
+.tab-btn.active .tab-count { background: rgba(255,255,255,.22); }
+.tab-empty { background: #fff; border: 1px dashed #d1d5db; border-radius: 16px; padding: 44px 20px; text-align: center; color: #6b7280; }
 
 /* Card đơn hàng */
-.order-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 14px rgba(0,0,0,.08); overflow: hidden; margin-bottom: 16px; transition: .2s; border: 1px solid #f0f0f0; }
-.order-card:hover { box-shadow: 0 4px 24px rgba(124,58,237,.12); transform: translateY(-2px); }
+.order-card { background: #fff; border-radius: 16px; box-shadow: 0 5px 18px rgba(31,24,62,.06); overflow: hidden; margin-bottom: 16px; transition: .2s; border: 1px solid #ebe8f2; }
+.order-card:hover { box-shadow: 0 9px 26px rgba(76,49,132,.1); transform: translateY(-1px); }
 .order-card-body { display: flex; align-items: stretch; gap: 0; }
 .order-img { width: 130px; min-height: 100px; flex-shrink: 0; overflow: hidden; }
 .order-img img { width: 100%; height: 100%; object-fit: cover; }
@@ -31,14 +44,14 @@
 .order-meta-item { display: flex; align-items: center; gap: 6px; font-size: .82rem; color: #666; }
 .order-meta-item i { color: #7c3aed; width: 14px; }
 .order-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 16px; border-top: 1px solid #f3f4f6; gap: 12px; flex-wrap: wrap; }
-.order-total { font-size: 1.1rem; font-weight: 800; color: #7c3aed; }
+.order-total { font-size: 1rem; font-weight: 750; color: #5b21b6; }
 .order-code { font-size: .78rem; color: #aaa; font-family: monospace; }
+.order-detail-btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 9px !important; font-weight: 650 !important; font-size: .82rem; padding: 7px 11px; white-space: nowrap; }
 
 /* Badge trạng thái */
 .badge-paid { display: inline-flex; align-items: center; gap: 5px; background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
 .badge-pending { display: inline-flex; align-items: center; gap: 5px; background: #fef9c3; color: #92400e; padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
 .badge-cancelled { display: inline-flex; align-items: center; gap: 5px; background: #fee2e2; color: #dc2626; padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
-.badge-refund { display: inline-flex; align-items: center; gap: 5px; background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
 .badge-expired { display: inline-flex; align-items: center; gap: 5px; background: #f3f4f6; color: #6b7280; padding: 4px 12px; border-radius: 20px; font-size: .78rem; font-weight: 700; }
 
 /* Phương thức thanh toán */
@@ -62,7 +75,6 @@
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
             <div>
                 <h1><i class="fas fa-ticket me-2"></i>Đơn hàng của tôi</h1>
-                <p>Xem lại lịch sử mua vé và tra cứu vé điện tử của bạn.</p>
             </div>
             <span style="background:rgba(255,255,255,.15);color:#fff;padding:8px 16px;border-radius:12px;font-weight:700;font-size:.95rem">
                 @Model.Count đơn hàng
@@ -71,13 +83,14 @@
     </div>
 
     @* TABS LỌC *@
-    <div class="orders-tabs">
-        <button class="tab-btn" onclick="locTab(this, 'all')"><i class="fas fa-list me-1"></i> Tất cả</button>
-        <button class="tab-btn active" id="tab-paid" onclick="locTab(this, '1')"><i class="fas fa-circle-check text-success me-1"></i> Đã thanh toán</button>
-        <button class="tab-btn" onclick="locTab(this, '0')"><i class="fas fa-clock text-warning me-1"></i> Chờ thanh toán</button>
-        <button class="tab-btn" onclick="locTab(this, '2')"><i class="fas fa-circle-xmark text-danger me-1"></i> Đã hủy</button>
-        <button class="tab-btn" onclick="locTab(this, '3,4')"><i class="fas fa-circle-info text-info me-1"></i> Hoàn tiền / Hết hạn</button>
+    <div class="orders-tabs" role="tablist" aria-label="Trạng thái đơn hàng">
+        <button class="tab-btn active" id="tab-all" role="tab" aria-selected="true" onclick="locTab(this, 'all')"><i class="fas fa-list me-1"></i>Tất cả <span class="tab-count">@Model.Count</span></button>
+        <button class="tab-btn" role="tab" aria-selected="false" onclick="locTab(this, '1')"><i class="fas fa-circle-check text-success me-1"></i>Hoàn tất <span class="tab-count">@CountStatus(1)</span></button>
+        <button class="tab-btn" role="tab" aria-selected="false" onclick="locTab(this, '0')"><i class="fas fa-clock text-warning me-1"></i>Chờ thanh toán <span class="tab-count">@CountStatus(0)</span></button>
+        <button class="tab-btn" role="tab" aria-selected="false" onclick="locTab(this, '2')"><i class="fas fa-circle-xmark text-danger me-1"></i>Đã hủy <span class="tab-count">@CountStatus(2)</span></button>
+        <button class="tab-btn" role="tab" aria-selected="false" onclick="locTab(this, '4')"><i class="fas fa-hourglass-end text-secondary me-1"></i>Hết hạn <span class="tab-count">@CountStatus(4)</span></button>
     </div>
+    <div id="orderResultCount" class="visually-hidden" role="status" aria-live="polite"></div>
 
     @* DANH SÁCH ĐƠN HÀNG *@
     <div id="orderList">
@@ -86,7 +99,6 @@
             <div class="empty-state">
                 <i class="fas fa-ticket"></i>
                 <h3>Bạn chưa có đơn hàng nào</h3>
-                <p>Khám phá các sự kiện đang mở bán và đặt vé ngay!</p>
                 <a href="/" class="btn btn-primary mt-3"><i class="fas fa-compass me-2"></i>Khám phá sự kiện</a>
             </div>
         }
@@ -99,9 +111,13 @@
                 string anhBia = (string)(item.AnhBia ?? "");
                 string maDon = (string)(item.MaDonHang ?? "");
                 decimal tongTien = (decimal)item.TongThanhToan;
-                string ngayTao = ((DateTime)item.NgayTao).ToString("dd/MM/yyyy HH:mm");
+                string ngayTao = VietnamTime.FromUtc((DateTime)item.NgayTao).ToString("dd/MM/yyyy HH:mm");
                 string diaDiem = (string)(item.DiaDiemSuKien ?? "");
+                byte loaiSuKien = (byte)(item.LoaiSuKien ?? 0);
+                bool laTrucTuyen = loaiSuKien == 1;
                 byte pttt = (byte)(item.PhuongThucThanhToan ?? 0);
+                string expiryUtc = DateTime.SpecifyKind((DateTime)item.NgayTao, DateTimeKind.Utc)
+                    .AddMinutes(paymentTimeoutMinutes).ToString("O");
 
                 <div class="order-card" data-tt="@tt">
                     <div class="order-card-body">
@@ -125,14 +141,21 @@
                                 <div class="order-event-name">@tenSuKien</div>
                                 <div class="order-meta-row mt-2">
                                     <span class="order-meta-item"><i class="fas fa-calendar"></i> @ngayTao</span>
-                                    @if (!string.IsNullOrEmpty(diaDiem))
+                                    @if (laTrucTuyen)
+                                    {
+                                        <span class="order-meta-item"><i class="fas fa-video"></i> Trực tuyến</span>
+                                    }
+                                    else if (!string.IsNullOrEmpty(diaDiem))
                                     {
                                         <span class="order-meta-item"><i class="fas fa-map-marker-alt"></i> @diaDiem</span>
                                     }
-                                    <span class="order-meta-item">
-                                        <i class="fas fa-credit-card"></i>
-                                        <span class="pm-tag">@(pttt == 2 ? "VNPay" : pttt == 3 ? "MoMo" : pttt == 4 ? "ZaloPay" : "Đang xử lý")</span>
-                                    </span>
+                                    @if (tongTien > 0)
+                                    {
+                                        <span class="order-meta-item">
+                                            <i class="fas fa-credit-card"></i>
+                                            <span class="pm-tag">@(pttt == 2 ? "VNPay" : pttt == 3 ? "MoMo" : pttt == 4 ? "ZaloPay" : "Đang xử lý")</span>
+                                        </span>
+                                    }
                                 </div>
                             </div>
                             <div class="order-code">Mã đơn: @maDon</div>
@@ -143,37 +166,41 @@
                         @* Badge trạng thái *@
                         @if (tt == 1)
                         {
-                            <span class="badge-paid"><i class="fas fa-circle-check"></i> Đã thanh toán</span>
+                            <span class="badge-paid"><i class="fas fa-circle-check"></i> @(tongTien == 0 ? "Đã đăng ký" : "Đã thanh toán")</span>
                         }
                         else if (tt == 0)
                         {
-                            <span class="badge-pending"><i class="fas fa-clock"></i> Chờ thanh toán</span>
+                            <span class="badge-pending"><i class="fas fa-clock"></i> Còn <strong data-payment-expiry="@expiryUtc">--:--</strong></span>
                         }
                         else if (tt == 2)
                         {
                             <span class="badge-cancelled"><i class="fas fa-ban"></i> Đã hủy</span>
                         }
-                        else if (tt == 3)
-                        {
-                            <span class="badge-refund"><i class="fas fa-rotate-left"></i> Hoàn tiền</span>
-                        }
-                        else
+                        else if (tt == 4)
                         {
                             <span class="badge-expired"><i class="fas fa-timer"></i> Hết hạn</span>
                         }
+                        else
+                        {
+                            <span class="badge-expired"><i class="fas fa-circle-question"></i> Không xác định</span>
+                        }
 
                         <div style="display:flex;align-items:center;gap:12px">
-                            <span class="order-total">@tongTien.ToString("N0") VND</span>
+                            <span class="order-total">@(tongTien == 0 ? "Miễn phí" : tongTien.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("vi-VN")) + " đ")</span>
                             @if (tt == 0)
                             {
                                 <a href="/Booking/ThanhToan?id=@item.Id" class="btn btn-primary btn-sm" style="border-radius:8px;font-weight:600">
                                     <i class="fas fa-credit-card me-1"></i>Thanh toán
                                 </a>
+                                <form method="post" asp-controller="Booking" asp-action="HuyDonHang" asp-route-id="@item.Id" class="d-inline"
+                                      data-confirm="Hủy đơn này và trả lại vé đang giữ?" data-confirm-title="Hủy đơn hàng" data-confirm-button="Hủy đơn" data-confirm-tone="danger">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" style="border-radius:8px;font-weight:600">Hủy</button>
+                                </form>
                             }
                             @if (tt == 1)
                             {
-                                <a href="/Booking/ChiTietDonHang?id=@item.Id" class="btn btn-outline-primary btn-sm" style="border-radius:8px;font-weight:600">
-                                    <i class="fas fa-ticket me-1"></i>Xem vé
+                                <a href="/Booking/ChiTietDonHang?id=@item.Id" class="btn btn-outline-primary btn-sm order-detail-btn">
+                                    <i class="fas @(laTrucTuyen ? "fa-arrow-right" : "fa-ticket")"></i>@(laTrucTuyen ? "Xem chi tiết" : "Xem vé")
                                 </a>
                             }
                         </div>
@@ -181,31 +208,64 @@
                 </div>
             }
         }
+        @if (Model.Any())
+        {
+            <div id="tabEmptyState" class="tab-empty" hidden>
+                <i class="fas fa-inbox fa-2x mb-3"></i>
+                <div class="fw-bold">Chưa có đơn ở trạng thái này</div>
+            </div>
+        }
     </div>
 </div>
 
 @section Scripts {
 <script>
 function locTab(btn, giaTri) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+    });
     btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    let visibleCount = 0;
     document.querySelectorAll('.order-card').forEach(card => {
         const tt = card.getAttribute('data-tt');
+        let hienThi;
         if (giaTri === 'all') {
-            card.style.display = '';
-        } else if (giaTri === '3,4') {
-            card.style.display = (tt === '3' || tt === '4') ? '' : 'none';
+            hienThi = true;
         } else {
-            card.style.display = (tt === giaTri) ? '' : 'none';
+            hienThi = tt === giaTri;
         }
+        card.hidden = !hienThi;
+        if (hienThi) visibleCount++;
     });
+    const empty = document.getElementById('tabEmptyState');
+    if (empty) empty.hidden = visibleCount > 0;
+    document.getElementById('orderResultCount').textContent = `${visibleCount} đơn hàng`;
 }
 
-// Tự động chạy bộ lọc cho tab Đã thanh toán lúc tải trang
+function capNhatThoiGianThanhToan() {
+    let daHetHan = false;
+    document.querySelectorAll('[data-payment-expiry]').forEach(label => {
+        const conLai = new Date(label.dataset.paymentExpiry).getTime() - Date.now();
+        if (conLai <= 0) {
+            label.textContent = '00:00';
+            daHetHan = true;
+            return;
+        }
+        const phut = Math.floor(conLai / 60000);
+        const giay = Math.floor((conLai % 60000) / 1000);
+        label.textContent = `${String(phut).padStart(2, '0')}:${String(giay).padStart(2, '0')}`;
+    });
+    if (daHetHan) window.location.reload();
+}
+
 window.addEventListener('DOMContentLoaded', function() {
-    const tabPaid = document.getElementById('tab-paid');
-    if (tabPaid) {
-        locTab(tabPaid, '1');
+    const tabAll = document.getElementById('tab-all');
+    if (tabAll) locTab(tabAll, 'all');
+    if (document.querySelector('[data-payment-expiry]')) {
+        capNhatThoiGianThanhToan();
+        window.setInterval(capNhatThoiGianThanhToan, 1000);
     }
 });
 </script>

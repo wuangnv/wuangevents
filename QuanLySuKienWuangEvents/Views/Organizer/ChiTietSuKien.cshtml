@@ -1,6 +1,8 @@
 @model SuKien
 
 @{
+    // Action trả một SuKien; ViewBag chứa số vé, doanh thu và các dữ liệu thống kê.
+    // Các nút đi sang vé/đơn/khách/báo cáo; form giờ check-in POST CapNhatGioCheckIn.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Chi tiết sự kiện";
 
@@ -268,8 +270,11 @@
     <a href="/Organizer/LoaiVe?suKienId=@Model.Id"><i class="fas fa-ticket"></i> Loại vé</a>
     <a href="/Organizer/MaGiamGia?suKienId=@Model.Id"><i class="fas fa-percent"></i> Mã giảm giá</a>
     <a href="/Organizer/DonHang?suKienId=@Model.Id"><i class="fas fa-receipt"></i> Đơn hàng</a>
-    <a href="/Organizer/QuanLyStaff?suKienId=@Model.Id"><i class="fas fa-user-check"></i> Phân công soát vé</a>
-    <a href="/Organizer/SoDoChoNgoi?suKienId=@Model.Id"><i class="fas fa-chair"></i> Sơ đồ chỗ ngồi</a>
+    @if (Model.LoaiSuKien == 0)
+    {
+        <a href="/Organizer/QuanLyStaff?suKienId=@Model.Id"><i class="fas fa-user-check"></i> Phân công soát vé</a>
+        <a href="/Organizer/SoDoChoNgoi?suKienId=@Model.Id"><i class="fas fa-chair"></i> Sơ đồ chỗ ngồi</a>
+    }
     <a href="/Organizer/KhachThamDu?suKienId=@Model.Id"><i class="fas fa-users"></i> Khách tham dự</a>
     <a href="/Organizer/BaoCao?suKienId=@Model.Id"><i class="fas fa-chart-bar"></i> Báo cáo</a>
     <a href="/Organizer/ChinhSuaSuKien/@Model.Id"><i class="fas fa-pen"></i> Chỉnh sửa</a>
@@ -364,6 +369,45 @@
         </div>
     </div>
     <div class="col-lg-6">
+      @if (Model.LoaiSuKien == 1)
+      {
+        <div class="info-card" style="height:100%;overflow:hidden;">
+            <div class="info-card-header" style="justify-content:space-between;gap:10px;">
+                <span><i class="fas fa-video" style="color:#7c3aed;"></i> Phòng trực tuyến</span>
+                <span class="badge @(string.IsNullOrWhiteSpace(Model.LinkOnline) ? "bg-warning-subtle text-warning-emphasis" : "bg-success-subtle text-success-emphasis")" style="font-size:.72rem;border-radius:999px;padding:5px 10px;">
+                    @(string.IsNullOrWhiteSpace(Model.LinkOnline) ? "Chưa thiết lập" : "Đã thiết lập")
+                </span>
+            </div>
+            <div class="info-card-body" style="background:linear-gradient(135deg,#fcfbff,#f7f5ff);height:calc(100% - 52px);">
+                <form asp-controller="Organizer" asp-action="CapNhatLinkOnline" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <label for="linkOnlineQuick" class="form-label fw-semibold" style="font-size:.84rem;color:#344054;">Đường dẫn tham dự</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" style="background:#fff;border-color:#e5e7eb;color:#7c3aed;"><i class="fas fa-link"></i></span>
+                        <input id="linkOnlineQuick" name="linkOnline" type="url" class="form-control" value="@Model.LinkOnline" required
+                               placeholder="Dán link phòng Google Meet" autocomplete="url" style="border-color:#e5e7eb;font-size:.86rem;" />
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="https://meet.google.com/" target="_blank" rel="noopener noreferrer" class="btn btn-light border btn-sm" style="border-radius:9px;font-weight:650;padding:7px 14px;">
+                            <i class="fas fa-video me-1" style="color:#0f9d58;"></i> Tạo phòng Google Meet
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-sm" style="border-radius:9px;font-weight:700;padding:7px 14px;">
+                            <i class="fas fa-floppy-disk me-1"></i> Lưu đường dẫn
+                        </button>
+                        @if (!string.IsNullOrWhiteSpace(Model.LinkOnline))
+                        {
+                            <a href="@Model.LinkOnline" target="_blank" rel="noopener noreferrer" class="btn btn-light border btn-sm" style="border-radius:9px;font-weight:650;padding:7px 14px;">
+                                <i class="fas fa-arrow-up-right-from-square me-1"></i> Mở phòng
+                            </a>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+      }
+      else
+      {
         @* === BỘ ĐIỀU KHIỂN THỜI GIAN & SOÁT VÉ HỢP NHẤT === *@
         <div class="info-card" id="checkinWidget" style="height: 100%;">
             <div class="info-card-header" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -418,6 +462,7 @@
             @* Chế độ chỉnh sửa nhanh (ẩn mặc định) *@
             <div class="info-card-body" id="checkinEdit" style="display:none;border-top:2px solid #ede9fe;background:#faf5ff;">
                 <form method="post" action="/Organizer/CapNhatGioCheckIn" id="checkinForm">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -474,10 +519,11 @@
                 </form>
             </div>
         </div>
+      }
     </div>
 
 
-    @if (Model.LoaiSuKien == 2)
+    @if (Model.LoaiSuKien == 0)
     {
         <div class="col-lg-6">
             <div class="info-card">
@@ -501,28 +547,13 @@
             </div>
         </div>
     }
-    else if (Model.LoaiSuKien == 1)
-    {
-        <div class="col-lg-6">
-            <div class="info-card">
-                <div class="info-card-header"><i class="fas fa-link" style="color:#0891b2;"></i> Sự kiện trực tuyến</div>
-                <div class="info-card-body">
-                    <div class="info-row">
-                        <label>Đường dẫn tham dự</label>
-                        <a href="@Model.LinkOnline" target="_blank" style="font-size:.9rem;word-break:break-all;">@Model.LinkOnline</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
     @if (!string.IsNullOrEmpty(Model.MoTaChiTiet))
     {
         <div class="col-12">
             <div class="info-card">
                 <div class="info-card-header"><i class="fas fa-align-left" style="color:#7c3aed;"></i> Mô tả chi tiết</div>
                 <div class="info-card-body" style="line-height:1.7;color:#374151;">
-                    @Html.Raw(Model.MoTaChiTiet)
+                    @Html.Raw(SafeHtml.Sanitize(Model.MoTaChiTiet))
                 </div>
             </div>
         </div>
@@ -535,7 +566,8 @@
             <div class="d-flex flex-wrap gap-2">
                 @if (Model.TrangThai == 3)
                 {
-                    <form method="post" action="/Organizer/DungBanVeSuKien/@Model.Id" class="m-0" onsubmit="return confirm('Bạn có chắc muốn dừng bán vé sự kiện này?')">
+                <form method="post" action="/Organizer/DungBanVeSuKien/@Model.Id" class="m-0" data-confirm="Dừng bán vé sự kiện này?" data-confirm-title="Dừng bán vé" data-confirm-button="Dừng bán">
+                    @Html.AntiForgeryToken()
                         <button class="btn btn-warning text-dark fw-semibold" type="submit" style="border-radius:8px;">
                             <i class="fas fa-pause me-1"></i> Dừng bán vé
                         </button>
@@ -543,7 +575,8 @@
                 }
                 else if (Model.TrangThai == 2)
                 {
-                    <form method="post" action="/Organizer/MoBanVeSuKienLai/@Model.Id" class="m-0" onsubmit="return confirm('Mở bán vé lại sự kiện này?')">
+                <form method="post" action="/Organizer/MoBanVeSuKienLai/@Model.Id" class="m-0" data-confirm="Mở bán vé lại cho sự kiện này?" data-confirm-title="Mở bán lại" data-confirm-button="Mở bán" data-confirm-tone="normal">
+                    @Html.AntiForgeryToken()
                         <button class="btn btn-success fw-semibold" type="submit" style="border-radius:8px;">
                             <i class="fas fa-play me-1"></i> Mở bán vé lại
                         </button>
@@ -551,7 +584,8 @@
                 }
                 @if (Model.TrangThai != 6)
                 {
-                    <form method="post" action="/Organizer/HuySuKien/@Model.Id" class="m-0" onsubmit="return confirm('CẢNH BÁO: Hủy sự kiện này? Hành động này không thể hoàn tác!')">
+                <form method="post" action="/Organizer/HuySuKien/@Model.Id" class="m-0" data-confirm="Hủy sự kiện này? Hành động này không thể hoàn tác." data-confirm-title="Hủy sự kiện" data-confirm-button="Hủy sự kiện">
+                    @Html.AntiForgeryToken()
                         <button class="btn btn-outline-danger fw-semibold" type="submit" style="border-radius:8px;">
                             <i class="fas fa-ban me-1"></i> Hủy sự kiện
                         </button>
@@ -766,14 +800,17 @@ function detectPresets() {
 }
 
 // Chạy dò tìm preset khi mở trang
-window.addEventListener('DOMContentLoaded', detectPresets);
+window.addEventListener('DOMContentLoaded', function () {
+    if (document.getElementById('checkinWidget')) detectPresets();
+});
 
 // Đặt về mặc định (xóa cả hai giờ)
-function resetCheckIn() {
-    if (!confirm('Xác nhận đặt về mặc định?\nHệ thống sẽ dùng giờ bắt đầu/kết thúc sự kiện làm khung giờ soát vé.')) return;
+async function resetCheckIn() {
+    const approved = await WuangUI.confirm('Giờ bắt đầu và kết thúc sự kiện sẽ được dùng làm khung giờ soát vé.', { title: 'Đặt lại khung giờ?', confirmText: 'Đặt về mặc định', danger: false });
+    if (!approved) return;
     document.getElementById('inputBatDau').value = '';
     document.getElementById('inputKetThuc').value = '';
-    document.getElementById('checkinForm').submit();
+    document.getElementById('checkinForm').requestSubmit();
 }
 
 // Tự mở widget nếu TempData có thông báo thành công (để user thấy kết quả)

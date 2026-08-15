@@ -1,10 +1,5 @@
-@* ============================================================
-   VIEW: Đăng ký (DangKy)
-   Giải thích:
-     - Trang đăng ký tài khoản cho phép người dùng tạo tài khoản mới
-     - Có tùy chọn check box "laOrganizer" để phân biệt Khách hàng thường (VaiTro = 0) và Nhà tổ chức (VaiTro = 1)
-     - Form gửi dữ liệu dạng POST lên action DangKy của AccountController
-   ============================================================ *@
+@* Form đăng ký POST Account/DangKy; input name khớp tham số action.
+   Controller kiểm tra dữ liệu, băm BCrypt, INSERT NguoiDung và gửi email. *@
 @{
     ViewData["Title"] = "Đăng ký";
 }
@@ -13,7 +8,6 @@
     <div class="auth-container">
         <div class="auth-header">
             <h2>Tạo tài khoản mới</h2>
-            <p>Đăng ký để đặt mua vé hoặc đăng hồ sơ tổ chức sự kiện.</p>
         </div>
 
         @* Hiển thị thông báo lỗi từ Controller gửi sang nếu có *@
@@ -44,14 +38,6 @@
             <div class="form-group">
                 <label>Số điện thoại (tùy chọn)</label>
                 <input class="form-control" name="soDienThoai" placeholder="Nhập số điện thoại liên lạc" />
-            </div>
-            
-            @* Checkbox này dùng để quyết định vai trò lúc tạo tài khoản mới *@
-            <div class="form-group">
-                <label class="form-checkbox">
-                    <input type="checkbox" name="laOrganizer" value="true" />
-                    <span>Đăng ký làm Ban Tổ Chức (để tạo và đăng sự kiện bán vé)</span>
-                </label>
             </div>
             
             <button class="btn btn-primary w-100 py-3 mt-2" type="submit">Đăng ký tài khoản</button>

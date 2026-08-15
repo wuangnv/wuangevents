@@ -1,6 +1,8 @@
 @model List<DanhMuc>
 
 @{
+    // GET DanhMuc SELECT danh sách vào Model; foreach bên dưới vẽ từng dòng.
+    // Link sửa tạo GET có id; form xóa tạo POST XoaDanhMuc.
     Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
     ViewData["Title"] = "Danh mục";
 }
@@ -9,10 +11,9 @@
     <div class="portal-page-title">
         <span class="portal-kicker"><i class="fas fa-layer-group"></i> Danh mục</span>
         <h1>Quản lý danh mục</h1>
-        <p>Danh mục dùng để phân loại sự kiện ở trang khách hàng.</p>
     </div>
     <div class="portal-actions">
-        <a class="btn btn-primary" href="/Admin/TaoMoiDanhMuc">
+        <a class="btn btn-primary" asp-controller="Admin" asp-action="TaoMoiDanhMuc">
             <i class="fas fa-plus me-1"></i> Thêm danh mục
         </a>
     </div>
@@ -56,11 +57,12 @@
                                 </span>
                             </td>
                             <td class="text-end">
-                                <a class="btn btn-outline-primary btn-sm" href="/Admin/ChinhSuaDanhMuc/@item.Id">
+                                <a class="btn btn-outline-primary btn-sm" asp-controller="Admin" asp-action="ChinhSuaDanhMuc" asp-route-id="@item.Id">
                                     <i class="fas fa-pen me-1"></i> Sửa
                                 </a>
-                                <form class="d-inline" method="post" action="/Admin/XoaDanhMuc/@item.Id"
-                                      onsubmit="return confirm('Xóa danh mục \u0022@item.TenDanhMuc\u0022?\nCác sự kiện thuộc danh mục này sẽ không bị xóa.')">
+                                <form class="d-inline" method="post" asp-controller="Admin" asp-action="XoaDanhMuc" asp-route-id="@item.Id"
+                                      data-confirm="Xóa danh mục “@item.TenDanhMuc”? Các sự kiện thuộc danh mục này sẽ được giữ nguyên."
+                                      data-confirm-button="Xóa danh mục">
                                     <button class="btn btn-outline-danger btn-sm" type="submit">
                                         <i class="fas fa-trash me-1"></i> Xóa
                                     </button>

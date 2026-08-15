@@ -1,11 +1,14 @@
 @model List<NhanVienSuKien>
 @{
+    // QuanLyStaff(suKienId) trả các dòng phân công NhanVienSuKien.
+    // ViewBag.CreatedStaff là tài khoản có thể chọn; form POST thêm/xóa phân công.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Phân công soát vé";
     var suKienId = (Guid)ViewBag.SuKienId;
     var createdStaff = ViewBag.CreatedStaff as List<NguoiDung> ?? new List<NguoiDung>();
-    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6;
-    string lockReason = ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG" : "ĐÃ HỦY";
+    bool isExpired = ViewBag.NgayKetThucSuKien != null && VietnamTime.Now > (DateTime)ViewBag.NgayKetThucSuKien;
+    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 5 || ViewBag.TrangThaiSuKien == 6 || isExpired;
+    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 5 ? "ĐÃ KẾT THÚC" : "ĐÃ HỦY";
 }
 
 <style>
@@ -107,6 +110,7 @@
                 @if (createdStaff.Count > 0)
                 {
                     <form method="post" action="/Organizer/ThemStaff" class="assign-form-select">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="suKienId" value="@suKienId" />
                         <div class="mb-3">
                             <label class="fl">Chọn nhân viên <span class="text-danger">*</span></label>
@@ -155,7 +159,6 @@
                     <div class="text-center py-5 text-muted">
                         <i class="fas fa-user-clock" style="font-size:3rem;margin-bottom:14px;display:block;color:#d1d5db;"></i>
                         <h5 style="color:#374151;font-weight:700;">Chưa phân công ai</h5>
-                        <p class="small mb-0">Chọn nhân viên từ form bên trái để phân công soát vé.</p>
                     </div>
                 }
                 else
@@ -171,10 +174,11 @@
                             </div>
                             <div class="d-flex flex-column align-items-end gap-1">
                                 <span class="badge-role-staff">@item.VaiTroNV</span>
-                                <span class="badge-role-date">Gán @item.NgayThem.ToString("dd/MM/yyyy")</span>
+                                <span class="badge-role-date">Gán @VietnamTime.FromUtc(item.NgayThem).ToString("dd/MM/yyyy")</span>
                             </div>
                             <form method="post" action="/Organizer/XoaStaff" style="display:inline;"
-                                  onsubmit="return confirm('Gỡ nhân viên @item.HoTenNV khỏi sự kiện này?')">
+                                  data-confirm="Gỡ nhân viên @item.HoTenNV khỏi sự kiện này?" data-confirm-title="Gỡ phân công" data-confirm-button="Gỡ nhân viên">
+                                @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@item.Id" />
                                 <input type="hidden" name="suKienId" value="@suKienId" />
                                 <button class="btn btn-sm btn-light text-danger border-0" type="submit"

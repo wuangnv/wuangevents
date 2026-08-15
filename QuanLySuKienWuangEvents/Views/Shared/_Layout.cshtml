@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+@* Layout trang khách chứa head/menu/footer/scripts; RenderBody chèn View hiện tại. *@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,20 +15,13 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+    @await Html.PartialAsync("_UiNotifications")
     <nav class="navbar" id="mainNav">
         <div class="container">
             <a href="/" class="navbar-brand">
                 <i class="fas fa-bolt"></i>
                 <span>Wuang<strong>Events</strong></span>
             </a>
-
-            @if (ViewContext.RouteData.Values["controller"]?.ToString() != "Home" || ViewContext.RouteData.Values["action"]?.ToString() != "Index")
-            {
-                <form class="navbar-search" method="get" asp-controller="Home" asp-action="Index">
-                    <i class="fas fa-search"></i>
-                    <input type="text" name="q" placeholder="Tìm kiếm sự kiện..." />
-                </form>
-            }
 
             <div class="navbar-actions" style="display: flex; align-items: center; gap: 0.5rem;">
                 @if (User.Identity?.IsAuthenticated == true)
@@ -72,15 +66,15 @@
                                 <i class="fas fa-user"></i> Hồ sơ cá nhân
                             </a>
                             <hr class="dropdown-divider" />
-                            <a href="/Account/DangXuat" class="dropdown-item text-danger">
-                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
-                            </a>
+                            <form method="post" asp-controller="Account" asp-action="DangXuat">
+                                <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                            </form>
                         </div>
                     </div>
                 }
                 else
                 {
-                    <a href="/Account/DangKy?laOrganizer=true" class="nav-link text-success fw-bold me-2 d-none d-sm-flex align-items-center" style="font-size: 0.85rem; gap: 4px; text-decoration: none;">
+                    <a href="/Account/DangKy" class="nav-link text-success fw-bold me-2 d-none d-sm-flex align-items-center" style="font-size: 0.85rem; gap: 4px; text-decoration: none;">
                         <i class="fas fa-calendar-plus"></i> Tạo sự kiện
                     </a>
                     <a href="/Account/DangNhap" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.75rem;">Đăng nhập</a>
@@ -115,7 +109,9 @@
 
                     <a href="/Booking/DonHangCuaToi" class="mobile-menu-item"><i class="fas fa-ticket"></i> Vé của tôi</a>
                 <a href="/Account/HoSo" class="mobile-menu-item"><i class="fas fa-user"></i> Hồ sơ cá nhân</a>
-                <a href="/Account/DangXuat" class="mobile-menu-item text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                <form method="post" asp-controller="Account" asp-action="DangXuat">
+                    <button type="submit" class="mobile-menu-item text-danger border-0 bg-transparent w-100 text-start"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button>
+                </form>
             }
             else
             {
@@ -126,15 +122,6 @@
     </div>
 
     <main class="main-content">
-        @if (TempData["Message"] != null)
-        {
-            <div class="container mt-3">
-                <div class="alert alert-info">
-                    <i class="fas fa-circle-info"></i>
-                    @TempData["Message"]
-                </div>
-            </div>
-        }
         @RenderBody()
     </main>
 
@@ -187,6 +174,7 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         function toggleUserMenu() {
             const menu = document.getElementById('userMenu');

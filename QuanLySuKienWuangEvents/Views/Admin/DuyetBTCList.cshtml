@@ -1,5 +1,7 @@
 ﻿@model List<NguoiDung>
 @{
+    // DuyetBTCList() lấy NguoiDung có YeuCauBanToChuc = 1.
+    // Form POST XuLyDuyetBTC gửi id, status và lý do.
     Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
     ViewData["Title"] = "Duyệt Ban tổ chức";
 }
@@ -8,7 +10,6 @@
     <div class="portal-page-title">
         <span class="portal-kicker"><i class="fas fa-handshake"></i> Đối tác</span>
         <h1>Duyệt Ban tổ chức</h1>
-        <p>Phê duyệt hoặc từ chối các yêu cầu nâng cấp tài khoản lên Ban tổ chức của người dùng.</p>
     </div>
 </div>
 
@@ -33,21 +34,21 @@
         <span class="badge bg-primary text-white" style="border-radius:12px; padding: 6px 12px; font-weight: 600;">@Model.Count yêu cầu</span>
     </div>
     <div class="table-responsive">
-        <table class="table portal-table align-middle" style="min-width: 800px;">
+        <table class="table portal-table align-middle" style="min-width: 1120px;">
             <thead>
                 <tr>
-                    <th style="width: 25%;">Họ và tên</th>
-                    <th style="width: 25%;">Email đăng nhập</th>
-                    <th style="width: 20%;">Số điện thoại</th>
-                    <th style="width: 15%;">Ngày gửi yêu cầu</th>
-                    <th class="text-end" style="width: 15%;">Thao tác</th>
+                    <th style="width: 23%;">Hồ sơ tổ chức</th>
+                    <th style="width: 20%;">Người đại diện</th>
+                    <th style="width: 32%;">Hoạt động dự kiến</th>
+                    <th style="width: 12%;">Ngày gửi</th>
+                    <th class="text-end" style="width: 13%;">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
                 @if (Model.Count == 0)
                 {
                     <tr>
-                        <td colspan="5" class="text-center text-muted py-5">
+                            <td colspan="5" class="text-center text-muted py-5">
                             <i class="fas fa-inbox fa-2x d-block mb-3" style="color: #e5e7eb;"></i>
                             Chưa có yêu cầu nâng cấp nào cần phê duyệt.
                         </td>
@@ -62,29 +63,37 @@
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="flex-shrink-0 d-flex align-items-center justify-content-center" 
                                          style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; font-weight: 700; font-size: 1rem;">
-                                        @(string.IsNullOrEmpty(item.HoTen) ? "U" : item.HoTen[0].ToString().ToUpper())
+                                        @(string.IsNullOrEmpty(item.TenToChuc) ? "B" : item.TenToChuc[0].ToString().ToUpper())
                                     </div>
                                     <div>
-                                        <div class="fw-bold" style="font-size: .95rem; color: #1a1a2e;">@item.HoTen</div>
-                                        <div class="text-muted small">Người dùng nâng cấp</div>
+                                        <div class="fw-bold" style="font-size: .95rem; color: #1a1a2e;">@item.TenToChuc</div>
+                                        <span class="badge bg-light text-dark border mt-1">@(item.LoaiChuTheBTC == 1 ? "Doanh nghiệp / đơn vị" : "Cá nhân")</span>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <span class="text-secondary" style="font-size: .92rem;">@item.Email</span>
+                                <div class="fw-semibold text-dark">@item.HoTen</div>
+                                <div class="text-secondary small mt-1">@item.Email <i class="fas fa-circle-check text-success ms-1" title="Email đã xác minh"></i></div>
+                                <div class="font-monospace text-dark small mt-1"><i class="fas fa-phone text-muted me-1"></i>@item.SdtBanToChuc</div>
                             </td>
                             <td>
-                                <span class="font-monospace text-dark" style="font-size: .9rem;"><i class="fas fa-phone text-muted me-1 small"></i> @item.SdtBanToChuc</span>
+                                <div class="text-secondary small" style="white-space:normal;line-height:1.55;">@item.MoTaYeuCauBTC</div>
+                                @if (item.DaDongYDieuKhoanBTC)
+                                {
+                                    <div class="text-success small mt-2"><i class="fas fa-shield-check me-1"></i>Đã đồng ý điều khoản</div>
+                                }
                             </td>
                             <td>
                                 <span class="text-secondary small">
                                     <i class="fas fa-calendar-alt text-muted me-1 small"></i> 
-                                    @(item.NgayYeuCauBTC.HasValue ? item.NgayYeuCauBTC.Value.ToString("dd/MM/yyyy HH:mm") : "N/A")
+                                    @(item.NgayYeuCauBTC.HasValue ? VietnamTime.FromUtc(item.NgayYeuCauBTC.Value).ToString("dd/MM/yyyy HH:mm") : "N/A")
                                 </span>
                             </td>
                             <td class="text-end">
                                 <div class="d-flex gap-1 justify-content-end">
-                                    <form class="d-inline" method="post" action="/Admin/XuLyDuyetBTC" onsubmit="return confirm('Bạn có chắc chắn muốn phê duyệt tài khoản này làm Ban tổ chức?')">
+                                    <form class="d-inline" method="post" asp-controller="Admin" asp-action="XuLyDuyetBTC"
+                                          data-confirm="Phê duyệt tài khoản này trở thành Ban tổ chức?"
+                                          data-confirm-title="Phê duyệt tài khoản" data-confirm-button="Phê duyệt" data-confirm-tone="normal">
                                         <input type="hidden" name="id" value="@item.Id" />
                                         <input type="hidden" name="status" value="true" />
                                         <button class="btn btn-sm btn-success fw-semibold" type="submit" style="border-radius: 8px; font-size: .78rem; padding: 6px 12px;">
@@ -115,7 +124,7 @@
                 <h5 class="modal-title fw-bold" id="rejectModalLabel"><i class="fas fa-ban text-danger me-2"></i> Từ chối yêu cầu</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form method="post" action="/Admin/XuLyDuyetBTC">
+            <form method="post" asp-controller="Admin" asp-action="XuLyDuyetBTC">
                 <div class="modal-body">
                     <input type="hidden" name="id" id="rejectUserId" />
                     <input type="hidden" name="status" value="false" />

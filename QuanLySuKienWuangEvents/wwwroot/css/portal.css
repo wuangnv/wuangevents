@@ -6,6 +6,7 @@ body.portal-body {
     font-family: Inter, "Plus Jakarta Sans", Arial, sans-serif;
 }
 
+/* CSS layout/card/table dùng chung cho Admin và Organizer; không xử lý phân quyền. */
 .portal-shell {
     min-height: 100vh;
     display: flex;

@@ -1,12 +1,14 @@
 @model List<LoaiVe>
 
 @{
+    // LoaiVe(suKienId) trả List<LoaiVe>; ViewBag chứa sự kiện/trạng thái khóa.
+    // Form tạo POST TaoMoiLoaiVe; các nút gọi sửa hoặc BatTatLoaiVe.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Loại vé";
     var suKienId = (Guid)ViewBag.SuKienId;
-    bool isExpired = ViewBag.NgayKetThucSuKien != null && DateTime.UtcNow > (DateTime)ViewBag.NgayKetThucSuKien;
-    bool isLocked = ViewBag.TrangThaiSuKien == 1 || ViewBag.TrangThaiSuKien == 2 || ViewBag.TrangThaiSuKien == 6 || isExpired;
-    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 2 ? "TẠM DỪNG" : "ĐÃ HỦY";
+    bool isExpired = ViewBag.NgayKetThucSuKien != null && VietnamTime.Now > (DateTime)ViewBag.NgayKetThucSuKien;
+    bool isLocked = ViewBag.TrangThaiSuKien is not (0 or 2 or 7) || isExpired;
+    string lockReason = isExpired ? "ĐÃ KẾT THÚC" : ViewBag.TrangThaiSuKien == 1 ? "CHỜ DUYỆT" : ViewBag.TrangThaiSuKien == 3 ? "ĐANG MỞ BÁN" : ViewBag.TrangThaiSuKien == 4 ? "ĐÃ BÁN HẾT" : "ĐÃ KHÓA";
 }
 
 <style>
@@ -75,7 +77,6 @@
             <div style="background:#fff;border-radius:14px;padding:60px 24px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.07);color:#9ca3af;">
                 <i class="fas fa-ticket" style="font-size:3rem;margin-bottom:16px;display:block;"></i>
                 <h5 style="color:#374151;font-weight:700;">Chưa có loại vé nào</h5>
-                <p class="small mb-0">Tạo loại vé đầu tiên ở khung bên phải để bắt đầu bán vé.</p>
             </div>
         }
         else
@@ -160,7 +161,7 @@
                 <i class="fas fa-plus-circle me-2"></i> Thêm loại vé mới
             </div>
             <div class="add-ticket-form-body">
-                <form method="post" action="/Organizer/LoaiVe/TaoMoi">
+                <form method="post" asp-controller="Organizer" asp-action="TaoMoiLoaiVe">
                     <input type="hidden" name="suKienId" value="@suKienId" />
                     <div class="mb-3">
                         <label class="form-label-custom">Tên loại vé <span class="text-danger">*</span></label>

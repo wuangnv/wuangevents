@@ -1,6 +1,8 @@
 @model List<ChiTietDonHang>
 @using QuanLySuKienWuangEvents.Models
 @{
+    // CheckIn() trả danh sách vé của một sự kiện sau tìm kiếm/lọc trạng thái.
+    // Form/QR gửi POST QuetVeCheckIn(suKienId, code), rồi redirect về trang này.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Check-in QR";
     var suKienId = (Guid)ViewBag.SuKienId;
@@ -64,7 +66,7 @@
             bool isDaHuy = ViewBag.TrangThaiSuKien == 6;
 
             // Quy đổi sang giờ Việt Nam (UTC+7)
-            DateTime nowLocal = DateTime.UtcNow.AddHours(7);
+            DateTime nowLocal = VietnamTime.Now;
             
             // Thiết lập mốc check-in thông minh (Smart Default): BĐ trước 1 tiếng, KT bằng giờ kết thúc sự kiện
             DateTime startCheckIn = batDau ?? ngayBatDau.AddHours(-1);
@@ -115,6 +117,7 @@
 <div class="scan-panel">
     <h2><i class="fas fa-barcode"></i> Quét mã vé / Nhập mã thủ công</h2>
     <form method="post" action="/Organizer/QuetVeCheckIn" id="checkinForm">
+        @Html.AntiForgeryToken()
         <input type="hidden" name="suKienId" value="@suKienId" />
         <div class="scan-input-row">
             <input id="codeInput" class="form-control" name="code" placeholder="VD: QR-ABC123... hoặc VE2606..." autofocus required autocomplete="off" @(isVoHieu ? "disabled" : "") />
@@ -168,7 +171,7 @@
                         else if(item.TrangThaiCheckin == 2){<span style="background:#fee2e2;color:#991b1b;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:600">Đã hủy</span>}
                         else{<span class="badge-pending"><i class="fas fa-circle"></i> Chưa check-in</span>}
                     </td>
-                    <td style="font-size:.82rem;color:#888">@item.NgayCheckin?.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td style="font-size:.82rem;color:#888">@(VietnamTime.FromUtc(item.NgayCheckin)?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
                 </tr>
                 }
             </tbody>

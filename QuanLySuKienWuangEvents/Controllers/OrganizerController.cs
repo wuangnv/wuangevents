@@ -1,16 +1,5 @@
-﻿// ORGANIZER CONTROLLER — Phân hệ Ban Tổ Chức
-// Chức năng chính:
-//   1. Dashboard: Xem nhanh số lượng sự kiện, đơn hàng, doanh thu
-//   2. Quản lý sự kiện: Tạo mới, chỉnh sửa, dừng bán vé, mở lại, hủy, sao chép
-//   3. Quản lý loại vé: Thêm, sửa, bật/tắt bán vé
-//   4. Quản lý mã giảm giá: Thêm, sửa, xóa mã voucher
-//   5. Quản lý đơn hàng & Khách tham dự: Xem danh sách, chi tiết đơn, xuất danh sách ra CSV
-//   6. Check-in: Danh sách soát vé, quét mã QR check-in
-//   7. Báo cáo: Xem doanh thu chi tiết theo loại vé, xuất báo cáo ra CSV
-//   8. Sơ đồ chỗ ngồi: Thiết lập sơ đồ theo mẫu (Cinema, Theater, Music, Simple, Custom), khóa/mở ghế, xóa sơ đồ
-//   9. Hồ sơ: Cập nhật thông tin Ban Tổ Chức
-//
-// Quyền truy cập: Chỉ tài khoản có vai trò "Organizer" hoặc "Admin" mới có quyền truy cập
+// ORGANIZER CONTROLLER — Phân hệ Ban Tổ Chức
+// Quản lý toàn bộ nghiệp vụ BTC; SQL luôn kiểm tra NguoiToChucId để phân quyền.
 
 using System.Security.Claims;
 using System.Text;
@@ -25,6 +14,17 @@ namespace QuanLySuKienWuangEvents.Controllers;
 [Route("Organizer/[action]/{id?}")]    // Đường dẫn mẫu: /Organizer/SuKien, /Organizer/TaoMoiSuKien, ...
 public class OrganizerController : Controller
 {
+    private readonly ILogger<OrganizerController> _logger;
+    private readonly IWebHostEnvironment _environment;
+
+    public OrganizerController(
+        ILogger<OrganizerController> logger,
+        IWebHostEnvironment environment)
+    {
+        _logger = logger;
+        _environment = environment;
+    }
+
     // 1. DASHBOARD & THỐNG KÊ
 
     // TRANG CHỦ DASHBOARD NHÀ TỔ CHỨC
@@ -126,6 +126,14 @@ public class OrganizerController : Controller
         if (!await LaSuKienCuaToi(id))
             return NotFound();
 
+        byte loaiSuKien = await Db.LayGiaTri<byte>(
+            "SELECT LoaiSuKien FROM SuKien WHERE Id = @id", new { id });
+        if (loaiSuKien == 1)
+        {
+            TempData["Error"] = "Sự kiện trực tuyến không sử dụng khung giờ check-in tại cổng.";
+            return RedirectToAction("ChiTietSuKien", new { id });
+        }
+
         var organizerId = LayIdNguoiDangNhap();
         string sql = @"
             UPDATE SuKien
@@ -138,6 +146,38 @@ public class OrganizerController : Controller
         await Db.ThucThi(sql, new { id, batDauCheckIn, ketThucCheckIn, organizerId });
 
         TempData["Message"] = "Đã cập nhật khung giờ soát vé thành công!";
+        return RedirectToAction("ChiTietSuKien", new { id });
+    }
+
+    // Cập nhật riêng đường dẫn phòng mà không đổi trạng thái sự kiện đang mở bán.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CapNhatLinkOnline(Guid id, string linkOnline)
+    {
+        if (!await LaSuKienCuaToi(id)) return NotFound();
+
+        var suKien = await Db.LayDonLe<SuKien>(
+            "SELECT Id, LoaiSuKien FROM SuKien WHERE Id = @id", new { id });
+        if (suKien == null || suKien.LoaiSuKien != 1)
+        {
+            TempData["Error"] = "Chỉ sự kiện trực tuyến mới có đường dẫn phòng.";
+            return RedirectToAction("ChiTietSuKien", new { id });
+        }
+
+        string link = linkOnline?.Trim() ?? "";
+        if (!LaLinkPhongHopLe(link))
+        {
+            TempData["Error"] = "Đường dẫn phòng chưa hợp lệ. Hãy tạo phòng thật rồi dán toàn bộ link https:// vào đây.";
+            return RedirectToAction("ChiTietSuKien", new { id });
+        }
+
+        await Db.ThucThi(@"
+            UPDATE SuKien
+            SET LinkOnline = @link, NgayCapNhat = GETUTCDATE()
+            WHERE Id = @id AND NguoiToChucId = @organizerId AND LoaiSuKien = 1",
+            new { id, link, organizerId = LayIdNguoiDangNhap() });
+
+        TempData["Message"] = "Đã cập nhật đường dẫn tham dự trực tuyến.";
         return RedirectToAction("ChiTietSuKien", new { id });
     }
 
@@ -154,7 +194,7 @@ public class OrganizerController : Controller
     public async Task<IActionResult> TaoMoiSuKien(
         string tenSuKien,
         int danhMucId,
-        byte loaiSuKien, // 0: Offline (Trực tiếp), 1: Online (Trực tuyến)
+        byte loaiSuKien, // 0: Offline, 1: Online
         string? linkOnline,
         string? anhBia,
         string? anhThumbnail,
@@ -186,23 +226,16 @@ public class OrganizerController : Controller
         {
             try
             {
-                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsDir))
-                {
-                    Directory.CreateDirectory(uploadsDir);
-                }
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(fileAnhBia.FileName);
-                var filePath = Path.Combine(uploadsDir, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await fileAnhBia.CopyToAsync(stream);
-                }
-                anhBia = "/uploads/" + fileName;
-                anhThumbnail = "/uploads/" + fileName;
+                anhBia = await LuuAnhSuKien(fileAnhBia);
+                anhThumbnail = anhBia;
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                ModelState.AddModelError("", "Lỗi tải ảnh lên: " + ex.Message);
+                ModelState.AddModelError("", ex.Message);
+            }
+            catch
+            {
+                ModelState.AddModelError("", "Không thể lưu ảnh bìa. Vui lòng thử lại.");
             }
         }
         else if (string.IsNullOrWhiteSpace(anhBia))
@@ -212,23 +245,22 @@ public class OrganizerController : Controller
         }
 
         // Kiểm tra hợp lệ dữ liệu cơ bản
-        if (ngayKetThuc < ngayBatDau)
-        {
-            ModelState.AddModelError("", "Ngày kết thúc sự kiện phải lớn hơn ngày bắt đầu.");
-        }
-        if (tenLoaiVe == null || tenLoaiVe.Length == 0)
-        {
-            ModelState.AddModelError("", "Bạn phải tạo ít nhất 1 loại vé.");
-        }
+        linkOnline = linkOnline?.Trim();
+        string? loiDuLieu = KiemTraDuLieuSuKien(
+            tenSuKien, loaiSuKien, linkOnline, tenDiaDiem, tinhThanh,
+            ngayBatDau, ngayKetThuc, batDauCheckIn, ketThucCheckIn,
+            tenLoaiVe, giaVe, soLuongVe, gioiHanMoiDon, submitAction != "draft", anhBia);
+        if (loiDuLieu != null) ModelState.AddModelError("", loiDuLieu);
 
         if (!ModelState.IsValid)
         {
             await NapDuLieuChoForm();
             return View();
         }
+        anhThumbnail = anhBia;
 
         var suKienId = Guid.NewGuid();
-        string slug  = TaoSlug(tenSuKien) + "-" + DateTime.Now.ToString("yyMMddHHmmss");
+        string slug  = TaoSlug(tenSuKien) + "-" + VietnamTime.Now.ToString("yyMMddHHmmss");
         var organizerId = LayIdNguoiDangNhap();
         
         // submitAction: "draft" là bản nháp (TrangThai = 0), ngược lại là gửi duyệt (TrangThai = 1)
@@ -273,7 +305,7 @@ public class OrganizerController : Controller
                 tenSuKien     = tenSuKien.Trim(),
                 slug,
                 moTaNgan,
-                moTaChiTiet,
+                moTaChiTiet = SafeHtml.Sanitize(moTaChiTiet),
                 anhBia,
                 anhThumbnail,
                 ngayBatDau,
@@ -281,8 +313,8 @@ public class OrganizerController : Controller
                 loaiSuKien,
                 linkOnline,
                 trangThai,
-                batDauCheckIn,
-                ketThucCheckIn,
+                batDauCheckIn = (loaiSuKien == 0) ? batDauCheckIn : null,
+                ketThucCheckIn = (loaiSuKien == 0) ? ketThucCheckIn : null,
                 // Gán trực tiếp dữ liệu địa điểm
                 tenDiaDiem       = (loaiSuKien == 0) ? tenDiaDiem?.Trim() : null,
                 diaChiDiaDiem    = (loaiSuKien == 0) ? soNhaDuong?.Trim() : null,
@@ -305,7 +337,7 @@ public class OrganizerController : Controller
                              NgayBatDauBan, NgayKetThucBan, ThuTuHienThi, TrangThai)
                         VALUES
                             (@suKienId, @tenLoaiVe, @giaVe, @soLuongVe, @gioiHan,
-                             GETUTCDATE(), @ngayKetThuc, @thuTu, 1)
+                             DATEADD(HOUR, 7, GETUTCDATE()), @ngayKetThuc, @thuTu, 1)
                     ";
 
                     await connection.ExecuteAsync(sqlInsertLoaiVe, new
@@ -347,7 +379,7 @@ public class OrganizerController : Controller
             new { suKienId = id }
         );
         ViewBag.Profile = await Db.LayDonLe<NguoiDung>(
-            "SELECT Id, TenNganHang, SoTaiKhoan, ChuTaiKhoan FROM NguoiDung WHERE Id = @id", 
+            "SELECT Id, HoTen, TenNganHang, SoTaiKhoan, ChuTaiKhoan FROM NguoiDung WHERE Id = @id",
             new { id = LayIdNguoiDangNhap() }
         );
 
@@ -394,23 +426,17 @@ public class OrganizerController : Controller
         {
             try
             {
-                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsDir))
-                {
-                    Directory.CreateDirectory(uploadsDir);
-                }
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(fileAnhBia.FileName);
-                var filePath = Path.Combine(uploadsDir, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await fileAnhBia.CopyToAsync(stream);
-                }
-                anhBia = "/uploads/" + fileName;
-                anhThumbnail = "/uploads/" + fileName;
+                anhBia = await LuuAnhSuKien(fileAnhBia);
+                anhThumbnail = anhBia;
             }
-            catch (Exception ex)
+            catch (InvalidDataException ex)
             {
-                TempData["Error"] = "Lỗi tải ảnh lên: " + ex.Message;
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("ChinhSuaSuKien", new { id });
+            }
+            catch
+            {
+                TempData["Error"] = "Không thể lưu ảnh bìa. Vui lòng thử lại.";
                 return RedirectToAction("ChinhSuaSuKien", new { id });
             }
         }
@@ -420,6 +446,17 @@ public class OrganizerController : Controller
             TempData["Error"] = "Ngày kết thúc phải diễn ra sau ngày bắt đầu.";
             return RedirectToAction("ChinhSuaSuKien", new { id });
         }
+        linkOnline = linkOnline?.Trim();
+        string? loiDuLieu = KiemTraDuLieuSuKien(
+            tenSuKien, loaiSuKien, linkOnline, tenDiaDiem, tinhThanh,
+            ngayBatDau, ngayKetThuc, batDauCheckIn, ketThucCheckIn,
+            tenLoaiVe, giaVe, soLuongVe, gioiHanMoiDon, submitAction != "draft", anhBia);
+        if (loiDuLieu != null)
+        {
+            TempData["Error"] = loiDuLieu;
+            return RedirectToAction("ChinhSuaSuKien", new { id });
+        }
+        anhThumbnail = anhBia;
 
         var organizerId = LayIdNguoiDangNhap();
         int trangThai   = (submitAction == "draft") ? 0 : 1;
@@ -474,14 +511,14 @@ public class OrganizerController : Controller
                   AND TrangThai    IN (0, 1, 2, 7)
             ";
 
-            await connection.ExecuteAsync(sqlUpdateSuKien, new
+            int soDongSuKien = await connection.ExecuteAsync(sqlUpdateSuKien, new
             {
                 id,
                 organizerId,
                 tenSuKien = tenSuKien.Trim(),
                 danhMucId,
                 moTaNgan,
-                moTaChiTiet,
+                moTaChiTiet = SafeHtml.Sanitize(moTaChiTiet),
                 anhBia,
                 anhThumbnail,
                 ngayBatDau,
@@ -489,8 +526,8 @@ public class OrganizerController : Controller
                 loaiSuKien,
                 linkOnline,
                 trangThai,
-                batDauCheckIn,
-                ketThucCheckIn,
+                batDauCheckIn = (loaiSuKien == 0) ? batDauCheckIn : null,
+                ketThucCheckIn = (loaiSuKien == 0) ? ketThucCheckIn : null,
                 // Gán trực tiếp dữ liệu địa điểm
                 tenDiaDiem       = (loaiSuKien == 0) ? tenDiaDiem?.Trim() : null,
                 diaChiDiaDiem    = (loaiSuKien == 0) ? soNhaDuong?.Trim() : null,
@@ -499,14 +536,26 @@ public class OrganizerController : Controller
                 sucChuaDiaDiem   = (loaiSuKien == 0) ? ((tongSoGhe > 0) ? tongSoGhe : 100) : (int?)null
             }, transaction);
 
-            // Cập nhật lại danh sách loại vé (Chỉ thực hiện khi CHƯA có đơn hàng đăng ký để tránh mất mát dữ liệu vé đã bán)
+            if (soDongSuKien == 0)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Trạng thái hiện tại không cho phép sửa thông tin. Hãy tạm dừng bán vé trước khi chỉnh sửa.";
+                return RedirectToAction("ChinhSuaSuKien", new { id });
+            }
+
+            // Không tạo lại loại vé khi đã có đơn hoặc sơ đồ ghế: KhuVuc đang tham chiếu LoaiVe.
             int soDonHang = await connection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(1) FROM DonHang WHERE SuKienId = @id", 
                 new { id }, 
                 transaction
             );
+            int soDoDaCauHinh = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(1) FROM SoDoChoNgoi WHERE SuKienId = @id",
+                new { id },
+                transaction
+            );
 
-            if (soDonHang == 0)
+            if (soDonHang == 0 && soDoDaCauHinh == 0)
             {
                 await connection.ExecuteAsync("DELETE FROM LoaiVe WHERE SuKienId = @suKienId", new { suKienId = id }, transaction);
 
@@ -523,7 +572,7 @@ public class OrganizerController : Controller
                                  NgayBatDauBan, NgayKetThucBan, ThuTuHienThi, TrangThai)
                             VALUES
                                 (@suKienId, @tenLoaiVe, @giaVe, @soLuongVe, @gioiHan,
-                                 GETUTCDATE(), @ngayKetThuc, @thuTu, 1)
+                                 DATEADD(HOUR, 7, GETUTCDATE()), @ngayKetThuc, @thuTu, 1)
                         ";
 
                         await connection.ExecuteAsync(sqlInsertLoaiVe, new
@@ -542,10 +591,12 @@ public class OrganizerController : Controller
 
             await transaction.CommitAsync();
         }
-        catch
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw;
+            _logger.LogError(ex, "Khong the cap nhat su kien {EventId}", id);
+            TempData["Error"] = "Không thể cập nhật sự kiện lúc này. Vui lòng kiểm tra lại thông tin và thử lại.";
+            return RedirectToAction("ChinhSuaSuKien", new { id });
         }
 
         TempData["Message"] = (trangThai == 0) ? "Đã lưu bản nháp." : "Đã gửi lại yêu cầu duyệt sự kiện.";
@@ -582,7 +633,30 @@ public class OrganizerController : Controller
             return RedirectToAction("SuKien");
         }
 
-        await DoiTrangThaiSuKien(id, 3, "Sự kiện đã được mở bán vé trở lại.");
+        int soDongCapNhat = await Db.ThucThi(@"
+            UPDATE SuKien
+            SET TrangThai = 3, NgayCapNhat = GETUTCDATE()
+            WHERE Id = @id
+              AND NguoiToChucId = @organizerId
+              AND TrangThai = 2
+              AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE())
+              AND EXISTS (
+                    SELECT 1 FROM LoaiVe lv
+                    WHERE lv.SuKienId = SuKien.Id
+                      AND lv.TrangThai = 1
+                      AND lv.SoLuongTong > lv.SoLuongDaBan + lv.SoLuongGiuCho
+                      AND (lv.NgayBatDauBan IS NULL OR lv.NgayBatDauBan <= DATEADD(HOUR, 7, GETUTCDATE()))
+                      AND (lv.NgayKetThucBan IS NULL OR lv.NgayKetThucBan >= DATEADD(HOUR, 7, GETUTCDATE()))
+              )
+              AND (LoaiSuKien = 0 OR LinkOnline LIKE 'https://%')
+              AND (CoSoDoChoNgoi = 0 OR EXISTS (
+                    SELECT 1 FROM SoDoChoNgoi sd WHERE sd.SuKienId = SuKien.Id
+              ))",
+            new { id, organizerId = LayIdNguoiDangNhap() });
+
+        TempData[soDongCapNhat > 0 ? "Message" : "Error"] = soDongCapNhat > 0
+            ? "Sự kiện đã được mở bán vé trở lại."
+            : "Không thể mở bán: sự kiện phải còn hạn, còn vé và đủ cấu hình hình thức tổ chức.";
         return RedirectToAction("SuKien");
     }
 
@@ -597,16 +671,57 @@ public class OrganizerController : Controller
         using var transaction = connection.BeginTransaction();
         try
         {
+            var suKien = await connection.QueryFirstOrDefaultAsync<dynamic>(@"
+                SELECT s.TrangThai
+                FROM SuKien s WITH (UPDLOCK, HOLDLOCK)
+                WHERE s.Id = @id AND s.NguoiToChucId = @organizerId",
+                new { id, organizerId }, transaction);
+
+            if (suKien == null)
+            {
+                await transaction.RollbackAsync();
+                return NotFound();
+            }
+
+            int trangThaiHienTai = Convert.ToInt32(suKien.TrangThai);
+            if (trangThaiHienTai is 4 or 5 or 6)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Không thể hủy sự kiện đã kết thúc, đã lưu trữ hoặc đã hủy.";
+                return RedirectToAction("SuKien");
+            }
+
+            int soDonDaThanhToan = await connection.ExecuteScalarAsync<int>(@"
+                SELECT COUNT(*)
+                FROM DonHang WITH (UPDLOCK, HOLDLOCK)
+                WHERE SuKienId = @id AND TrangThai = 1",
+                new { id }, transaction);
+
+            if (soDonDaThanhToan > 0)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Sự kiện đã có đơn thanh toán nên không thể hủy khi hệ thống chưa hỗ trợ hoàn tiền.";
+                return RedirectToAction("SuKien");
+            }
+
             string sqlCancelSuKien = @"
                 UPDATE SuKien
                 SET TrangThai   = 6,
+                    HienThiCongKhai = 0,
                     NgayCapNhat = GETUTCDATE()
                 WHERE Id            = @id
                   AND NguoiToChucId = @organizerId
+                  AND TrangThai IN (0, 1, 2, 3, 7)
             ";
             int affected = await connection.ExecuteAsync(sqlCancelSuKien, new { id, organizerId }, transaction);
             if (affected > 0)
             {
+                // Hủy các đơn đang chờ để callback thanh toán đến muộn không thể hoàn tất đơn.
+                await connection.ExecuteAsync(@"
+                    UPDATE DonHang
+                    SET TrangThai = 2, NgayCapNhat = GETUTCDATE()
+                    WHERE SuKienId = @id AND TrangThai = 0", new { id }, transaction);
+
                 // Reset SoLuongGiuCho của các loại vé đi kèm
                 string sqlResetGiuCho = @"
                     UPDATE LoaiVe
@@ -615,11 +730,11 @@ public class OrganizerController : Controller
                 ";
                 await connection.ExecuteAsync(sqlResetGiuCho, new { id }, transaction);
 
-                // Giải phóng các ghế đang bị giữ ở trạng thái Chờ thanh toán (TrangThai = 2 -> 0)
+                // Ghế 1 là đang giữ; ghế 2 đã bán nên tuyệt đối không được mở lại.
                 string sqlReleaseSeats = @"
                     UPDATE ChoNgoi
                     SET TrangThai = 0
-                    WHERE TrangThai = 2
+                    WHERE TrangThai = 1
                       AND HangGheId IN (
                           SELECT h.Id 
                           FROM HangGhe h 
@@ -648,7 +763,7 @@ public class OrganizerController : Controller
     {
         var organizerId = LayIdNguoiDangNhap();
         var newId       = Guid.NewGuid();
-        string suffix   = DateTime.Now.ToString("yyMMddHHmmss");
+        string suffix   = VietnamTime.Now.ToString("yyMMddHHmmss");
 
         using var connection = Db.TaoKetNoi();
         await connection.OpenAsync();
@@ -685,7 +800,7 @@ public class OrganizerController : Controller
                      GioiHanMoiDon, NgayBatDauBan, NgayKetThucBan,
                      ThuTuHienThi, MauSac, TrangThai)
                 SELECT @newId, TenLoaiVe, MoTa, GiaBan, SoLuongTong,
-                       GioiHanMoiDon, GETUTCDATE(), DATEADD(day, 30, NgayKetThucBan),
+                       GioiHanMoiDon, DATEADD(HOUR, 7, GETUTCDATE()), DATEADD(day, 30, NgayKetThucBan),
                        ThuTuHienThi, MauSac, TrangThai
                 FROM LoaiVe
                 WHERE SuKienId = @id
@@ -715,7 +830,7 @@ public class OrganizerController : Controller
             // Lấy sự kiện mới nhất để hiển thị nếu không truyền Id
             var organizerId = LayIdNguoiDangNhap();
             var latestId = await Db.LayGiaTri<Guid?>(
-                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId ORDER BY NgayTao DESC", new { organizerId });
+                "SELECT TOP 1 Id FROM SuKien WHERE NguoiToChucId = @organizerId AND LoaiSuKien = 0 ORDER BY NgayTao DESC", new { organizerId });
             
             if (latestId == null)
             {
@@ -760,9 +875,9 @@ public class OrganizerController : Controller
     {
         if (!await LaSuKienCuaToi(suKienId)) return NotFound();
 
-        if (await LaSuKienTamDungHoacHuy(suKienId))
+        if (await LaCauHinhVeHoacSoDoBiKhoa(suKienId))
         {
-            TempData["Error"] = "Không thể thêm loại vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Chỉ cấu hình vé khi sự kiện là bản nháp, đang tạm dừng hoặc bị từ chối.";
             return RedirectToAction("LoaiVe", new { suKienId });
         }
         
@@ -808,9 +923,9 @@ public class OrganizerController : Controller
         if (loaiVe == null) return NotFound();
         if (!await LaSuKienCuaToi(loaiVe.SuKienId)) return Forbid();
 
-        if (await LaSuKienTamDungHoacHuy(loaiVe.SuKienId))
+        if (await LaCauHinhVeHoacSoDoBiKhoa(loaiVe.SuKienId))
         {
-            TempData["Error"] = "Không thể chỉnh sửa cấu hình vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Chỉ cấu hình vé khi sự kiện là bản nháp, đang tạm dừng hoặc bị từ chối.";
             return RedirectToAction("LoaiVe", new { suKienId = loaiVe.SuKienId });
         }
 
@@ -818,17 +933,32 @@ public class OrganizerController : Controller
     }
 
     [HttpPost]
+    // POST nhận toàn bộ input có name trùng property LoaiVe vào model.
+    // Action kiểm tra quyền sở hữu sự kiện/ràng buộc rồi UPDATE và redirect.
     public async Task<IActionResult> ChinhSuaLoaiVe(LoaiVe model)
     {
         var original = await Db.LayDonLe<LoaiVe>("SELECT * FROM LoaiVe WHERE Id = @id", new { id = model.Id });
         if (original == null) return NotFound();
         if (!await LaSuKienCuaToi(original.SuKienId)) return Forbid();
 
-        if (await LaSuKienTamDungHoacHuy(original.SuKienId))
+        if (await LaCauHinhVeHoacSoDoBiKhoa(original.SuKienId))
         {
-            TempData["Error"] = "Không thể chỉnh sửa cấu hình vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Chỉ cấu hình vé khi sự kiện là bản nháp, đang tạm dừng hoặc bị từ chối.";
             return RedirectToAction("LoaiVe", new { suKienId = original.SuKienId });
         }
+
+        if (string.IsNullOrWhiteSpace(model.TenLoaiVe) || model.GiaBan < 0
+            || model.SoLuongTong < original.SoLuongDaBan || model.GioiHanMoiDon < 1
+            || (model.NgayBatDauBan.HasValue && model.NgayKetThucBan.HasValue
+                && model.NgayKetThucBan <= model.NgayBatDauBan))
+        {
+            TempData["Error"] = "Thông tin loại vé không hợp lệ hoặc số lượng tổng nhỏ hơn số vé đã bán.";
+            return RedirectToAction("ChinhSuaLoaiVe", new { id = original.Id });
+        }
+
+        // Khi đã bán vé, giữ nguyên tên và giá để dữ liệu trên vé cũ không đổi nghĩa.
+        string tenLoaiVe = original.SoLuongDaBan > 0 ? original.TenLoaiVe : model.TenLoaiVe.Trim();
+        decimal giaBan = original.SoLuongDaBan > 0 ? original.GiaBan : model.GiaBan;
 
         // Phải đảm bảo số lượng vé tổng lớn hơn hoặc bằng số lượng vé thực tế đã bán
         string sql = @"
@@ -848,13 +978,13 @@ public class OrganizerController : Controller
               AND @soLuongTong   >= lv.SoLuongDaBan
         ";
 
-        await Db.ThucThi(sql, new
+        int soDong = await Db.ThucThi(sql, new
         {
             id            = model.Id,
             organizerId   = LayIdNguoiDangNhap(),
-            tenLoaiVe     = model.TenLoaiVe.Trim(),
+            tenLoaiVe,
             moTa          = model.MoTa,
-            giaBan        = model.GiaBan,
+            giaBan,
             soLuongTong   = model.SoLuongTong,
             gioiHanMoiDon = model.GioiHanMoiDon,
             ngayBatDauBan = model.NgayBatDauBan,
@@ -862,18 +992,21 @@ public class OrganizerController : Controller
             mauSac        = model.MauSac
         });
 
-        TempData["Message"] = "Đã cập nhật loại vé.";
-        return RedirectToAction("LoaiVe", new { suKienId = model.SuKienId });
+        TempData[soDong > 0 ? "Message" : "Error"] = soDong > 0
+            ? "Đã cập nhật loại vé."
+            : "Không thể cập nhật loại vé với dữ liệu hiện tại.";
+        return RedirectToAction("LoaiVe", new { suKienId = original.SuKienId });
     }
 
     [HttpPost]
+    // Bật/tắt bán một loại vé. suKienId dùng redirect; quyền vẫn phải kiểm tra bằng SQL.
     public async Task<IActionResult> BatTatLoaiVe(int id, Guid suKienId)
     {
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
 
-        if (await LaSuKienTamDungHoacHuy(suKienId))
+        if (await LaCauHinhVeHoacSoDoBiKhoa(suKienId))
         {
-            TempData["Error"] = "Không thể bật/tắt bán vé khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Chỉ thay đổi loại vé khi sự kiện là bản nháp, đang tạm dừng hoặc bị từ chối.";
             return RedirectToAction("LoaiVe", new { suKienId });
         }
 
@@ -936,14 +1069,15 @@ public class OrganizerController : Controller
     }
 
     [HttpPost]
+    // POST form tạo voucher; model binding ghép input vào MaGiamGia model.
     public async Task<IActionResult> TaoMoiMaGiamGia(MaGiamGia model)
     {
         var events = await LaySuKienCuaToiDropdown();
         if (!events.ContainsKey(model.SuKienId)) return NotFound();
 
-        if (await LaSuKienTamDungHoacHuy(model.SuKienId))
+        if (await LaNghiepVuVanHanhBiKhoa(model.SuKienId))
         {
-            TempData["Error"] = "Không thể tạo mã giảm giá khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Không thể tạo mã khi sự kiện chờ duyệt, đã hủy hoặc đã kết thúc.";
             return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
         }
 
@@ -999,14 +1133,15 @@ public class OrganizerController : Controller
     }
 
     [HttpPost]
+    // POST lưu voucher sau khi kiểm tra thời gian, giá trị và quyền qua SuKien.
     public async Task<IActionResult> ChinhSuaMaGiamGia(MaGiamGia model)
     {
         var original = await LayMaGiamGia(model.Id);
         if (original == null) return NotFound();
 
-        if (await LaSuKienTamDungHoacHuy(original.SuKienId))
+        if (await LaNghiepVuVanHanhBiKhoa(original.SuKienId))
         {
-            TempData["Error"] = "Không thể chỉnh sửa mã giảm giá khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Không thể sửa mã khi sự kiện chờ duyệt, đã hủy hoặc đã kết thúc.";
             return RedirectToAction("MaGiamGia", new { suKienId = original.SuKienId });
         }
 
@@ -1070,14 +1205,15 @@ public class OrganizerController : Controller
     }
 
     [HttpPost]
+    // POST xóa mã; trước khi DELETE phải xác nhận mã thuộc sự kiện của BTC hiện tại.
     public async Task<IActionResult> XoaMaGiamGia(int id)
     {
         var model = await LayMaGiamGia(id);
         if (model == null) return NotFound();
 
-        if (await LaSuKienTamDungHoacHuy(model.SuKienId))
+        if (await LaNghiepVuVanHanhBiKhoa(model.SuKienId))
         {
-            TempData["Error"] = "Không thể xóa mã giảm giá khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Không thể xóa mã khi sự kiện chờ duyệt, đã hủy hoặc đã kết thúc.";
             return RedirectToAction("MaGiamGia", new { suKienId = model.SuKienId });
         }
 
@@ -1104,12 +1240,21 @@ public class OrganizerController : Controller
     // Danh sách đơn hàng
     public async Task<IActionResult> DonHang(Guid? suKienId, byte? trangThai, string? search)
     {
+        if (!suKienId.HasValue || suKienId.Value == Guid.Empty)
+        {
+            TempData["Error"] = "Vui lòng chọn sự kiện cần quản lý đơn hàng.";
+            return RedirectToAction("SuKien");
+        }
+
+        Guid eventId = suKienId.Value;
+        if (!await LaSuKienCuaToi(eventId)) return NotFound();
+
         string sql = @"
             SELECT d.*
             FROM DonHang d
             JOIN SuKien s ON s.Id = d.SuKienId
             WHERE s.NguoiToChucId = @organizerId
-              AND (@suKienId IS NULL OR d.SuKienId = @suKienId)
+              AND d.SuKienId = @suKienId
               AND (@trangThai IS NULL OR d.TrangThai = @trangThai)
               AND (@search = '' OR d.MaDonHang    LIKE '%' + @search + '%'
                                OR d.EmailNguoiMua LIKE '%' + @search + '%'
@@ -1120,13 +1265,13 @@ public class OrganizerController : Controller
         var list = await Db.LayDanhSach<DonHang>(sql, new
         { 
             organizerId = LayIdNguoiDangNhap(),
-            suKienId,
+            suKienId = eventId,
             trangThai,
             search      = search?.Trim() ?? ""
         });
 
-        ViewBag.SuKiens   = await LaySuKienCuaToiDropdown();
-        ViewBag.SuKienId  = suKienId;
+        ViewBag.SuKienId  = eventId;
+        ViewBag.TenSuKien = await LayTenSuKien(eventId);
         ViewBag.TrangThai = trangThai;
         ViewBag.Search    = search;
         return View(list);
@@ -1199,6 +1344,7 @@ public class OrganizerController : Controller
                     UPDATE ChoNgoi
                     SET TrangThai = 0
                     WHERE Id IN @danhSachGheId
+                      AND TrangThai = 1
                 ";
                 await connection.ExecuteAsync(sqlReleaseSeats, new { danhSachGheId }, transaction);
             }
@@ -1236,7 +1382,8 @@ public class OrganizerController : Controller
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            TempData["Error"] = "Lỗi khi hủy đơn hàng: " + ex.Message;
+            _logger.LogError(ex, "Khong huy duoc don {OrderId}", id);
+            TempData["Error"] = "Không thể hủy đơn hàng lúc này.";
         }
 
         return RedirectToAction("ChiTietDonHang", new { id });
@@ -1326,8 +1473,14 @@ public class OrganizerController : Controller
         var sId = suKienId.Value;
         if (!await LaSuKienCuaToi(sId)) return Forbid();
 
-        string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @sId";
+        string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, LoaiSuKien, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @sId";
         var sk = await Db.LayDonLe<dynamic>(sqlSuKien, new { sId });
+        if (sk == null) return NotFound();
+        if ((byte)sk.LoaiSuKien == 1)
+        {
+            TempData["Error"] = "Sự kiện trực tuyến không sử dụng QR hoặc check-in tại cổng.";
+            return RedirectToAction("ChiTietSuKien", new { id = sId });
+        }
         if (sk != null)
         {
             ViewBag.BatDauCheckIn = (DateTime?)sk.BatDauCheckIn;
@@ -1369,13 +1522,23 @@ public class OrganizerController : Controller
 
     // Xử lý Check-in bằng cách quét QR Code hoặc gõ tay mã vé
     [HttpPost]
-    public async Task<IActionResult> QuetVeCheckIn(Guid suKienId, string code)
+    public async Task<IActionResult> QuetVeCheckIn(Guid suKienId, string? code)
     {
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            TempData["Error"] = "Vui lòng quét hoặc nhập mã vé.";
+            return RedirectToAction("CheckIn", new { suKienId });
+        }
 
-        string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @suKienId";
+        string sqlSuKien = "SELECT NgayBatDau, NgayKetThuc, TrangThai, LoaiSuKien, BatDauCheckIn, KetThucCheckIn FROM SuKien WHERE Id = @suKienId";
         var skInfo = await Db.LayDonLe<dynamic>(sqlSuKien, new { suKienId });
         if (skInfo == null) return NotFound();
+        if ((byte)skInfo.LoaiSuKien == 1)
+        {
+            TempData["Error"] = "Sự kiện trực tuyến không sử dụng QR hoặc check-in tại cổng.";
+            return RedirectToAction("ChiTietSuKien", new { id = suKienId });
+        }
 
         if (skInfo.TrangThai == 2 || skInfo.TrangThai == 6)
         {
@@ -1384,7 +1547,7 @@ public class OrganizerController : Controller
         }
 
         // Quy đổi thời gian hiện tại sang giờ Việt Nam (UTC+7)
-        DateTime now = DateTime.UtcNow.AddHours(7);
+        DateTime now = VietnamTime.Now;
         
         // Thiết lập mốc check-in thông minh (Smart Default): BĐ trước 1 tiếng, KT bằng giờ kết thúc sự kiện
         DateTime batDauCheckIn = skInfo.BatDauCheckIn ?? ((DateTime)skInfo.NgayBatDau).AddHours(-1);
@@ -1519,13 +1682,14 @@ public class OrganizerController : Controller
     }
 
     [HttpPost]
+    // POST tạo dòng bảng nối NhanVienSuKien để phân công Staff vào sự kiện.
     public async Task<IActionResult> ThemStaff(Guid suKienId, Guid nguoiDungId)
     {
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
 
-        if (await LaSuKienTamDungHoacHuy(suKienId))
+        if (await LaNghiepVuVanHanhBiKhoa(suKienId))
         {
-            TempData["Error"] = "Không thể phân công nhân viên khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Không thể phân công khi sự kiện chờ duyệt, đã hủy hoặc đã kết thúc.";
             return RedirectToAction("QuanLyStaff", new { suKienId });
         }
 
@@ -1559,13 +1723,14 @@ public class OrganizerController : Controller
     }
 
     [HttpPost]
+    // POST xóa một dòng phân công, không xóa tài khoản NguoiDung của Staff.
     public async Task<IActionResult> XoaStaff(int id, Guid suKienId)
     {
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
 
-        if (await LaSuKienTamDungHoacHuy(suKienId))
+        if (await LaNghiepVuVanHanhBiKhoa(suKienId))
         {
-            TempData["Error"] = "Không thể gỡ nhân viên khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Không thể thay đổi nhân sự khi sự kiện chờ duyệt, đã hủy hoặc đã kết thúc.";
             return RedirectToAction("QuanLyStaff", new { suKienId });
         }
 
@@ -1692,7 +1857,8 @@ public class OrganizerController : Controller
         catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            TempData["Error"] = "Có lỗi xảy ra khi xóa: " + ex.Message;
+            _logger.LogError(ex, "Khong xoa duoc tai khoan staff {StaffId}", id);
+            TempData["Error"] = "Không thể xóa tài khoản nhân viên lúc này.";
         }
 
         return RedirectToAction("NhanVienStaff");
@@ -1880,6 +2046,7 @@ public class OrganizerController : Controller
         ViewBag.LoaiVes   = await LayLoaiVeList(sId);
         ViewBag.Ghe       = new List<ChoNgoi>();
         ViewBag.Hang      = new Dictionary<int, string>();
+        ViewBag.KhuVucTheoHang = new Dictionary<int, KhuVuc>();
         var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @id", new { id = sId });
         ViewBag.TrangThaiSuKien = sk != null ? (int)sk.TrangThai : 0;
         ViewBag.NgayKetThucSuKien = sk?.NgayKetThuc;
@@ -1891,10 +2058,18 @@ public class OrganizerController : Controller
 
         var seats = new List<ChoNgoi>();
         var rows  = new Dictionary<int, string>();
+        var zonesByRow = new Dictionary<int, KhuVuc>();
 
         string sqlSeats = @"
             SELECT g.*,
-                   h.TenHang
+                   h.TenHang,
+                   k.Id AS KhuVucId,
+                   k.LoaiVeId,
+                   k.TenKhuVuc,
+                   k.MauSac,
+                   k.ViTriX AS KhuVucViTriX,
+                   k.ViTriY AS KhuVucViTriY,
+                   k.ThuTu AS ThuTuKhuVuc
             FROM ChoNgoi g
             JOIN HangGhe h ON h.Id = g.HangGheId
             JOIN KhuVuc  k ON k.Id = h.KhuVucId
@@ -1917,41 +2092,156 @@ public class OrganizerController : Controller
             int hId      = seat.HangGheId;
             string tHang = seat.TenHang;
             rows[hId]    = tHang;
+            zonesByRow[hId] = new KhuVuc
+            {
+                Id = seat.KhuVucId,
+                SoDoChoNgoiId = model.Id,
+                LoaiVeId = seat.LoaiVeId,
+                TenKhuVuc = seat.TenKhuVuc,
+                MauSac = seat.MauSac,
+                ViTriX = seat.KhuVucViTriX,
+                ViTriY = seat.KhuVucViTriY,
+                ThuTu = seat.ThuTuKhuVuc
+            };
         }
 
         ViewBag.Ghe  = seats;
         ViewBag.Hang = rows;
+        ViewBag.KhuVucTheoHang = zonesByRow;
         return View(model);
     }
 
     // Xử lý Thiết lập sơ đồ theo mẫu
     [HttpPost]
     public async Task<IActionResult> TaoSoDo(
-        Guid suKienId, 
-        string tenSoDo, 
-        string loaiSoDo, // "cinema", "theater", "music", "simple", "custom", "none" (ghế ngẫu nhiên)
-        int? simpleLoaiVeId, 
-        int? simpleSoHang, 
-        int? simpleSoGheMoiHang,
+        Guid suKienId,
+        string tenSoDo,
+        string loaiSoDo,
         List<string>? zoneTen,
         List<int>? zoneLoaiVeId,
         List<int>? zoneSoHang,
         List<int>? zoneSoGheMoiHang,
         List<string>? zoneMauSac,
-        int? cinemaVipLoaiVeId,
-        int? cinemaNormalLoaiVeId,
-        int? theaterVipLoaiVeId,
-        int? theaterNormalLoaiVeId,
-        int? musicVipLoaiVeId,
-        int? musicNormalLoaiVeId
-    )
+        List<int>? zoneViTriX,
+        List<int>? zoneViTriY,
+        int? sanKhauX,
+        int? sanKhauY)
     {
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
 
-        if (await LaSuKienTamDungHoacHuy(suKienId))
+        loaiSoDo = (loaiSoDo ?? "").Trim().ToLowerInvariant();
+        string[] cacLoaiSoDoHopLe = ["none", "auditorium", "theatre", "cinema", "arena", "custom"];
+        if (!cacLoaiSoDoHopLe.Contains(loaiSoDo)) loaiSoDo = "custom";
+
+        if (await LaCauHinhVeHoacSoDoBiKhoa(suKienId))
         {
-            TempData["Error"] = "Không thể cấu hình sơ đồ ghế khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Chỉ cấu hình sơ đồ khi sự kiện là bản nháp, đang tạm dừng hoặc bị từ chối.";
             return RedirectToAction("SoDoChoNgoi", new { suKienId });
+        }
+
+        // Không đổi cấu trúc sơ đồ sau khi đã phát sinh đơn giữ chỗ hoặc vé đã bán.
+        int donDangSuDung = await Db.LayGiaTri<int>(@"
+            SELECT COUNT(*) FROM DonHang
+            WHERE SuKienId = @suKienId AND TrangThai IN (0, 1)", new { suKienId });
+        if (donDangSuDung > 0)
+        {
+            TempData["Error"] = "Không thể tạo lại sơ đồ vì sự kiện đã có đơn đang giữ chỗ hoặc đã thanh toán.";
+            return RedirectToAction("SoDoChoNgoi", new { suKienId });
+        }
+
+        // Canvas mới dùng 12 x 12 ô. Sân khấu chiếm 4 ô ngang và có thể đặt ở bất kỳ hàng nào.
+        int stageX = Math.Clamp(sanKhauX ?? 5, 1, 9);
+        int stageY = Math.Clamp(sanKhauY ?? 1, 1, 12);
+        var zones = new List<ZoneDefinition>();
+        if (loaiSoDo != "none")
+        {
+            int count = zoneTen?.Count ?? 0;
+            bool mangKhongKhop = count == 0 || count > 20
+                || zoneLoaiVeId?.Count != count || zoneSoHang?.Count != count
+                || zoneSoGheMoiHang?.Count != count || zoneMauSac?.Count != count
+                || (zoneViTriX != null && zoneViTriX.Count != count)
+                || (zoneViTriY != null && zoneViTriY.Count != count);
+            if (mangKhongKhop)
+            {
+                TempData["Error"] = "Dữ liệu khu vực không hợp lệ. Sơ đồ cần từ 1 đến 20 khu vực.";
+                return RedirectToAction("SoDoChoNgoi", new { suKienId });
+            }
+
+            var loaiVeHopLe = (await Db.LayDanhSach<LoaiVe>(
+                "SELECT * FROM LoaiVe WHERE SuKienId = @suKienId", new { suKienId }))
+                .ToDictionary(x => x.Id);
+            for (int i = 0; i < count; i++)
+            {
+                int loaiVeId = zoneLoaiVeId![i];
+                int soHang = zoneSoHang![i];
+                int soGhe = zoneSoGheMoiHang![i];
+                if (!loaiVeHopLe.ContainsKey(loaiVeId) || string.IsNullOrWhiteSpace(zoneTen![i])
+                    || soHang is < 1 or > 50 || soGhe is < 1 or > 60)
+                {
+                    TempData["Error"] = "Mỗi khu phải dùng loại vé của sự kiện, có 1–50 hàng và 1–60 ghế mỗi hàng.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+                string mau = string.IsNullOrWhiteSpace(zoneMauSac![i]) ? "#7c3aed" : zoneMauSac[i]!;
+                if (!System.Text.RegularExpressions.Regex.IsMatch(mau, "^#[0-9a-fA-F]{6}$")) mau = "#7c3aed";
+                int viTriX = zoneViTriX?.ElementAtOrDefault(i) ?? (i % 3) + 1;
+                int viTriY = zoneViTriY?.ElementAtOrDefault(i) ?? (i / 3) + 1;
+                if (viTriX is < 1 or > 12 || viTriY is < 1 or > 12)
+                {
+                    TempData["Error"] = "Vị trí khu vực phải nằm trong lưới sơ đồ 12 × 12.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+                zones.Add(new ZoneDefinition
+                {
+                    Ten = zoneTen![i].Trim(), LoaiVeId = loaiVeId,
+                    SoHang = soHang, SoGheMoiHang = soGhe, MauSac = mau,
+                    ViTriX = viTriX, ViTriY = viTriY
+                });
+            }
+
+            // Một ô canvas tương ứng tối đa 2 hàng x 3 ghế. Kiểm tra hình chữ nhật
+            // để khu ghế không chồng lên nhau hoặc đè lên sân khấu.
+            if (sanKhauX.HasValue || sanKhauY.HasValue)
+            {
+                foreach (var zone in zones)
+                {
+                    zone.RongCanvas = Math.Clamp((int)Math.Ceiling(zone.SoGheMoiHang / 3d), 1, 12);
+                    zone.CaoCanvas = Math.Clamp((int)Math.Ceiling(zone.SoHang / 2d), 1, 12);
+                    if (zone.ViTriX + zone.RongCanvas - 1 > 12 || zone.ViTriY + zone.CaoCanvas - 1 > 12)
+                    {
+                        TempData["Error"] = "Khu ghế đang vượt ra ngoài lưới sơ đồ 12 × 12.";
+                        return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                    }
+                    if (HinhChuNhatGiaoNhau(zone.ViTriX, zone.ViTriY, zone.RongCanvas, zone.CaoCanvas, stageX, stageY, 4, 1))
+                    {
+                        TempData["Error"] = "Khu ghế không được chồng lên vị trí sân khấu.";
+                        return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                    }
+                }
+
+                for (int i = 0; i < zones.Count; i++)
+                for (int j = i + 1; j < zones.Count; j++)
+                    if (HinhChuNhatGiaoNhau(zones[i].ViTriX, zones[i].ViTriY, zones[i].RongCanvas, zones[i].CaoCanvas,
+                                             zones[j].ViTriX, zones[j].ViTriY, zones[j].RongCanvas, zones[j].CaoCanvas))
+                    {
+                        TempData["Error"] = "Các khu ghế không được chồng lên nhau. Hãy kéo lại vị trí trên sơ đồ.";
+                        return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                    }
+            }
+
+            if (zones.Sum(x => x.SoHang * x.SoGheMoiHang) > 5000)
+            {
+                TempData["Error"] = "Một sơ đồ được tối đa 5.000 ghế để đảm bảo hiệu năng.";
+                return RedirectToAction("SoDoChoNgoi", new { suKienId });
+            }
+            foreach (var group in zones.GroupBy(x => x.LoaiVeId))
+            {
+                int soGheCuaLoai = group.Sum(x => x.SoHang * x.SoGheMoiHang);
+                if (soGheCuaLoai > loaiVeHopLe[group.Key].SoLuongTong)
+                {
+                    TempData["Error"] = $"Các khu dùng vé '{loaiVeHopLe[group.Key].TenLoaiVe}' có {soGheCuaLoai} ghế nhưng số lượng vé chỉ là {loaiVeHopLe[group.Key].SoLuongTong}.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+            }
         }
 
         using var connection = Db.TaoKetNoi();
@@ -1971,66 +2261,30 @@ public class OrganizerController : Controller
                 await connection.ExecuteAsync("DELETE FROM SoDoChoNgoi WHERE Id = @sId", new { sId }, transaction);
             }
 
-            // Nếu người dùng chọn "none" (Không sử dụng sơ đồ ghế -> Xếp ngẫu nhiên)
+            // "none" xóa sơ đồ và quay về bán vé theo số lượng, không gán ghế.
             if (loaiSoDo == "none")
             {
                 await connection.ExecuteAsync("UPDATE SuKien SET CoSoDoChoNgoi = 0 WHERE Id = @id", new { id = suKienId }, transaction);
                 await transaction.CommitAsync();
-                TempData["Message"] = "Đã cấu hình sự kiện không sử dụng sơ đồ ghế. Vé sẽ được sắp xếp ngẫu nhiên khi thanh toán.";
+                TempData["Message"] = "Đã chuyển sự kiện sang bán vé không chọn ghế.";
                 return RedirectToAction("SoDoChoNgoi", new { suKienId });
             }
 
             // Bước 2: Tạo sơ đồ chỗ ngồi mới
             var mapId = await connection.QuerySingleAsync<int>(@"
                 INSERT INTO SoDoChoNgoi
-                    (SuKienId, TenSoDo, NgayTao)
+                    (SuKienId, TenSoDo, LoaiSoDo, SanKhauX, SanKhauY, NgayTao)
                 OUTPUT INSERTED.Id
                 VALUES
-                    (@suKienId, @tenSoDo, GETUTCDATE())
+                    (@suKienId, @tenSoDo, @loaiSoDo, @stageX, @stageY, GETUTCDATE())
             ", new
             {
                 suKienId,
+                loaiSoDo,
+                stageX,
+                stageY,
                 tenSoDo = string.IsNullOrEmpty(tenSoDo) ? "Sơ đồ ghế mặc định" : tenSoDo.Trim()
             }, transaction);
-
-            var zones = new List<ZoneDefinition>();
-
-            // Bước 3: Định nghĩa các khu vực ghế dựa vào loại sơ đồ mẫu được chọn
-            if (loaiSoDo == "cinema")
-            {
-                zones.Add(new ZoneDefinition { Ten = "Standard Area", LoaiVeId = cinemaNormalLoaiVeId ?? 0, SoHang = 4, SoGheMoiHang = 12, MauSac = "#0d6efd" });
-                zones.Add(new ZoneDefinition { Ten = "VIP Area", LoaiVeId = cinemaVipLoaiVeId ?? 0, SoHang = 4, SoGheMoiHang = 14, MauSac = "#ffc107" });
-            }
-            else if (loaiSoDo == "theater")
-            {
-                zones.Add(new ZoneDefinition { Ten = "VIP Front Row", LoaiVeId = theaterVipLoaiVeId ?? 0, SoHang = 3, SoGheMoiHang = 10, MauSac = "#dc3545" });
-                zones.Add(new ZoneDefinition { Ten = "Standard Seats", LoaiVeId = theaterNormalLoaiVeId ?? 0, SoHang = 7, SoGheMoiHang = 12, MauSac = "#198754" });
-            }
-            else if (loaiSoDo == "music")
-            {
-                zones.Add(new ZoneDefinition { Ten = "VIP Fanzone", LoaiVeId = musicVipLoaiVeId ?? 0, SoHang = 4, SoGheMoiHang = 8, MauSac = "#6f42c1" });
-                zones.Add(new ZoneDefinition { Ten = "Standard Standing", LoaiVeId = musicNormalLoaiVeId ?? 0, SoHang = 8, SoGheMoiHang = 14, MauSac = "#0dcaf0" });
-            }
-            else if (loaiSoDo == "simple")
-            {
-                zones.Add(new ZoneDefinition { Ten = "Khu vực chính", LoaiVeId = simpleLoaiVeId ?? 0, SoHang = simpleSoHang ?? 5, SoGheMoiHang = simpleSoGheMoiHang ?? 10, MauSac = "#198754" });
-            }
-            else if (loaiSoDo == "custom" && zoneTen != null && zoneLoaiVeId != null && zoneSoHang != null && zoneSoGheMoiHang != null)
-            {
-                // Custom: Tạo sơ đồ tự định nghĩa thủ công
-                for (int i = 0; i < zoneTen.Count; i++)
-                {
-                    if (string.IsNullOrWhiteSpace(zoneTen[i])) continue;
-                    zones.Add(new ZoneDefinition
-                    {
-                        Ten          = zoneTen[i].Trim(),
-                        LoaiVeId     = zoneLoaiVeId[i],
-                        SoHang       = zoneSoHang[i],
-                        SoGheMoiHang = zoneSoGheMoiHang[i],
-                        MauSac       = (zoneMauSac != null && zoneMauSac.Count > i && !string.IsNullOrEmpty(zoneMauSac[i])) ? zoneMauSac[i] : "#198754"
-                    });
-                }
-            }
 
             int currentOverallRow = 0;
             int orderCounter      = 1;
@@ -2042,28 +2296,25 @@ public class OrganizerController : Controller
                 
                 var zoneId = await connection.QuerySingleAsync<int>(@"
                     INSERT INTO KhuVuc
-                        (SoDoChoNgoiId, LoaiVeId, TenKhuVuc, MauSac, ThuTu)
+                        (SoDoChoNgoiId, LoaiVeId, TenKhuVuc, MauSac, ViTriX, ViTriY, ThuTu)
                     OUTPUT INSERTED.Id
                     VALUES
-                        (@mapId, @loaiVeId, @ten, @mau, @order)
+                        (@mapId, @loaiVeId, @ten, @mau, @viTriX, @viTriY, @order)
                 ", new
                 {
                     mapId,
                     loaiVeId = z.LoaiVeId,
                     ten      = z.Ten,
                     mau      = z.MauSac,
+                    viTriX  = z.ViTriX,
+                    viTriY  = z.ViTriY,
                     order    = orderCounter++
                 }, transaction);
 
                 for (int r = 0; r < z.SoHang; r++)
                 {
-                    // Đặt tên hàng (A, B, C, D...)
-                    char rowChar = (char)('A' + (currentOverallRow % 26));
-                    string rowName = rowChar.ToString();
-                    if (currentOverallRow >= 26)
-                    {
-                        rowName = ((char)('A' + ((currentOverallRow - 26) % 26))).ToString() + "2";
-                    }
+                    // Đặt tên hàng A..Z, AA..AZ... nên không bị giới hạn 26 hàng.
+                    string rowName = TaoTenHang(currentOverallRow);
                     currentOverallRow++;
 
                     var rowId = await connection.QuerySingleAsync<int>(@"
@@ -2103,10 +2354,11 @@ public class OrganizerController : Controller
             await transaction.CommitAsync();
             TempData["Message"] = "Đã tạo sơ đồ chỗ ngồi thành công.";
         }
-        catch
+        catch (Exception ex)
         {
             await transaction.RollbackAsync();
-            throw;
+            _logger.LogError(ex, "Khong tao duoc so do cho su kien {EventId}", suKienId);
+            TempData["Error"] = "Không thể tạo sơ đồ lúc này. Vui lòng kiểm tra dữ liệu và thử lại.";
         }
 
         return RedirectToAction("SoDoChoNgoi", new { suKienId });
@@ -2119,16 +2371,33 @@ public class OrganizerController : Controller
         public int SoHang { get; set; }
         public int SoGheMoiHang { get; set; }
         public string MauSac { get; set; } = "#198754";
+        public int ViTriX { get; set; }
+        public int ViTriY { get; set; }
+        public int RongCanvas { get; set; }
+        public int CaoCanvas { get; set; }
+    }
+
+    private static bool HinhChuNhatGiaoNhau(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2)
+        => x1 <= x2 + width2 - 1 && x1 + width1 - 1 >= x2
+        && y1 <= y2 + height2 - 1 && y1 + height1 - 1 >= y2;
+
+    private static string TaoTenHang(int index)
+    {
+        string result = "";
+        for (int value = index + 1; value > 0; value = (value - 1) / 26)
+            result = (char)('A' + (value - 1) % 26) + result;
+        return result;
     }
 
     [HttpPost]
+    // POST khóa/mở một ghế; SQL JOIN ngược lên sơ đồ/sự kiện để kiểm tra chủ sở hữu.
     public async Task<IActionResult> DoiTrangThaiGhe(Guid suKienId, int seatId)
     {
         if (!await LaSuKienCuaToi(suKienId)) return NotFound();
 
-        if (await LaSuKienTamDungHoacHuy(suKienId))
+        if (await LaCauHinhVeHoacSoDoBiKhoa(suKienId))
         {
-            TempData["Error"] = "Không thể thay đổi trạng thái ghế khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Hãy tạm dừng bán vé trước khi khóa hoặc mở ghế.";
             return RedirectToAction("SoDoChoNgoi", new { suKienId });
         }
 
@@ -2148,13 +2417,23 @@ public class OrganizerController : Controller
     }
 
     [HttpPost]
+    // POST xóa sơ đồ. ON DELETE CASCADE xử lý khu vực/hàng/ghế con theo schema.
     public async Task<IActionResult> XoaSoDo(Guid suKienId)
     {
         if (!await LaSuKienCuaToi(suKienId)) return NotFound();
 
-        if (await LaSuKienTamDungHoacHuy(suKienId))
+        if (await LaCauHinhVeHoacSoDoBiKhoa(suKienId))
         {
-            TempData["Error"] = "Không thể xóa sơ đồ ghế khi sự kiện đang tạm dừng bán vé hoặc đã hủy.";
+            TempData["Error"] = "Hãy tạm dừng bán vé trước khi xóa sơ đồ ghế.";
+            return RedirectToAction("SoDoChoNgoi", new { suKienId });
+        }
+
+        int donDangSuDung = await Db.LayGiaTri<int>(@"
+            SELECT COUNT(*) FROM DonHang
+            WHERE SuKienId = @suKienId AND TrangThai IN (0, 1)", new { suKienId });
+        if (donDangSuDung > 0)
+        {
+            TempData["Error"] = "Không thể xóa sơ đồ đang có đơn giữ chỗ hoặc vé đã thanh toán.";
             return RedirectToAction("SoDoChoNgoi", new { suKienId });
         }
 
@@ -2196,11 +2475,35 @@ public class OrganizerController : Controller
         return count > 0;
     }
 
-    private async Task<bool> LaSuKienTamDungHoacHuy(Guid suKienId)
+    private static bool LaLinkPhongHopLe(string? value)
+    {
+        if (!Uri.TryCreate(value?.Trim(), UriKind.Absolute, out var uri)
+            || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp)
+            || string.IsNullOrWhiteSpace(uri.Host))
+            return false;
+
+        if (!uri.Host.Equals("meet.google.com", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        string maPhong = uri.AbsolutePath.Trim('/');
+        return !string.IsNullOrWhiteSpace(maPhong)
+            && !maPhong.Equals("abc-defg-hij", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Cấu trúc vé/ghế chỉ đổi ở bản nháp, tạm dừng hoặc bị từ chối.
+    private async Task<bool> LaCauHinhVeHoacSoDoBiKhoa(Guid suKienId)
     {
         var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @suKienId", new { suKienId });
         if (sk == null) return true;
-        return sk.TrangThai == 1 || sk.TrangThai == 2 || sk.TrangThai == 6 || DateTime.UtcNow > sk.NgayKetThuc;
+        return sk.TrangThai is not (0 or 2 or 7) || VietnamTime.Now > sk.NgayKetThuc;
+    }
+
+    // Voucher/nhân sự vẫn vận hành khi mở bán, nhưng khóa lúc chờ duyệt, hủy hoặc kết thúc.
+    private async Task<bool> LaNghiepVuVanHanhBiKhoa(Guid suKienId)
+    {
+        var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @suKienId", new { suKienId });
+        if (sk == null) return true;
+        return sk.TrangThai is 1 or 5 or 6 || VietnamTime.Now > sk.NgayKetThuc;
     }
 
     // Lấy tên sự kiện theo Id
@@ -2255,9 +2558,13 @@ public class OrganizerController : Controller
                 NgayCapNhat = GETUTCDATE()
             WHERE Id            = @id
               AND NguoiToChucId = @organizerId
+              AND TrangThai = 3
         ";
-        await Db.ThucThi(sql, new { trangThai, id, organizerId = LayIdNguoiDangNhap() });
-        TempData["Message"] = message;
+        int soDongCapNhat = await Db.ThucThi(
+            sql, new { trangThai, id, organizerId = LayIdNguoiDangNhap() });
+        TempData[soDongCapNhat > 0 ? "Message" : "Error"] = soDongCapNhat > 0
+            ? message
+            : "Trạng thái sự kiện đã thay đổi. Vui lòng tải lại trang.";
     }
 
     // Lấy thông tin sự kiện của tôi
@@ -2283,13 +2590,100 @@ public class OrganizerController : Controller
         );
     }
 
+    private async Task<string> LuuAnhSuKien(IFormFile file)
+    {
+        const long maxBytes = 5 * 1024 * 1024;
+        string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        string[] extensions = [".jpg", ".jpeg", ".png", ".webp"];
+        string[] contentTypes = ["image/jpeg", "image/png", "image/webp"];
+        if (file.Length <= 0 || file.Length > maxBytes
+            || !extensions.Contains(extension)
+            || !contentTypes.Contains(file.ContentType.ToLowerInvariant()))
+            throw new InvalidDataException("Ảnh bìa chỉ nhận JPG, PNG, WEBP và tối đa 5 MB.");
+
+        await using var input = file.OpenReadStream();
+        using var memory = new MemoryStream();
+        await input.CopyToAsync(memory);
+        byte[] bytes = memory.ToArray();
+        bool dungDinhDang = extension switch
+        {
+            ".jpg" or ".jpeg" => bytes.Length >= 3
+                && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF,
+            ".png" => bytes.Length >= 8
+                && bytes.AsSpan(0, 8).SequenceEqual(
+                    new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }),
+            ".webp" => bytes.Length >= 12
+                && Encoding.ASCII.GetString(bytes, 0, 4) == "RIFF"
+                && Encoding.ASCII.GetString(bytes, 8, 4) == "WEBP",
+            _ => false
+        };
+        if (!dungDinhDang)
+            throw new InvalidDataException("Nội dung tệp không đúng định dạng ảnh đã chọn.");
+
+        string uploadsDir = Path.Combine(_environment.WebRootPath, "uploads");
+        Directory.CreateDirectory(uploadsDir);
+        string fileName = Guid.NewGuid().ToString("N") + extension;
+        await System.IO.File.WriteAllBytesAsync(Path.Combine(uploadsDir, fileName), bytes);
+        return "/uploads/" + fileName;
+    }
+
+    private static string? KiemTraDuLieuSuKien(
+        string? tenSuKien, byte loaiSuKien, string? linkOnline,
+        string? tenDiaDiem, string? tinhThanh,
+        DateTime ngayBatDau, DateTime ngayKetThuc,
+        DateTime? batDauCheckIn, DateTime? ketThucCheckIn,
+        string[]? tenLoaiVe, decimal[]? giaVe, int[]? soLuongVe,
+        int[]? gioiHanMoiDon, bool guiDuyet, string? anhBia)
+    {
+        if (string.IsNullOrWhiteSpace(tenSuKien) || tenSuKien.Trim().Length > 200)
+            return "Tên sự kiện bắt buộc và không quá 200 ký tự.";
+        if (loaiSuKien is not (0 or 1)) return "Hình thức sự kiện không hợp lệ.";
+        if (ngayKetThuc <= ngayBatDau) return "Ngày kết thúc phải sau ngày bắt đầu.";
+        if (guiDuyet && ngayKetThuc <= VietnamTime.Now)
+            return "Không thể gửi duyệt sự kiện đã kết thúc.";
+        if (loaiSuKien == 1 && guiDuyet && string.IsNullOrWhiteSpace(linkOnline))
+            return "Sự kiện trực tuyến cần có đường dẫn phòng họp.";
+        if (loaiSuKien == 1 && !string.IsNullOrWhiteSpace(linkOnline) && !LaLinkPhongHopLe(linkOnline))
+            return "Đường dẫn phòng trực tuyến chưa hợp lệ.";
+        if (loaiSuKien == 0 && guiDuyet
+            && (string.IsNullOrWhiteSpace(tenDiaDiem) || string.IsNullOrWhiteSpace(tinhThanh)))
+            return "Sự kiện trực tiếp cần có tên địa điểm và tỉnh/thành phố.";
+        if (loaiSuKien == 0 && batDauCheckIn.HasValue && ketThucCheckIn.HasValue
+            && ketThucCheckIn <= batDauCheckIn)
+            return "Thời gian đóng check-in phải sau thời gian mở check-in.";
+        if (!string.IsNullOrWhiteSpace(anhBia) && !LaDuongDanAnhHopLe(anhBia))
+            return "Đường dẫn ảnh bìa chỉ nhận HTTP, HTTPS hoặc đường dẫn nội bộ.";
+
+        int count = tenLoaiVe?.Length ?? 0;
+        if (count == 0 || giaVe?.Length != count || soLuongVe?.Length != count
+            || gioiHanMoiDon?.Length != count)
+            return "Cần khai báo đầy đủ thông tin cho ít nhất một loại vé.";
+        string[] tenVe = tenLoaiVe!;
+        if (tenVe.Any(string.IsNullOrWhiteSpace)
+            || tenVe.Any(x => x.Trim().Length > 100)
+            || tenVe.Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).Count() != count)
+            return "Tên loại vé không được trống, trùng nhau hoặc dài quá 100 ký tự.";
+        if (giaVe!.Any(x => x < 0) || soLuongVe!.Any(x => x <= 0)
+            || gioiHanMoiDon!.Any(x => x is < 1 or > 20))
+            return "Giá vé không âm, số lượng phải lớn hơn 0 và giới hạn mỗi đơn từ 1–20 vé.";
+        return null;
+    }
+
+    private static bool LaDuongDanAnhHopLe(string value)
+    {
+        value = value.Trim();
+        if (value.StartsWith('/') && !value.StartsWith("//") && !value.Contains('\\')) return true;
+        return Uri.TryCreate(value, UriKind.Absolute, out Uri? uri)
+            && uri.Scheme is "http" or "https";
+    }
+
 
 
     // Lấy ID người đang đăng nhập từ token Claims
     private Guid LayIdNguoiDangNhap()
     {
         string? idText = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return Guid.Parse(idText ?? Guid.Empty.ToString());
+        return Guid.TryParse(idText, out Guid id) ? id : Guid.Empty;
     }
 
     // Sinh Slug thân thiện với SEO từ chuỗi tiếng Việt (ví dụ: "Sự Kiện Ca Nhạc" -> "su-kien-ca-nhac")

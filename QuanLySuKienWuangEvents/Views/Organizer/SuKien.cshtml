@@ -1,6 +1,8 @@
 @model List<SuKien>
 
 @{
+    // SuKien() chỉ SELECT sự kiện có NguoiToChucId bằng user đang đăng nhập.
+    // Model là List<SuKien>; mỗi card dẫn tới các màn quản lý hoặc action trạng thái.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Sự kiện của tôi";
 }
@@ -9,7 +11,6 @@
     <div class="portal-page-title">
         <span class="portal-kicker"><i class="fas fa-list-check"></i> Sự kiện</span>
         <h1>Sự kiện của tôi</h1>
-        <p>Chọn một sự kiện để quản lý vé, đơn hàng, khách tham dự và báo cáo.</p>
     </div>
     <a class="btn btn-success" href="/Organizer/TaoMoiSuKien">
         <i class="fas fa-plus me-1"></i> Tạo sự kiện
@@ -22,9 +23,10 @@
 }
 
 @{
-    var now = DateTime.UtcNow;
-    var activeEvents = Model.Where(e => (e.TrangThai == 1 || e.TrangThai == 3) && e.NgayKetThuc > now).ToList();
-    var otherEvents = Model.Where(e => (e.TrangThai != 1 && e.TrangThai != 3) || e.NgayKetThuc <= now).ToList();
+    var now = VietnamTime.Now;
+    var activeEvents = Model.Where(e => e.NgayKetThuc > now && e.TrangThai is 2 or 3 or 4).ToList();
+    var preparationEvents = Model.Where(e => e.NgayKetThuc > now && e.TrangThai is 0 or 1 or 7).ToList();
+    var archivedEvents = Model.Where(e => e.NgayKetThuc <= now || e.TrangThai is 5 or 6).ToList();
 }
 
 @{
@@ -84,14 +86,15 @@
                                     <a class="btn btn-sm btn-outline-primary" href="/Organizer/ChiTietSuKien/@item.Id" title="Quản lý chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Mở menu chức năng">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" title="Thêm thao tác">
                                         <i class="fas fa-ellipsis"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li><a class="dropdown-item" href="/Organizer/ChiTietSuKien/@item.Id"><i class="fas fa-info-circle me-2"></i>Chi tiết & Quản lý</a></li>
                                         <li><a class="dropdown-item" href="/Organizer/ChinhSuaSuKien/@item.Id"><i class="fas fa-pen me-2"></i>Sửa sự kiện</a></li>
                                         <li>
-                                            <form method="post" action="/Organizer/SaoChepSuKien/@item.Id" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn nhân bản (sao chép) sự kiện này? Một bản nháp sự kiện mới sẽ được tạo.')">
+                                            <form method="post" action="/Organizer/SaoChepSuKien/@item.Id" class="m-0" data-confirm="Tạo một bản nháp mới từ sự kiện này?" data-confirm-title="Nhân bản sự kiện" data-confirm-button="Tạo bản sao" data-confirm-tone="normal">
+                                                @Html.AntiForgeryToken()
                                                 <button class="dropdown-item" type="submit"><i class="fas fa-copy me-2"></i>Sao chép</button>
                                             </form>
                                         </li>
@@ -109,12 +112,17 @@
 <ul class="nav nav-pills mb-4 gap-2" id="eventTabs" role="tablist">
     <li class="nav-item" role="presentation">
         <button class="nav-link active px-4 py-2 fw-semibold" id="active-events-tab" data-bs-toggle="pill" data-bs-target="#active-events" type="button" role="tab" aria-controls="active-events" aria-selected="true" style="border-radius: 8px;">
-            <i class="fas fa-play me-1"></i> Sự kiện đang chạy (@activeEvents.Count)
+            <i class="fas fa-play me-1"></i> Đang hoạt động (@activeEvents.Count)
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link px-4 py-2 fw-semibold" id="preparation-events-tab" data-bs-toggle="pill" data-bs-target="#preparation-events" type="button" role="tab" aria-controls="preparation-events" aria-selected="false" style="border-radius: 8px;">
+            <i class="fas fa-file-pen me-1"></i> Bản nháp & duyệt (@preparationEvents.Count)
         </button>
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link px-4 py-2 fw-semibold" id="archived-events-tab" data-bs-toggle="pill" data-bs-target="#archived-events" type="button" role="tab" aria-controls="archived-events" aria-selected="false" style="border-radius: 8px;">
-            <i class="fas fa-archive me-1"></i> Sự kiện khác / Lưu trữ (@otherEvents.Count)
+            <i class="fas fa-archive me-1"></i> Lưu trữ (@archivedEvents.Count)
         </button>
     </li>
 </ul>
@@ -123,19 +131,25 @@
     <div class="tab-pane fade show active" id="active-events" role="tabpanel" aria-labelledby="active-events-tab">
         <div class="portal-card">
             <div class="portal-card-header">
-                <h2>Sự kiện đang chạy</h2>
-                <span class="text-muted small">@activeEvents.Count sự kiện đang mở bán hoặc chờ duyệt</span>
+                <h2>Đang hoạt động</h2>
             </div>
             @{ await RenderEventsTable(activeEvents); }
+        </div>
+    </div>
+    <div class="tab-pane fade" id="preparation-events" role="tabpanel" aria-labelledby="preparation-events-tab">
+        <div class="portal-card">
+            <div class="portal-card-header">
+                <h2>Bản nháp & duyệt</h2>
+            </div>
+            @{ await RenderEventsTable(preparationEvents); }
         </div>
     </div>
     <div class="tab-pane fade" id="archived-events" role="tabpanel" aria-labelledby="archived-events-tab">
         <div class="portal-card">
             <div class="portal-card-header">
-                <h2>Kho sự kiện khác & Lưu trữ</h2>
-                <span class="text-muted small">@otherEvents.Count sự kiện nháp, tạm dừng, từ chối hoặc đã hủy</span>
+                <h2>Lưu trữ</h2>
             </div>
-            @{ await RenderEventsTable(otherEvents); }
+            @{ await RenderEventsTable(archivedEvents); }
         </div>
     </div>
 </div>
@@ -143,10 +157,10 @@
 @functions {
     private static string TrangThaiSuKienText(SuKien item)
     {
-        if (item.TrangThai == 3 && DateTime.UtcNow > item.NgayKetThuc) return "Đã kết thúc";
+        if (item.TrangThai == 3 && VietnamTime.Now > item.NgayKetThuc) return "Đã kết thúc";
         byte value = item.TrangThai;
         if (value == 1) return "Chờ duyệt";
-        if (value == 2) return "Đã duyệt / tạm dừng";
+        if (value == 2) return "Tạm dừng";
         if (value == 3) return "Đang bán";
         if (value == 4) return "Hết vé";
         if (value == 5) return "Đã kết thúc";
@@ -157,7 +171,7 @@
 
     private static string TrangThaiClass(SuKien item)
     {
-        if (item.TrangThai == 3 && DateTime.UtcNow > item.NgayKetThuc) return "status-draft"; // Gray
+        if (item.TrangThai == 3 && VietnamTime.Now > item.NgayKetThuc) return "status-draft"; // Gray
         byte value = item.TrangThai;
         if (value == 1) return "status-pending";
         if (value is 2 or 3) return "status-approved";

@@ -1,4 +1,6 @@
 ﻿@{
+    // Index() dùng COUNT/SUM bảng SuKien/DonHang và gửi số liệu qua ViewBag.
+    // Không khai báo @model vì dashboard dùng các số rời và link điều hướng.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Bảng điều khiển";
 }
@@ -7,7 +9,6 @@
     <div class="portal-page-title">
         <span class="portal-kicker"><i class="fas fa-calendar-days"></i> Ban tổ chức</span>
         <h1>Bảng điều khiển ban tổ chức</h1>
-        <p>Theo dõi số liệu cơ bản và mở nhanh các màn tạo, quản lý sự kiện.</p>
     </div>
     <div class="portal-actions">
         <a class="btn btn-outline-success" href="/Organizer/SuKien">
@@ -50,7 +51,7 @@
 </div>
 
 <div class="row g-3">
-    <div class="col-lg-7">
+    <div class="col-12">
         <div class="portal-card h-100">
             <div class="portal-card-header">
                 <h2>Việc cần làm</h2>
@@ -68,18 +69,6 @@
                     <span><i class="fas fa-house me-2 text-success"></i>Quay lại trang chủ</span>
                     <i class="fas fa-chevron-right"></i>
                 </a>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-5">
-        <div class="portal-card h-100">
-            <div class="portal-card-header">
-                <h2>Trạng thái sự kiện</h2>
-            </div>
-            <div class="portal-card-body">
-                <p class="mb-2"><span class="status-pill status-pending">Chờ duyệt</span> sau khi Ban tổ chức tạo sự kiện.</p>
-                <p class="mb-2"><span class="status-pill status-live">Đang bán</span> sau khi Quản trị viên duyệt.</p>
-                <p class="mb-0"><span class="status-pill status-rejected">Từ chối</span> nếu Quản trị viên không chấp nhận.</p>
             </div>
         </div>
     </div>

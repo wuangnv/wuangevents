@@ -1,9 +1,11 @@
 @model List<NhanVienSuKien>
 @{
+    // StaffController.Index() JOIN NhanVienSuKien + SuKien theo user claim.
+    // Model là danh sách ca/sự kiện được phân công; link mở CheckIn với suKienId.
     Layout = "~/Views/Shared/_StaffLayout.cshtml";
     ViewData["Title"] = "Lịch làm việc";
 
-    var now = DateTime.UtcNow.AddHours(7); // Giờ Việt Nam (UTC+7)
+    var now = VietnamTime.Now;
 
     var activeEvents = Model?.Where(item => {
         bool isDangBan = item.TrangThaiSuKien == 3;
@@ -61,25 +63,33 @@
     color: #fff;
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
-.event-card {
+.staff-event-card {
     background: #fff;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 2px 10px rgba(0,0,0,0.07);
     display: flex;
     flex-direction: column;
+    width: 100%;
+    min-width: 0;
     height: 100%;
+    border: 1px solid #eef0f4;
     transition: transform 0.2s, box-shadow 0.2s;
 }
-.event-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.staff-event-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.staff-event-card.is-archived { background: #f8fafc; box-shadow: 0 2px 8px rgba(15,23,42,0.05); }
+.staff-events-grid > [class*="col-"] { display: flex; }
 .event-card-img {
-    width: 100%; aspect-ratio: 16/7;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9;
     object-fit: cover;
     background: #e5e7eb;
     display: block;
 }
+.staff-event-card.is-archived .event-card-img { filter: grayscale(35%) saturate(70%); opacity: .82; }
 .event-card-img-placeholder {
-    width: 100%; aspect-ratio: 16/7;
+    width: 100%; aspect-ratio: 16/9;
     background: linear-gradient(135deg, #a78bfa, #7c3aed);
     display: flex; align-items: center; justify-content: center;
     font-size: 3rem; color: rgba(255,255,255,0.6);
@@ -140,12 +150,17 @@
     color: #9ca3af;
 }
 .empty-state i { font-size: 3.5rem; margin-bottom: 16px; display: block; }
+@@media (max-width: 575.98px) {
+    .tab-pills { overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .tab-pills::-webkit-scrollbar { display: none; }
+    .tab-pill { flex: 0 0 auto; padding: 8px 15px; }
+    .staff-hero { padding: 22px 20px; }
+}
 </style>
 }
 
 <div class="staff-hero">
     <h1><i class="fas fa-clipboard-check me-2"></i>Lịch làm việc soát vé</h1>
-    <p>Chọn sự kiện đang diễn ra để bắt đầu quét QR Code kiểm soát vào cửa.</p>
 </div>
 
 @if (Model == null || Model.Count == 0)
@@ -153,16 +168,15 @@
     <div class="empty-state">
         <i class="fas fa-calendar-times"></i>
         <h5 style="color:#374151; font-weight:700;">Không có sự kiện nào được phân công</h5>
-        <p class="small mb-0">Liên hệ với ban tổ chức sự kiện để được thêm vào danh sách soát vé.</p>
     </div>
 }
 else
 {
-    <div class="tab-pills">
-        <button class="tab-pill active" onclick="switchTab('active', this)">
-            <i class="fas fa-play-circle me-1"></i> Đang diễn ra <span style="background:rgba(255,255,255,0.25);padding:1px 8px;border-radius:10px;margin-left:4px;">@activeEvents.Count</span>
+    <div class="tab-pills" role="tablist" aria-label="Lịch làm việc">
+        <button class="tab-pill active" role="tab" aria-selected="true" onclick="switchTab('active', this)">
+            <i class="fas fa-play-circle me-1"></i> Hiện tại & sắp tới <span style="background:rgba(255,255,255,0.25);padding:1px 8px;border-radius:10px;margin-left:4px;">@activeEvents.Count</span>
         </button>
-        <button class="tab-pill" onclick="switchTab('archived', this)">
+        <button class="tab-pill" role="tab" aria-selected="false" onclick="switchTab('archived', this)">
             <i class="fas fa-archive me-1"></i> Lưu trữ <span style="background:rgba(0,0,0,0.08);padding:1px 8px;border-radius:10px;margin-left:4px;">@archivedEvents.Count</span>
         </button>
     </div>
@@ -172,23 +186,23 @@ else
         {
             <div class="empty-state">
                 <i class="fas fa-moon"></i>
-                <h5 style="color:#374151; font-weight:700;">Không có sự kiện nào đang diễn ra</h5>
-                <p class="small mb-0">Tất cả sự kiện đã kết thúc hoặc chưa đến giờ check-in.</p>
+                <h5 style="color:#374151; font-weight:700;">Không có lịch làm việc sắp tới</h5>
             </div>
         }
         else
         {
-            <div class="row g-3">
+            <div class="row g-3 staff-events-grid">
                 @foreach (var item in activeEvents)
                 {
                     DateTime actualStart = item.BatDauCheckInSuKien ?? item.NgayBatDauSuKien?.AddHours(-1) ?? DateTime.MinValue;
                     DateTime actualEnd = item.KetThucCheckInSuKien ?? item.NgayKetThucSuKien ?? DateTime.MaxValue;
                     bool isCheckInChuaBatDau = now < actualStart;
+                    bool isSuKienChuaBatDau = item.NgayBatDauSuKien.HasValue && now < item.NgayBatDauSuKien.Value;
                     string checkInStart = actualStart != DateTime.MinValue ? actualStart.ToString("HH:mm dd/MM") : "—";
                     string checkInEnd = actualEnd != DateTime.MaxValue ? actualEnd.ToString("HH:mm dd/MM") : "—";
 
                     <div class="col-md-6 col-lg-4">
-                        <div class="event-card">
+                        <div class="staff-event-card">
                             <div style="position:relative;">
                                 @if (!string.IsNullOrEmpty(item.AnhBiaSuKien))
                                 {
@@ -203,7 +217,11 @@ else
                                 <span class="badge-role">@item.VaiTroNV</span>
                                 @if (isCheckInChuaBatDau)
                                 {
-                                    <span style="position:absolute;top:12px;right:12px;background:#f59e0b;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">Sắp diễn ra</span>
+                                    <span style="position:absolute;top:12px;right:12px;background:#f59e0b;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;">Chờ mở check-in</span>
+                                }
+                                else if (isSuKienChuaBatDau)
+                                {
+                                    <span style="position:absolute;top:12px;right:12px;background:#059669;color:#fff;font-size:0.72rem;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-circle" style="font-size:.5rem;vertical-align:middle;margin-right:3px;"></i>Đang mở check-in</span>
                                 }
                                 else
                                 {
@@ -262,12 +280,11 @@ else
             <div class="empty-state">
                 <i class="fas fa-box-open"></i>
                 <h5 style="color:#374151; font-weight:700;">Không có sự kiện lưu trữ</h5>
-                <p class="small mb-0">Tất cả sự kiện đang hoạt động bình thường.</p>
             </div>
         }
         else
         {
-            <div class="row g-3">
+            <div class="row g-3 staff-events-grid">
                 @foreach (var item in archivedEvents)
                 {
                     bool isTamDung = item.TrangThaiSuKien == 2;
@@ -279,11 +296,11 @@ else
                     string archiveColor = isDaHuy ? "#dc2626" : isTamDung ? "#d97706" : "#6b7280";
 
                     <div class="col-md-6 col-lg-4">
-                        <div class="event-card" style="opacity:0.72;">
+                        <div class="staff-event-card is-archived">
                             <div style="position:relative;">
                                 @if (!string.IsNullOrEmpty(item.AnhBiaSuKien))
                                 {
-                                    <img src="@item.AnhBiaSuKien" class="event-card-img" alt="@item.TenSuKien" style="filter:grayscale(50%);" />
+                                    <img src="@item.AnhBiaSuKien" class="event-card-img" alt="@item.TenSuKien" />
                                 }
                                 else
                                 {
@@ -316,9 +333,13 @@ else
 @section Scripts {
 <script>
 function switchTab(tab, btn) {
-    document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pill').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+    });
     document.querySelectorAll('.tab-content-section').forEach(s => s.classList.remove('active'));
     btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
     document.getElementById('tab-' + tab).classList.add('active');
 }
 </script>

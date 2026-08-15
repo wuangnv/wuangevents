@@ -3,8 +3,13 @@
 
 @{
     ViewData["Title"] = "Đặt vé thành công";
+    var sk = ViewBag.SuKien as SuKien;
+    bool laTrucTuyen = sk?.LoaiSuKien == 1;
+    bool laMienPhi = Model.TongThanhToan <= 0;
 }
 
+@* ThanhCong(id) chỉ trả đơn đã thanh toán thuộc user hiện tại.
+   Model là DonHang; ViewBag chứa sự kiện, danh sách vé và ghế. *@
 @section Styles {
 <style>
     @@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -183,7 +188,7 @@
         <div class="step-line completed"></div>
         <div class="step completed">
             <span class="step-num"><i class="fas fa-check"></i></span>
-            <span class="step-label">Thanh toán</span>
+            <span class="step-label">@(laMienPhi ? "Xác nhận" : "Thanh toán")</span>
         </div>
         <div class="step-line completed"></div>
         <div class="step completed">
@@ -194,26 +199,28 @@
 
     <div class="success-card">
         <div class="success-icon">
-            <i class="fas fa-check fa-2x"></i>
+            <i class="fas @(laTrucTuyen ? "fa-video" : "fa-check") fa-2x"></i>
         </div>
         
-        <h1 class="h3 fw-bold" style="color: #0f172a; font-weight: 800;">Đặt vé thành công!</h1>
+        <h1 class="h3 fw-bold" style="color: #0f172a; font-weight: 800;">@(laTrucTuyen || laMienPhi ? "Đăng ký tham dự thành công!" : "Đặt vé thành công!")</h1>
         <p style="color: #64748b; font-size: 0.95rem; margin-top: 8px; line-height: 1.5;">
-            Hệ thống đã nhận được thanh toán và tạo vé điện tử thành công cho bạn.
+            @(laTrucTuyen
+                ? "Quyền tham dự trực tuyến đã được gắn với đơn hàng của bạn."
+                : laMienPhi
+                    ? "Đăng ký đã được xác nhận và vé điện tử đã sẵn sàng cho bạn."
+                    : "Hệ thống đã nhận được thanh toán và tạo vé điện tử thành công cho bạn.")
         </p>
 
         <div class="order-summary-box">
-            <div class="summary-title">Thông tin giao dịch</div>
+            <div class="summary-title">@(laMienPhi ? "Thông tin đăng ký" : "Thông tin giao dịch")</div>
             
             <div class="summary-row">
                 <span>Mã đơn hàng:</span>
                 <strong style="color: #7c3aed; font-family: monospace; font-size: 1rem;">@Model.MaDonHang</strong>
             </div>
 
-            @{
-                var sk = ViewBag.SuKien as SuKien;
-                if (sk != null)
-                {
+            @if (sk != null)
+            {
                     <div class="summary-row">
                         <span>Sự kiện:</span>
                         <strong style="max-width: 320px; text-align: right;">@sk.TenSuKien</strong>
@@ -222,28 +229,27 @@
                         <span>Thời gian:</span>
                         <strong>@sk.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</strong>
                     </div>
-                }
             }
 
             <div class="summary-row">
-                <span>Tổng tiền đã thanh toán:</span>
-                <strong style="color: #10b981; font-size: 1.05rem;">@Model.TongThanhToan.ToString("N0") VND</strong>
+                <span>@(laMienPhi ? "Chi phí:" : "Tổng tiền đã thanh toán:")</span>
+                <strong style="color: #10b981; font-size: 1.05rem;">@(laMienPhi ? "Miễn phí" : Model.TongThanhToan.ToString("N0") + " VND")</strong>
             </div>
         </div>
 
         <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 14px; padding: 16px; text-align: left; font-size: 0.88rem; color: #065f46; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 24px;">
             <i class="fas fa-envelope-open-text" style="font-size: 1.2rem; margin-top: 2px;"></i>
             <div>
-                <strong>Vé đã gửi đến Email:</strong><br />
-                Thông tin vé chi tiết đã được gửi đến hòm thư <strong style="text-decoration: underline;">@Model.EmailNguoiMua</strong>. Vui lòng kiểm tra hộp thư đến (và mục thư rác/spam nếu không tìm thấy).
+                <strong>@(laTrucTuyen ? "Xác nhận tham dự đã gửi đến email:" : "Vé đã gửi đến email:")</strong><br />
+                @(laTrucTuyen ? "Thông tin truy cập" : "Thông tin vé chi tiết") đã được gửi đến <strong style="text-decoration: underline;">@Model.EmailNguoiMua</strong>.
             </div>
         </div>
 
         @if (sk != null)
         {
             var format = "yyyyMMddTHHmmssZ";
-            var startUtc = DateTime.SpecifyKind(sk.NgayBatDau, DateTimeKind.Utc).ToString(format);
-            var endUtc = DateTime.SpecifyKind(sk.NgayKetThuc, DateTimeKind.Utc).ToString(format);
+            var startUtc = VietnamTime.ToUtc(sk.NgayBatDau).ToString(format);
+            var endUtc = VietnamTime.ToUtc(sk.NgayKetThuc).ToString(format);
             var gTitle = Uri.EscapeDataString(sk.TenSuKien);
             var gDesc = Uri.EscapeDataString(sk.MoTaNgan ?? "");
             var gLoc = Uri.EscapeDataString(sk.LoaiSuKien == 1 ? "Trực tuyến: " + (sk.LinkOnline ?? "") : $"{sk.TenDiaDiem}, {sk.DiaChiDiaDiem}, {sk.ThanhPhoDiaDiem}");
@@ -258,7 +264,7 @@
 
         <div class="btn-action-group">
             <a class="btn-main" asp-controller="Booking" asp-action="ChiTietDonHang" asp-route-id="@Model.Id">
-                <i class="fas fa-qrcode"></i> Xem vé của bạn
+                <i class="fas @(laTrucTuyen ? "fa-video" : "fa-qrcode")"></i> @(laTrucTuyen ? "Xem quyền tham dự" : "Xem vé của bạn")
             </a>
             <a class="btn-secondary" asp-controller="Home" asp-action="Index">
                 <i class="fas fa-home"></i> Về trang chủ

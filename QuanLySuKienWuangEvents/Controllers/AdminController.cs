@@ -1,13 +1,5 @@
 ﻿// ADMIN CONTROLLER — Quản trị hệ thống
-// Chức năng:
-//   - Dashboard: thống kê tổng quan
-//   - Danh mục: thêm/sửa/xóa danh mục sự kiện
-//   - Đối tác: duyệt/từ chối nhà tổ chức
-//   - Sự kiện: duyệt/từ chối/ẩn/hủy sự kiện
-//   - Đơn hàng: xem tất cả đơn hàng trên hệ thống
-//   - Người dùng: xem/khóa/mở khóa tài khoản
-//
-// Lưu ý: Chỉ Admin (VaiTro = 3) mới truy cập được
+// Dashboard, danh mục, duyệt, đơn và user; chỉ Admin, route /Admin/{action}/{id?}.
 
 using System.Security.Claims;
 using System.Text;
@@ -26,6 +18,7 @@ public class AdminController : Controller
 
     // TRANG TỔNG QUAN ADMIN
     // URL: GET /Admin/Index
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         // Lấy các con số thống kê để hiển thị trên dashboard
@@ -62,6 +55,7 @@ public class AdminController : Controller
 
     // DANH SÁCH DANH MỤC
     // URL: GET /Admin/DanhMuc
+    [HttpGet]
     public async Task<IActionResult> DanhMuc()
     {
         string sql = @"
@@ -84,6 +78,19 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> TaoMoiDanhMuc(DanhMuc model)
     {
+        if (string.IsNullOrWhiteSpace(model.TenDanhMuc))
+        {
+            ModelState.AddModelError(nameof(model.TenDanhMuc), "Tên danh mục là bắt buộc.");
+        }
+        if (model.ThuTu < 0)
+        {
+            ModelState.AddModelError(nameof(model.ThuTu), "Thứ tự hiển thị không được là số âm.");
+        }
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
         string sql = @"
             INSERT INTO DanhMuc
                 (TenDanhMuc, MoTa, Icon, ThuTu, TrangThai)
@@ -109,6 +116,19 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> ChinhSuaDanhMuc(DanhMuc model)
     {
+        if (string.IsNullOrWhiteSpace(model.TenDanhMuc))
+        {
+            ModelState.AddModelError(nameof(model.TenDanhMuc), "Tên danh mục là bắt buộc.");
+        }
+        if (model.ThuTu < 0)
+        {
+            ModelState.AddModelError(nameof(model.ThuTu), "Thứ tự hiển thị không được là số âm.");
+        }
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
         string sql = @"
             UPDATE DanhMuc
             SET TenDanhMuc = @TenDanhMuc,
@@ -126,7 +146,16 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> XoaDanhMuc(int id)
     {
+        int soSuKienDangDung = await Db.LayGiaTri<int>(
+            "SELECT COUNT(1) FROM SuKien WHERE DanhMucId = @id", new { id });
+        if (soSuKienDangDung > 0)
+        {
+            TempData["Error"] = "Không thể xóa danh mục đang được sự kiện sử dụng. Hãy ẩn danh mục thay vì xóa.";
+            return RedirectToAction("DanhMuc");
+        }
+
         await Db.ThucThi("DELETE FROM DanhMuc WHERE Id = @id", new { id });
+        TempData["Message"] = "Đã xóa danh mục.";
         return RedirectToAction("DanhMuc");
     }
 
@@ -149,6 +178,7 @@ public class AdminController : Controller
     // XỬ LÝ DUYỆT / TỪ CHỐI YÊU CẦU LÊN BAN TỔ CHỨC
     // URL: POST /Admin/XuLyDuyetBTC
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> XuLyDuyetBTC(Guid id, bool status, string? lyDo)
     {
         if (status)
@@ -160,7 +190,14 @@ public class AdminController : Controller
                     YeuCauBanToChuc = 2,
                     LyDoTuChoiBTC = NULL,
                     NgayCapNhat = GETUTCDATE()
-                WHERE Id = @id AND YeuCauBanToChuc = 1
+                WHERE Id = @id
+                  AND YeuCauBanToChuc = 1
+                  AND EmailXacNhan = 1
+                  AND SdtBanToChuc IS NOT NULL
+                  AND TenToChuc IS NOT NULL
+                  AND LoaiChuTheBTC IN (0, 1)
+                  AND LEN(MoTaYeuCauBTC) >= 30
+                  AND DaDongYDieuKhoanBTC = 1
             ";
             int rows = await Db.ThucThi(sqlApprove, new { id });
             if (rows > 0)
@@ -169,11 +206,17 @@ public class AdminController : Controller
             }
             else
             {
-                TempData["Error"] = "Phê duyệt thất bại hoặc yêu cầu không tồn tại.";
+                TempData["Error"] = "Không thể phê duyệt vì hồ sơ chưa đủ điều kiện hoặc không còn ở trạng thái chờ.";
             }
         }
         else
         {
+            if (string.IsNullOrWhiteSpace(lyDo))
+            {
+                TempData["Error"] = "Vui lòng nhập lý do từ chối hồ sơ.";
+                return RedirectToAction("DuyetBTCList");
+            }
+
             // Từ chối phê duyệt: Đổi YeuCauBanToChuc = 3 (Bị từ chối) và lưu lý do
             string sqlReject = @"
                 UPDATE NguoiDung
@@ -182,7 +225,7 @@ public class AdminController : Controller
                     NgayCapNhat = GETUTCDATE()
                 WHERE Id = @id AND YeuCauBanToChuc = 1
             ";
-            int rows = await Db.ThucThi(sqlReject, new { id, lyDo = lyDo?.Trim() ?? "Không có lý do cụ thể." });
+            int rows = await Db.ThucThi(sqlReject, new { id, lyDo = lyDo.Trim() });
             if (rows > 0)
             {
                 TempData["Message"] = "Đã từ chối phê duyệt tài khoản làm Ban tổ chức.";
@@ -198,20 +241,25 @@ public class AdminController : Controller
 
     // PHẦN 4: DUYỆT SỰ KIỆN
 
-    // DANH SÁCH SỰ KIỆN (để Admin duyệt)
-    // URL: GET /Admin/SuKien
-    // TrangThai: 1=Nháp, 2=Đang bán, 3=Đã duyệt/Sắp diễn ra, 4=Đã kết thúc,
-    //            5=Chờ duyệt, 6=Đã hủy, 7=Bị từ chối
-    public async Task<IActionResult> SuKien(byte? trangThai)
+    // GET /Admin/SuKien: trạng thái 0 nháp, 1 chờ, 2 dừng, 3 bán, 6 hủy, 7 từ chối.
+    [HttpGet]
+    public async Task<IActionResult> SuKien(byte? trangThai, string? q)
     {
         string sql = @"
             SELECT *
             FROM SuKien
             WHERE (@trangThai IS NULL OR TrangThai = @trangThai)
+              AND (@q = '' OR TenSuKien LIKE '%' + @q + '%'
+                           OR MoTaNgan LIKE '%' + @q + '%')
             ORDER BY NgayTao DESC
         ";
-        var danhSachSuKien = await Db.LayDanhSach<SuKien>(sql, new { trangThai });
+        var danhSachSuKien = await Db.LayDanhSach<SuKien>(sql, new
+        {
+            trangThai,
+            q = q?.Trim() ?? ""
+        });
         ViewBag.TrangThai = trangThai;
+        ViewBag.Search = q;
         return View(danhSachSuKien);
     }
 
@@ -224,9 +272,24 @@ public class AdminController : Controller
             SET TrangThai    = 3,
                 NgayCapNhat  = GETUTCDATE()
             WHERE Id = @id
+              AND TrangThai = 1
+              AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE())
+              AND EXISTS (
+                    SELECT 1 FROM LoaiVe lv
+                    WHERE lv.SuKienId = SuKien.Id
+                      AND lv.TrangThai = 1
+                      AND lv.SoLuongTong > 0
+              )
+              AND (LoaiSuKien = 0 OR LinkOnline LIKE 'https://%')
+              AND (CoSoDoChoNgoi = 0 OR EXISTS (
+                    SELECT 1 FROM SoDoChoNgoi sd
+                    WHERE sd.SuKienId = SuKien.Id
+              ))
         ";
-        await Db.ThucThi(sql, new { id });
-        TempData["Message"] = "Đã duyệt sự kiện.";
+        int soDongCapNhat = await Db.ThucThi(sql, new { id });
+        TempData[soDongCapNhat > 0 ? "Message" : "Error"] = soDongCapNhat > 0
+            ? "Đã duyệt sự kiện."
+            : "Không thể duyệt: sự kiện phải đang chờ duyệt, còn hạn, có loại vé và đủ cấu hình hình thức tổ chức.";
         return RedirectToAction("SuKien");
     }
 
@@ -234,15 +297,25 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> TuChoiSuKien(Guid id, string? lyDo)
     {
+        lyDo = lyDo?.Trim();
+        if (string.IsNullOrWhiteSpace(lyDo) || lyDo.Length < 5 || lyDo.Length > 500)
+        {
+            TempData["Error"] = "Lý do từ chối phải có từ 5 đến 500 ký tự.";
+            return RedirectToAction("SuKien");
+        }
+
         string sql = @"
             UPDATE SuKien
             SET TrangThai    = 7,
                 LyDoTuChoi   = @lyDo,
                 NgayCapNhat  = GETUTCDATE()
             WHERE Id = @id
+              AND TrangThai = 1
         ";
-        await Db.ThucThi(sql, new { id, lyDo });
-        TempData["Message"] = "Đã từ chối sự kiện.";
+        int soDongCapNhat = await Db.ThucThi(sql, new { id, lyDo });
+        TempData[soDongCapNhat > 0 ? "Message" : "Error"] = soDongCapNhat > 0
+            ? "Đã từ chối sự kiện."
+            : "Chỉ có thể từ chối sự kiện đang ở trạng thái chờ duyệt.";
         return RedirectToAction("SuKien");
     }
 
@@ -255,9 +328,12 @@ public class AdminController : Controller
             SET HienThiCongKhai = CASE WHEN HienThiCongKhai = 1 THEN 0 ELSE 1 END,
                 NgayCapNhat     = GETUTCDATE()
             WHERE Id = @id
+              AND TrangThai IN (3, 5)
         ";
-        await Db.ThucThi(sql, new { id });
-        TempData["Message"] = "Đã thay đổi trạng thái hiển thị sự kiện.";
+        int soDongCapNhat = await Db.ThucThi(sql, new { id });
+        TempData[soDongCapNhat > 0 ? "Message" : "Error"] = soDongCapNhat > 0
+            ? "Đã thay đổi trạng thái hiển thị sự kiện."
+            : "Chỉ sự kiện đang bán hoặc đã lưu trữ mới được hiển thị công khai.";
         return RedirectToAction("SuKien");
     }
 
@@ -270,6 +346,38 @@ public class AdminController : Controller
         using var transaction = connection.BeginTransaction();
         try
         {
+            var suKien = await connection.QueryFirstOrDefaultAsync<dynamic>(@"
+                SELECT TrangThai
+                FROM SuKien WITH (UPDLOCK, HOLDLOCK)
+                WHERE Id = @id", new { id }, transaction);
+
+            if (suKien == null)
+            {
+                await transaction.RollbackAsync();
+                return NotFound();
+            }
+
+            int trangThaiHienTai = Convert.ToInt32(suKien.TrangThai);
+            if (trangThaiHienTai is 4 or 5 or 6)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Không thể hủy sự kiện đã kết thúc, đã lưu trữ hoặc đã hủy.";
+                return RedirectToAction("SuKien");
+            }
+
+            int soDonDaThanhToan = await connection.ExecuteScalarAsync<int>(@"
+                SELECT COUNT(*)
+                FROM DonHang WITH (UPDLOCK, HOLDLOCK)
+                WHERE SuKienId = @id AND TrangThai = 1",
+                new { id }, transaction);
+
+            if (soDonDaThanhToan > 0)
+            {
+                await transaction.RollbackAsync();
+                TempData["Error"] = "Sự kiện đã có đơn thanh toán nên không thể hủy khi hệ thống chưa hỗ trợ hoàn tiền.";
+                return RedirectToAction("SuKien");
+            }
+
             string sql = @"
                 UPDATE SuKien
                 SET TrangThai       = 6,
@@ -277,10 +385,17 @@ public class AdminController : Controller
                     LyDoTuChoi      = @lyDo,
                     NgayCapNhat     = GETUTCDATE()
                 WHERE Id = @id
+                  AND TrangThai IN (0, 1, 2, 3, 7)
             ";
             int affected = await connection.ExecuteAsync(sql, new { id, lyDo = lyDo ?? "Admin hủy sự kiện" }, transaction);
             if (affected > 0)
             {
+                // Đơn chưa thanh toán không được tiếp tục quay lại từ cổng sau khi sự kiện đã hủy.
+                await connection.ExecuteAsync(@"
+                    UPDATE DonHang
+                    SET TrangThai = 2, NgayCapNhat = GETUTCDATE()
+                    WHERE SuKienId = @id AND TrangThai = 0", new { id }, transaction);
+
                 // Reset SoLuongGiuCho của các loại vé đi kèm
                 string sqlResetGiuCho = @"
                     UPDATE LoaiVe
@@ -289,11 +404,11 @@ public class AdminController : Controller
                 ";
                 await connection.ExecuteAsync(sqlResetGiuCho, new { id }, transaction);
 
-                // Giải phóng các ghế đang bị giữ ở trạng thái Chờ thanh toán (TrangThai = 2 -> 0)
+                // Ghế 1 là đang giữ; ghế 2 đã bán nên tuyệt đối không được mở lại.
                 string sqlReleaseSeats = @"
                     UPDATE ChoNgoi
                     SET TrangThai = 0
-                    WHERE TrangThai = 2
+                    WHERE TrangThai = 1
                       AND HangGheId IN (
                           SELECT h.Id 
                           FROM HangGhe h 
@@ -318,35 +433,57 @@ public class AdminController : Controller
 
     // PHẦN 5: QUẢN LÝ ĐƠN HÀNG
 
-    // DANH SÁCH TẤT CẢ ĐƠN HÀNG
-    // URL: GET /Admin/DonHang
+    // GET /Admin/DonHang: nhận trạng thái/từ khóa từ query string và trả danh sách đơn.
     public async Task<IActionResult> DonHang(byte? trangThai, string? search)
     {
-        // Lấy đơn hàng kèm tên sự kiện (từ bảng SuKien)
+        // @"..." là chuỗi C# nhiều dòng, dùng để chứa câu lệnh SQL cho dễ đọc.
+        // d và s chỉ là tên viết tắt: d = DonHang, s = SuKien.
         string sql = @"
+            -- d.* lấy toàn bộ cột của bảng DonHang.
+            -- DonHang chỉ giữ SuKienId, nên phải JOIN để lấy thêm TenSuKien.
             SELECT d.*,
                    s.TenSuKien
             FROM DonHang d
+
+            -- Ghép một đơn với sự kiện có Id bằng SuKienId của đơn.
             JOIN SuKien s ON s.Id = d.SuKienId
+
+            -- Không chọn trạng thái: @trangThai IS NULL đúng -> không lọc.
+            -- Có chọn trạng thái: chỉ lấy d.TrangThai bằng giá trị được chọn.
             WHERE (@trangThai IS NULL OR d.TrangThai = @trangThai)
+
+              -- Search rỗng thì điều kiện @search = '' đúng -> không lọc chữ.
+              -- Search có chữ thì LIKE tìm chữ đó trong mã đơn/email/họ tên.
               AND (@search = '' OR d.MaDonHang      LIKE '%' + @search + '%'
                                OR d.EmailNguoiMua   LIKE '%' + @search + '%'
                                OR d.HoTenNguoiMua   LIKE '%' + @search + '%')
+
+            -- DESC = giảm dần: đơn mới nhất đứng trên cùng.
             ORDER BY d.NgayTao DESC
         ";
 
+        // Dùng dynamic vì SELECT thêm TenSuKien; object ẩn danh truyền tham số cho Dapper.
         var danhSachTho = await Db.LayDanhSach<dynamic>(sql, new
         {
+            // Viết tắt của trangThai = trangThai.
             trangThai,
+
+            // ?.Trim(): nếu search không null thì xóa khoảng trắng đầu/cuối.
+            // ?? "": nếu search null thì dùng chuỗi rỗng.
             search = search?.Trim() ?? ""
         });
 
-        // Tách tên sự kiện ra khỏi kết quả để gửi qua ViewBag
+        // Tạo danh sách DonHang rỗng để chuẩn bị đưa vào @model của View.
         var danhSachDonHang = new List<DonHang>();
-        var tenSuKienTheoId = new Dictionary<Guid, string>(); // key=SuKienId, value=TenSuKien
 
+        // Dictionary ánh xạ SuKienId -> TenSuKien để View tra tên.
+        var tenSuKienTheoId = new Dictionary<Guid, string>();
+
+        // foreach chạy một lần cho mỗi dòng SQL mà Dapper vừa trả về.
         foreach (var dong in danhSachTho)
         {
+            // Chuyển dòng dynamic thành model DonHang rõ kiểu.
+            // Bên trái là property của model; bên phải là cột SQL của dòng hiện tại.
             var donHang = new DonHang
             {
                 Id             = dong.Id,
@@ -364,21 +501,28 @@ public class AdminController : Controller
                 NgayTao        = dong.NgayTao,
                 NgayCapNhat    = dong.NgayCapNhat
             };
+
+            // Sau khi dựng xong một DonHang, thêm nó vào List<DonHang>.
             danhSachDonHang.Add(donHang);
+
+            // Nhiều đơn cùng sự kiện dùng chung một tên trong dictionary.
             tenSuKienTheoId[donHang.SuKienId] = dong.TenSuKien;
         }
 
+        // Model chỉ gửi được danhSachDonHang qua return View(...).
+        // Các dữ liệu phụ được đặt vào ViewBag của đúng request hiện tại.
         ViewBag.Events    = tenSuKienTheoId;
         ViewBag.TrangThai = trangThai;
         ViewBag.Search    = search;
+
+        // Render Views/Admin/DonHang.cshtml với danhSachDonHang làm Model.
         return View(danhSachDonHang);
     }
 
-    // CHI TIẾT ĐƠN HÀNG (Admin xem)
-    // URL: GET /Admin/ChiTietDonHang?id={donHangId}
+    // GET /Admin/ChiTietDonHang/{id}: lấy đơn và các vé con để Admin xem.
     public async Task<IActionResult> ChiTietDonHang(Guid id)
     {
-        // Lấy đơn hàng kèm tên sự kiện
+        // SQL thứ nhất: lấy đúng một đơn theo Id và lấy thêm tên sự kiện.
         string sqlDonHang = @"
             SELECT d.*,
                    s.TenSuKien
@@ -386,14 +530,19 @@ public class AdminController : Controller
             JOIN SuKien s ON s.Id = d.SuKienId
             WHERE d.Id = @id
         ";
+
+        // LayDonLe<dynamic> gọi QueryFirstOrDefaultAsync của Dapper trong Db.cs.
+        // new { id } tạo tham số @id; không tìm thấy thì dong nhận null.
         var dong = await Db.LayDonLe<dynamic>(sqlDonHang, new { id });
 
+        // Phải kiểm tra null trước khi đọc dong.MaDonHang, dong.SuKienId,...
+        // Nếu không có đơn, trả HTTP 404 thay vì để chương trình lỗi NullReference.
         if (dong == null)
         {
             return NotFound();
         }
 
-        // Map dữ liệu vào model DonHang
+        // Chuyển dòng dynamic thành model DonHang để View có kiểu dữ liệu rõ ràng.
         var donHang = new DonHang
         {
             Id             = dong.Id,
@@ -412,26 +561,34 @@ public class AdminController : Controller
             NgayCapNhat    = dong.NgayCapNhat
         };
 
-        // Lấy danh sách từng vé trong đơn hàng
+        // SQL thứ hai: một DonHang có thể có nhiều ChiTietDonHang (nhiều vé).
+        // ct.* lấy các cột của vé; hai JOIN lấy thêm TenLoaiVe và SoGhe.
         string sqlChiTiet = @"
             SELECT ct.*, lv.TenLoaiVe, cn.SoGhe
             FROM ChiTietDonHang ct
+
+            -- LEFT JOIN giữ lại vé kể cả khi dữ liệu được nối không tồn tại.
+            -- Đặc biệt ChoNgoiId có thể null với sự kiện không chọn ghế.
             LEFT JOIN LoaiVe lv ON lv.Id = ct.LoaiVeId
             LEFT JOIN ChoNgoi cn ON cn.Id = ct.ChoNgoiId
+
+            -- Chỉ lấy những vé con thuộc đơn đang xem.
             WHERE ct.DonHangId = @donHangId
         ";
 
+        // Dữ liệu chính của View là donHang; hai dữ liệu phụ đi qua ViewBag.
         ViewBag.TenSuKien = dong.TenSuKien;
+
+        // Dapper ghép TenLoaiVe/SoGhe vào property bổ sung; @donHangId nhận id.
         ViewBag.ChiTiet   = await Db.LayDanhSach<ChiTietDonHang>(sqlChiTiet, new { donHangId = id });
+
+        // Tìm Views/Admin/ChiTietDonHang.cshtml và gán donHang vào Model.
         return View(donHang);
     }
 
     // PHẦN 6: QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG
 
-    // DANH SÁCH NGƯỜI DÙNG
-    // URL: GET /Admin/NguoiDung
-    // VaiTro: 0=Khách hàng, 1=Nhà tổ chức, 3=Admin
-    // TrangThai: 0=Bị khóa, 1=Đang hoạt động
+    // GET /Admin/NguoiDung: lọc role (0 khách, 1 BTC, 2 Staff, 3 Admin) và trạng thái.
     public async Task<IActionResult> NguoiDung(byte? vaiTro, byte? trangThai, string? search)
     {
         string sql = @"
@@ -606,6 +763,6 @@ public class AdminController : Controller
     private Guid LayAdminId()
     {
         string? idChuoi = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return Guid.Parse(idChuoi ?? Guid.Empty.ToString());
+        return Guid.TryParse(idChuoi, out Guid id) ? id : Guid.Empty;
     }
 }

@@ -1,19 +1,29 @@
-﻿@model DonHang
+@* ChiTietDonHang() gọi return View(donHang), vì vậy Model của trang là một DonHang. *@
+@model DonHang
 
 @{
     Layout = "~/Views/Shared/_AdminSimpleLayout.cshtml";
     ViewData["Title"] = "Chi tiết đơn";
+
+    // Danh sách vé là dữ liệu phụ được Controller gửi trong ViewBag.ChiTiet.
+    // Nếu ép kiểu thất bại hoặc dữ liệu null thì dùng danh sách rỗng.
     var chiTiet = ViewBag.ChiTiet as List<ChiTietDonHang> ?? new();
 }
 
 <div class="d-flex justify-content-between align-items-start mb-4">
     <div class="portal-page-title">
+        @* Model lấy dữ liệu từ object donHang mà Controller trả về. *@
         <h1>Đơn @Model.MaDonHang</h1>
+
+        @* TenSuKien không thuộc model DonHang nên Controller gửi riêng bằng ViewBag. *@
         <p>@ViewBag.TenSuKien</p>
     </div>
-    <a class="btn btn-outline-secondary" href="/Admin/DonHang">Quay lại</a>
+
+    @* Link này tạo request GET /Admin/DonHang để quay lại action danh sách. *@
+    <a class="btn btn-outline-secondary" asp-controller="Admin" asp-action="DonHang">Quay lại</a>
 </div>
 
+@* TempData giữ thông báo qua được một lần redirect; nếu có lỗi thì mới in khối HTML này. *@
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
@@ -36,7 +46,7 @@
     <div class="col-md-4">
         <div class="portal-card portal-card-body">
             <span class="text-muted">Trạng thái</span>
-            <strong class="d-block">@(Model.TrangThai == 1 ? "Đã thanh toán" : Model.TrangThai == 3 ? "Đã hoàn tiền" : "Khác")</strong>
+            <strong class="d-block">@(Model.TrangThai == 0 ? "Chờ thanh toán" : Model.TrangThai == 1 ? "Đã thanh toán" : Model.TrangThai == 2 ? "Đã hủy" : Model.TrangThai == 4 ? "Hết hạn" : "Không xác định")</strong>
         </div>
     </div>
 </div>
@@ -59,6 +69,7 @@
                 </tr>
             </thead>
             <tbody>
+                @* Một đơn có thể có nhiều vé nên lặp List<ChiTietDonHang>. *@
                 @foreach (var item in chiTiet)
                 {
                     <tr>
@@ -66,6 +77,7 @@
                         <td>@item.EmailNguoiThamDu</td>
                         <td><span class="badge bg-info text-dark">@item.TenLoaiVe</span></td>
                         <td>
+                            @* SoGhe có thể null/rỗng với sự kiện không sử dụng sơ đồ ghế. *@
                             @if (!string.IsNullOrEmpty(item.SoGhe))
                             {
                                 <span class="badge bg-secondary"><i class="fas fa-chair me-1"></i>@item.SoGhe</span>
@@ -78,6 +90,7 @@
                         <td><code>@item.MaVe</code></td>
                         <td>@item.GiaVe.ToString("N0") VND</td>
                         <td>
+                            @* Đổi mã check-in trong database thành nhãn hiển thị. *@
                             @if (item.TrangThaiCheckin == 1)
                             {
                                 <span class="badge bg-success">Đã check-in</span>

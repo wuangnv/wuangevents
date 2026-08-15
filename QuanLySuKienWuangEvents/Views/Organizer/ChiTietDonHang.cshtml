@@ -1,6 +1,8 @@
 @model DonHang
 
 @{
+    // ChiTietDonHang(id) chỉ lấy đơn thuộc sự kiện của BTC hiện tại.
+    // Model là DonHang; ViewBag.ChiTiet là List<ChiTietDonHang> và tên sự kiện.
     Layout = "~/Views/Shared/_OrganizerSimpleLayout.cshtml";
     ViewData["Title"] = "Chi tiết đơn hàng";
     var chiTiet = ViewBag.ChiTiet as List<ChiTietDonHang> ?? new();
@@ -40,10 +42,6 @@
                 {
                     <span class="badge bg-danger text-white">Đã hủy</span>
                 }
-                else if (Model.TrangThai == 3)
-                {
-                    <span class="badge bg-info text-dark">Hoàn tiền</span>
-                }
                 else if (Model.TrangThai == 4)
                 {
                     <span class="badge bg-secondary text-white">Hết hạn</span>
@@ -73,7 +71,7 @@
             <i class="fas fa-clock" style="color:#3b82f6;font-size:1.3rem"></i>
             <div>
                 <h5 class="fw-bold mb-1" style="color:#1d4ed8"><i class="fas fa-hourglass-half me-1"></i>Đơn hàng đang chờ thanh toán qua cổng</h5>
-                <p class="text-muted small mb-0">Khách hàng đang thực hiện thanh toán qua VNPAY / MoMo / ZaloPay. Vé sẽ được kích hoạt tự động sau khi cổng xác nhận giao dịch thành công.</p>
+                <p class="text-muted small mb-0">Chờ xác nhận từ cổng thanh toán.</p>
             </div>
         </div>
     </div>
