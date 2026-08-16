@@ -2246,13 +2246,20 @@ public class OrganizerController : Controller
                 int viTriY = zoneViTriY![i];
                 int rong = zoneRong![i];
                 int cao = zoneCao![i];
-                int minRong = isGA ? 180 : Math.Max(180, 74 + soGhe * 22);
-                int minCao = isGA ? 120 : Math.Max(112, 76 + soHang * 28);
-                if (rong is < 120 or > 900 || cao is < 80 or > 900
-                    || rong < minRong || cao < minCao
-                    || viTriX < 0 || viTriY < 0 || viTriX + rong > mapWidth || viTriY + cao > mapHeight)
+                // Kích thước phải đúng với công thức canvas ở SoDoChoNgoi.cshtml.
+                // Trước đây hai công thức lệch vài px, làm sơ đồ hợp lệ ở giao diện bị từ chối khi lưu.
+                int minRong = isGA ? 180 : Math.Max(180, 50 + soGhe * 32);
+                int minCao = isGA ? 120 : Math.Max(112, 56 + soHang * 30);
+                bool kichThuocKhongHopLe = rong is < 120 or > 900 || cao is < 80 or > 900
+                    || rong < minRong || cao < minCao;
+                bool namNgoaiCanvas = viTriX < 0 || viTriY < 0
+                    || viTriX + rong > mapWidth || viTriY + cao > mapHeight;
+                if (kichThuocKhongHopLe || namNgoaiCanvas)
                 {
-                    TempData["Error"] = "Có khu vực vượt khỏi canvas hoặc kích thước chưa đủ để hiển thị ghế.";
+                    string tenKhu = zoneTen[i].Trim();
+                    TempData["Error"] = kichThuocKhongHopLe
+                        ? $"Khu vực '{tenKhu}' chưa đủ kích thước để hiển thị số ghế đã chọn."
+                        : $"Khu vực '{tenKhu}' đang nằm ngoài bản vẽ. Hãy kéo khu vực trở lại canvas.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
                 string tienTo = (zoneTienTo![i] ?? "").Trim();
@@ -2544,59 +2551,6 @@ public class OrganizerController : Controller
             WHERE g.Id = @seatId AND sd.SuKienId = @suKienId AND g.TrangThai IN (0,3)";
         await Db.ThucThi(sqlUpdate, new { seatId, suKienId, newStatus });
         return Json(new { success = true, newStatus });
-    }
-
-    [HttpGet]
-    // Xuất sơ đồ ghế của sự kiện ra JSON để tái sử dụng cho các sự kiện khác.
-    public async Task<IActionResult> ExportSoDo(Guid suKienId)
-    {
-        if (!await LaSuKienCuaToi(suKienId)) return Forbid();
-
-        var soDo = await Db.LayDonLe<SoDoChoNgoi>("SELECT * FROM SoDoChoNgoi WHERE SuKienId = @suKienId", new { suKienId });
-        if (soDo == null) return NotFound();
-
-        var khuVucs = await Db.LayDanhSach<KhuVuc>("SELECT * FROM KhuVuc WHERE SoDoChoNgoiId = @id ORDER BY ThuTu", new { id = soDo.Id });
-        var hangGhes = await Db.LayDanhSach<HangGhe>("SELECT h.* FROM HangGhe h JOIN KhuVuc k ON k.Id = h.KhuVucId WHERE k.SoDoChoNgoiId = @id ORDER BY h.ThuTu", new { id = soDo.Id });
-
-        var exportObj = new
-        {
-            version = "2.0",
-            tenSoDo = soDo.TenSoDo,
-            loaiSoDo = soDo.LoaiSoDo,
-            canvas = new { width = soDo.CanvasRong, height = soDo.CanvasCao },
-            sanKhauX = soDo.SanKhauX,
-            sanKhauY = soDo.SanKhauY,
-            stage = new
-            {
-                x = soDo.SanKhauX,
-                y = soDo.SanKhauY,
-                width = soDo.SanKhauRong,
-                height = soDo.SanKhauCao,
-                title = soDo.NhanSanKhau
-            },
-            zones = khuVucs.Select(k => new
-            {
-                ten = k.TenKhuVuc,
-                loaiVeId = k.LoaiVeId,
-                mauSac = k.MauSac,
-                viTriX = k.ViTriX,
-                viTriY = k.ViTriY,
-                rong = k.Rong,
-                cao = k.Cao,
-                loaiKhuVuc = k.LoaiKhuVuc,
-                sucChua = k.SucChua,
-                tienTo = k.TienToHangGhe,
-                huongDanhSo = k.KieuDanhSo,
-                soBatDau = k.SoBatDau,
-                boQuaChuDeNham = k.BoQuaChuDeNham,
-                soHang = hangGhes.Count(h => h.KhuVucId == k.Id),
-                soGheMoiHang = hangGhes.Where(h => h.KhuVucId == k.Id).Select(h => h.SoGhe).FirstOrDefault()
-            })
-        };
-
-        string json = System.Text.Json.JsonSerializer.Serialize(exportObj, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-        string fileName = $"seating-{suKienId}.json";
-        return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", fileName);
     }
 
     [HttpPost]

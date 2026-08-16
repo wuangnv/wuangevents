@@ -24,7 +24,7 @@
 <style>
 /* ===== VENUE SEATING STUDIO — 100% LIGHT THEME ===== */
 *{box-sizing:border-box}
-.seat-admin { max-width: 1440px; margin: 0 auto; padding: 20px 16px 80px; }
+.seat-admin { max-width: 1700px; margin: 0 auto; padding: 20px 16px 80px; }
 
 /* Hero Bar */
 .hero-bar{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px;box-shadow:0 2px 6px rgba(0,0,0,.03)}
@@ -108,7 +108,7 @@
 .legend-box{width:20px;height:17px;border-radius:4px 4px 2px 2px;display:inline-block;border:1.5px solid}
 
 /* ====== STUDIO BUILDER ====== */
-.studio-layout{display:grid;grid-template-columns:260px 1fr 300px;gap:16px;align-items:start}
+.studio-layout{display:grid;grid-template-columns:235px minmax(620px,1fr) 270px;gap:16px;align-items:start}
 .studio-sidebar{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,.03)}
 .studio-canvas-area{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,.03);min-width:0}
 .studio-props{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:18px;box-shadow:0 4px 14px rgba(0,0,0,.03)}
@@ -138,7 +138,7 @@
 .canvas-hud-title{font-size:.88rem;font-weight:850;color:#1e1b4b;display:flex;align-items:center;gap:6px}
 .canvas-hud-tools{display:flex;align-items:center;gap:5px}
 .pill-stat{background:#f1f5f9;color:#475569;font-size:.72rem;font-weight:750;padding:4px 10px;border-radius:999px;border:1px solid #e2e8f0}
-#konva-container{border:1px solid #e2e8f0;border-radius:14px;background:#f8fafc;overflow:hidden;cursor:grab;height:520px}
+#konva-container{border:1px solid #e2e8f0;border-radius:14px;background:#f8fafc;overflow:hidden;cursor:grab;height:min(640px,calc(100vh - 255px));min-height:500px}
 #konva-container:active{cursor:grabbing}
 
 /* Properties Panel */
@@ -163,11 +163,6 @@
 .zt-btn{flex:1;padding:7px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.77rem;font-weight:800;cursor:pointer;text-align:center;transition:.15s}
 .zt-btn.active{border-color:#4f46e5;background:#f5f7ff;color:#4f46e5}
 
-/* Canvas Export/Import */
-.canvas-io-bar{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #f1f5f9}
-.io-btn{border:1px solid #cbd5e1;background:#fff;color:#475569;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:750;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
-.io-btn:hover{background:#f8fafc;border-color:#94a3b8}
-
 /* Form Submit Bar */
 .studio-submit-bar{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid #f1f5f9;margin-top:14px;gap:12px}
 .btn-save-map{border:0;background:#4f46e5;color:#fff;border-radius:10px;padding:11px 22px;font-weight:850;font-size:.88rem;cursor:pointer;transition:.15s}
@@ -178,7 +173,7 @@
 /* No ticket type fallback */
 .no-loaive-box{background:#fff1f2;border:1px solid #fecdd3;color:#be123c;border-radius:12px;padding:14px 18px;font-weight:650;font-size:.86rem}
 
-@@media(max-width:1200px){.studio-layout{grid-template-columns:1fr 1fr}}
+@@media(max-width:1200px){.seat-admin{max-width:1100px}.studio-layout{grid-template-columns:1fr 1fr}.studio-props{grid-column:span 2}}
 @@media(max-width:800px){.studio-layout{grid-template-columns:1fr}.studio-props{order:3}.stats-bar{grid-template-columns:repeat(2,1fr)}}
 </style>
 }
@@ -205,9 +200,6 @@
         <div style="display:flex;gap:8px;align-items:center">
             @if (Model.Id != 0)
             {
-                <a href="/Organizer/ExportSoDo?suKienId=@suKienId" class="io-btn" title="Xuất sơ đồ ra file JSON">
-                    <i class="fas fa-download"></i> Xuất JSON
-                </a>
                 <form method="post" action="/Organizer/XoaSoDo" data-confirm="Xóa toàn bộ sơ đồ ghế của sự kiện?" data-confirm-title="Xóa sơ đồ ghế" data-confirm-button="Xóa sơ đồ" style="margin:0">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="suKienId" value="@suKienId" />
@@ -338,10 +330,6 @@
                 <button type="button" class="sb-btn-add" onclick="addSeatedZone()"><i class="fas fa-chair"></i> Thêm khu ghế ngồi</button>
                 <button type="button" class="sb-btn-add" onclick="addGAZone()" style="background:#fff8f0;border-color:#f59e0b;color:#d97706;margin-top:0"><i class="fas fa-person-walking"></i> Thêm khu đứng (GA)</button>
                 <div class="sb-zone-list" id="sbZoneList"></div>
-                <hr class="sb-divider">
-                <div class="canvas-io-bar" style="margin-top:0;padding-top:0;border:0;flex-wrap:wrap">
-                    <label class="io-btn" style="cursor:pointer"><i class="fas fa-upload"></i> Nhập JSON <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBlueprintFile(this)"></label>
-                </div>
             </div>
 
             <!-- CANVAS GIỮA (Konva.js) -->
@@ -500,7 +488,7 @@ let stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' 
 // ─── Init Konva Stage ──────────────────────────────────────────────────────
 function initKonva() {
     const container = document.getElementById('konva-container');
-    konvaStage = new Konva.Stage({ container: 'konva-container', width: container.clientWidth, height: 520 });
+    konvaStage = new Konva.Stage({ container: 'konva-container', width: container.clientWidth, height: container.clientHeight });
     konvaBgLayer = new Konva.Layer();
     konvaLayer  = new Konva.Layer();
     konvaStage.add(konvaBgLayer);
@@ -516,6 +504,19 @@ function initKonva() {
     window.addEventListener('keydown', e => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undoAction(); }
         if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redoAction(); }
+    });
+
+    // Canvas logic is 1200 × 800, but the available screen width varies.
+    // Recalculate the view rather than leaving the right part of the map cropped.
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (!container.clientWidth || !container.clientHeight) return;
+            konvaStage.size({ width: container.clientWidth, height: container.clientHeight });
+            drawDotGrid();
+            konvaFitView();
+        }, 120);
     });
 }
 
@@ -549,6 +550,25 @@ function handlePanMove(e) {
 }
 function handlePanEnd() { isPanning = false; }
 
+function applyKonvaTransform(scale, x, y) {
+    konvaLayer.scale({ x: scale, y: scale });
+    konvaLayer.position({ x, y });
+    konvaBgLayer.scale({ x: scale, y: scale });
+    konvaBgLayer.position({ x, y });
+    konvaLayer.batchDraw();
+    konvaBgLayer.batchDraw();
+    document.getElementById('konvaZoomLbl').textContent = Math.round(scale * 100) + '%';
+}
+
+function getFitScale() {
+    const padding = 28;
+    return Math.max(0.35, Math.min(
+        1,
+        (konvaStage.width() - padding * 2) / MAP_WIDTH,
+        (konvaStage.height() - padding * 2) / MAP_HEIGHT
+    ));
+}
+
 // ─── Wheel Zoom ──────────────────────────────────────────────────────────────
 function handleWheel(e) {
     e.evt.preventDefault();
@@ -558,27 +578,28 @@ function handleWheel(e) {
     const mousePointTo = { x: (pointer.x - konvaLayer.x()) / oldScale, y: (pointer.y - konvaLayer.y()) / oldScale };
     const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
     const clamped = Math.min(Math.max(newScale, 0.3), 3);
-    konvaLayer.scale({ x: clamped, y: clamped });
-    konvaLayer.x(pointer.x - mousePointTo.x * clamped);
-    konvaLayer.y(pointer.y - mousePointTo.y * clamped);
-    konvaBgLayer.scale({ x: clamped, y: clamped });
-    konvaBgLayer.position(konvaLayer.position());
-    konvaLayer.batchDraw(); konvaBgLayer.batchDraw();
-    document.getElementById('konvaZoomLbl').textContent = Math.round(clamped * 100) + '%';
+    applyKonvaTransform(
+        clamped,
+        pointer.x - mousePointTo.x * clamped,
+        pointer.y - mousePointTo.y * clamped
+    );
 }
 function konvaZoom(delta) {
     const sc = Math.min(Math.max(konvaLayer.scaleX() + delta, 0.3), 3);
-    konvaLayer.scale({ x: sc, y: sc });
-    konvaBgLayer.scale({ x: sc, y: sc });
-    konvaBgLayer.position(konvaLayer.position());
-    konvaLayer.batchDraw(); konvaBgLayer.batchDraw();
-    document.getElementById('konvaZoomLbl').textContent = Math.round(sc * 100) + '%';
+    const center = { x: konvaStage.width() / 2, y: konvaStage.height() / 2 };
+    const logicalCenter = {
+        x: (center.x - konvaLayer.x()) / konvaLayer.scaleX(),
+        y: (center.y - konvaLayer.y()) / konvaLayer.scaleY()
+    };
+    applyKonvaTransform(sc, center.x - logicalCenter.x * sc, center.y - logicalCenter.y * sc);
 }
 function konvaFitView() {
-    konvaLayer.scale({ x: 1, y: 1 }); konvaLayer.position({ x: 0, y: 0 });
-    konvaBgLayer.scale({ x: 1, y: 1 }); konvaBgLayer.position({ x: 0, y: 0 });
-    konvaLayer.batchDraw(); konvaBgLayer.batchDraw();
-    document.getElementById('konvaZoomLbl').textContent = '100%';
+    const scale = getFitScale();
+    applyKonvaTransform(
+        scale,
+        Math.max(12, Math.round((konvaStage.width() - MAP_WIDTH * scale) / 2)),
+        Math.max(12, Math.round((konvaStage.height() - MAP_HEIGHT * scale) / 2))
+    );
 }
 
 // ─── Preset Config ────────────────────────────────────────────────────────────
@@ -733,6 +754,14 @@ function calcZoneSize(z) {
     return { w: Math.max(w, 140), h: Math.max(h, 80) };
 }
 
+// Khi người dùng tăng số hàng/cột, khu có thể rộng hơn vị trí cũ.
+// Luôn kéo nó trở lại phần bản vẽ hợp lệ để không phát sinh lỗi lúc lưu.
+function keepZoneInsideCanvas(z) {
+    const { w, h } = calcZoneSize(z);
+    z.x = Math.max(0, Math.min(MAP_WIDTH - w, Math.round(Number(z.x || 0) / GRID) * GRID));
+    z.y = Math.max(0, Math.min(MAP_HEIGHT - h, Math.round(Number(z.y || 0) / GRID) * GRID));
+}
+
 function renderZone(z) {
     if (z.group) z.group.destroy();
     const { w, h } = calcZoneSize(z);
@@ -871,10 +900,12 @@ function updateSelectedZone(field, value) {
     else if (field === 'startNum') z.startNum = Math.max(1, Number(value));
     else if (field === 'skipLetters') z.skipLetters = value;
     else if (field === 'capacity') z.capacity = Math.max(1, Number(value));
+    keepZoneInsideCanvas(z);
     renderZone(z);
     konvaLayer.batchDraw();
     updateStats();
     updateCapTab(z);
+    updateSbZoneList();
 }
 
 function setZoneType(type) {
@@ -885,9 +916,11 @@ function setZoneType(type) {
     setZoneTypeUI(type);
     if (type === 'ga') { z.rows = 0; z.cols = 0; z.capacity = z.capacity || 200; }
     else { z.rows = z.rows || 5; z.cols = z.cols || 10; }
+    keepZoneInsideCanvas(z);
     renderZone(z);
     konvaLayer.batchDraw();
     updateStats();
+    updateSbZoneList();
 }
 
 function setZoneTypeUI(type) {
@@ -900,6 +933,7 @@ function addSeatedZone() {
     pushUndo();
     const t = TICKET_TYPES[0];
     const z = makeZone('Khu vực ' + (zones.length + 1), t.id, 'seated', 5, 10, 20 + zones.length * 50, 120 + zones.length * 30, t.color || '#4f46e5');
+    keepZoneInsideCanvas(z);
     zones.push(z);
     renderZone(z);
     konvaLayer.batchDraw();
@@ -912,6 +946,7 @@ function addGAZone() {
     pushUndo();
     const t = TICKET_TYPES[0];
     const z = makeZone('Khu đứng (GA) ' + (zones.length + 1), t.id, 'ga', 0, 0, 20 + zones.length * 40, 100 + zones.length * 20, t.color || '#f59e0b', 300);
+    keepZoneInsideCanvas(z);
     zones.push(z);
     renderZone(z);
     konvaLayer.batchDraw();
@@ -1046,54 +1081,8 @@ function selectPreset(preset) {
     };
     document.getElementById('tenSoDoField').value = names[preset] || 'Sơ đồ - ' + EVENT_NAME;
     renderCanvas();
-    deselectZone();
-}
-
-// ─── Export / Import ──────────────────────────────────────────────────────────
-function exportBlueprint() {
-    const data = { version: '2.0', preset: currentPreset, canvas: { width: MAP_WIDTH, height: MAP_HEIGHT }, stage: stageConfig, zones: zones.map(z => ({
-        name: z.name, ticketId: z.ticketId, type: z.type,
-        rows: z.rows, cols: z.cols, capacity: z.capacity, color: z.color,
-        x: z.x, y: z.y, prefix: z.prefix, numScheme: z.numScheme, startNum: z.startNum, skipLetters: z.skipLetters
-    }))};
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `seating-${EVENT_NAME.replace(/\s+/g,'-')}.json`; a.click();
-}
-
-function importBlueprintFile(input) {
-    const file = input.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        try {
-            const data = JSON.parse(e.target.result);
-            if (!Array.isArray(data.zones) || !data.zones.length) throw new Error('Invalid blueprint');
-            pushUndo();
-            zones.forEach(z => { if (z.group) z.group.destroy(); });
-            if (data.stage) stageConfig = { ...stageConfig, ...data.stage };
-            else if (data.sanKhauX != null) stageConfig = { ...stageConfig, x: data.sanKhauX, y: data.sanKhauY ?? 36 };
-            zones = data.zones.map(d => makeZone(
-                d.name || d.ten || 'Khu vực', d.ticketId || d.loaiVeId,
-                d.type || d.loaiKhuVuc || 'seated', d.rows || d.soHang || 5,
-                d.cols || d.soGheMoiHang || 10, d.x ?? d.viTriX ?? 20,
-                d.y ?? d.viTriY ?? 120, d.color || d.mauSac, d.capacity || d.sucChua || 200));
-            zones.forEach((z, i) => {
-                const d = data.zones[i];
-                z.prefix = d.prefix ?? d.tienTo ?? '';
-                z.numScheme = d.numScheme ?? d.huongDanhSo ?? 'ltr';
-                z.startNum = d.startNum ?? d.soBatDau ?? 1;
-                z.skipLetters = d.skipLetters ?? (d.boQuaChuDeNham === false ? 'no' : 'yes');
-            });
-            currentPreset = data.preset || data.loaiSoDo || 'custom';
-            document.querySelectorAll('.preset-btn').forEach(b => b.classList.toggle('active', b.dataset.preset === currentPreset));
-            document.getElementById('loaiSoDoInput').value = ['concert','theatre','auditorium','arena','custom'].includes(currentPreset) ? currentPreset : 'custom';
-            renderCanvas();
-            if (typeof WuangUI !== 'undefined') WuangUI.toast('Đã nhập sơ đồ thành công!', 'success');
-        } catch (err) {
-            if (typeof WuangUI !== 'undefined') WuangUI.toast('File JSON không hợp lệ', 'error');
-        }
-    };
-    reader.readAsText(file);
-    input.value = '';
+    if (zones.length) selectZone(zones[0].id);
+    requestAnimationFrame(konvaFitView);
 }
 
 // ─── Form Submit ──────────────────────────────────────────────────────────────
@@ -1113,6 +1102,7 @@ function submitStudioForm() {
         if (!z.ticketId || !getTicketById(z.ticketId)) {
             z.ticketId = TICKET_TYPES[0]?.id;
         }
+        keepZoneInsideCanvas(z);
     });
 
     // Validate capacity
