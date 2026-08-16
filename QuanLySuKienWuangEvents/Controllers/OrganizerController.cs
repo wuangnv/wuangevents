@@ -2124,13 +2124,18 @@ public class OrganizerController : Controller
         List<string>? zoneMauSac,
         List<int>? zoneViTriX,
         List<int>? zoneViTriY,
+        List<string>? zoneLoaiKhuVuc,
+        List<int>? zoneSucChua,
+        List<string>? zoneTienTo,
+        List<string>? zoneHuongDanhSo,
+        List<int>? zoneSoBatDau,
         int? sanKhauX,
         int? sanKhauY)
     {
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
 
         loaiSoDo = (loaiSoDo ?? "").Trim().ToLowerInvariant();
-        string[] cacLoaiSoDoHopLe = ["none", "auditorium", "theatre", "cinema", "arena", "custom"];
+        string[] cacLoaiSoDoHopLe = ["none", "auditorium", "theatre", "cinema", "arena", "custom", "concert"];
         if (!cacLoaiSoDoHopLe.Contains(loaiSoDo)) loaiSoDo = "custom";
 
         if (await LaCauHinhVeHoacSoDoBiKhoa(suKienId))
@@ -2149,21 +2154,18 @@ public class OrganizerController : Controller
             return RedirectToAction("SoDoChoNgoi", new { suKienId });
         }
 
-        // Canvas mới dùng 12 x 12 ô. Sân khấu chiếm 4 ô ngang và có thể đặt ở bất kỳ hàng nào.
-        int stageX = Math.Clamp(sanKhauX ?? 5, 1, 9);
-        int stageY = Math.Clamp(sanKhauY ?? 1, 1, 12);
+        int stageX = sanKhauX ?? 5;
+        int stageY = sanKhauY ?? 1;
         var zones = new List<ZoneDefinition>();
         if (loaiSoDo != "none")
         {
             int count = zoneTen?.Count ?? 0;
-            bool mangKhongKhop = count == 0 || count > 20
-                || zoneLoaiVeId?.Count != count || zoneSoHang?.Count != count
-                || zoneSoGheMoiHang?.Count != count || zoneMauSac?.Count != count
-                || (zoneViTriX != null && zoneViTriX.Count != count)
-                || (zoneViTriY != null && zoneViTriY.Count != count);
+            bool mangKhongKhop = count == 0 || count > 30
+                || zoneLoaiVeId?.Count != count
+                || zoneMauSac?.Count != count;
             if (mangKhongKhop)
             {
-                TempData["Error"] = "Dữ liệu khu vực không hợp lệ. Sơ đồ cần từ 1 đến 20 khu vực.";
+                TempData["Error"] = "Dữ liệu khu vực không hợp lệ. Sơ đồ cần từ 1 đến 30 khu vực.";
                 return RedirectToAction("SoDoChoNgoi", new { suKienId });
             }
 
@@ -2173,72 +2175,53 @@ public class OrganizerController : Controller
             for (int i = 0; i < count; i++)
             {
                 int loaiVeId = zoneLoaiVeId![i];
-                int soHang = zoneSoHang![i];
-                int soGhe = zoneSoGheMoiHang![i];
-                if (!loaiVeHopLe.ContainsKey(loaiVeId) || string.IsNullOrWhiteSpace(zoneTen![i])
-                    || soHang is < 1 or > 50 || soGhe is < 1 or > 60)
+                string loaiKhu = zoneLoaiKhuVuc?.ElementAtOrDefault(i) ?? "seated";
+                bool isGA = loaiKhu == "ga";
+                int soHang = isGA ? 0 : (zoneSoHang?.ElementAtOrDefault(i) ?? 1);
+                int soGhe  = isGA ? 0 : (zoneSoGheMoiHang?.ElementAtOrDefault(i) ?? 1);
+                int sucChua = isGA ? Math.Max(1, zoneSucChua?.ElementAtOrDefault(i) ?? 100) : 0;
+
+                if (!loaiVeHopLe.ContainsKey(loaiVeId) || string.IsNullOrWhiteSpace(zoneTen![i]))
                 {
-                    TempData["Error"] = "Mỗi khu phải dùng loại vé của sự kiện, có 1–50 hàng và 1–60 ghế mỗi hàng.";
+                    TempData["Error"] = "Mỗi khu phải dùng loại vé hợp lệ của sự kiện."; 
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+                if (!isGA && (soHang is < 1 or > 50 || soGhe is < 1 or > 60))
+                {
+                    TempData["Error"] = "Khu ghế ngồi phải có 1–50 hàng và 1–60 ghế mỗi hàng.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
                 string mau = string.IsNullOrWhiteSpace(zoneMauSac![i]) ? "#7c3aed" : zoneMauSac[i]!;
                 if (!System.Text.RegularExpressions.Regex.IsMatch(mau, "^#[0-9a-fA-F]{6}$")) mau = "#7c3aed";
-                int viTriX = zoneViTriX?.ElementAtOrDefault(i) ?? (i % 3) + 1;
-                int viTriY = zoneViTriY?.ElementAtOrDefault(i) ?? (i / 3) + 1;
-                if (viTriX is < 1 or > 12 || viTriY is < 1 or > 12)
-                {
-                    TempData["Error"] = "Vị trí khu vực phải nằm trong lưới sơ đồ 12 × 12.";
-                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
-                }
+                int viTriX = zoneViTriX?.ElementAtOrDefault(i) ?? ((i % 3) * 4 + 1);
+                int viTriY = zoneViTriY?.ElementAtOrDefault(i) ?? ((i / 3) * 3 + 2);
+                string tienTo = zoneTienTo?.ElementAtOrDefault(i) ?? "";
+                string huong  = zoneHuongDanhSo?.ElementAtOrDefault(i) ?? "ltr";
+                int soBD = Math.Max(1, zoneSoBatDau?.ElementAtOrDefault(i) ?? 1);
                 zones.Add(new ZoneDefinition
                 {
                     Ten = zoneTen![i].Trim(), LoaiVeId = loaiVeId,
                     SoHang = soHang, SoGheMoiHang = soGhe, MauSac = mau,
-                    ViTriX = viTriX, ViTriY = viTriY
+                    ViTriX = viTriX, ViTriY = viTriY,
+                    LoaiKhuVuc = loaiKhu, SucChua = sucChua,
+                    TienToHangGhe = tienTo, HuongDanhSo = huong, SoBatDau = soBD
                 });
             }
 
-            // Một ô canvas tương ứng tối đa 2 hàng x 3 ghế. Kiểm tra hình chữ nhật
-            // để khu ghế không chồng lên nhau hoặc đè lên sân khấu.
-            if (sanKhauX.HasValue || sanKhauY.HasValue)
+            int tongGhe = zones.Where(z => z.LoaiKhuVuc != "ga").Sum(x => x.SoHang * x.SoGheMoiHang);
+            int tongGA  = zones.Where(z => z.LoaiKhuVuc == "ga").Sum(x => x.SucChua);
+            if (tongGhe + tongGA > 10000)
             {
-                foreach (var zone in zones)
-                {
-                    zone.RongCanvas = Math.Clamp((int)Math.Ceiling(zone.SoGheMoiHang / 3d), 1, 12);
-                    zone.CaoCanvas = Math.Clamp((int)Math.Ceiling(zone.SoHang / 2d), 1, 12);
-                    if (zone.ViTriX + zone.RongCanvas - 1 > 12 || zone.ViTriY + zone.CaoCanvas - 1 > 12)
-                    {
-                        TempData["Error"] = "Khu ghế đang vượt ra ngoài lưới sơ đồ 12 × 12.";
-                        return RedirectToAction("SoDoChoNgoi", new { suKienId });
-                    }
-                    if (HinhChuNhatGiaoNhau(zone.ViTriX, zone.ViTriY, zone.RongCanvas, zone.CaoCanvas, stageX, stageY, 4, 1))
-                    {
-                        TempData["Error"] = "Khu ghế không được chồng lên vị trí sân khấu.";
-                        return RedirectToAction("SoDoChoNgoi", new { suKienId });
-                    }
-                }
-
-                for (int i = 0; i < zones.Count; i++)
-                for (int j = i + 1; j < zones.Count; j++)
-                    if (HinhChuNhatGiaoNhau(zones[i].ViTriX, zones[i].ViTriY, zones[i].RongCanvas, zones[i].CaoCanvas,
-                                             zones[j].ViTriX, zones[j].ViTriY, zones[j].RongCanvas, zones[j].CaoCanvas))
-                    {
-                        TempData["Error"] = "Các khu ghế không được chồng lên nhau. Hãy kéo lại vị trí trên sơ đồ.";
-                        return RedirectToAction("SoDoChoNgoi", new { suKienId });
-                    }
-            }
-
-            if (zones.Sum(x => x.SoHang * x.SoGheMoiHang) > 5000)
-            {
-                TempData["Error"] = "Một sơ đồ được tối đa 5.000 ghế để đảm bảo hiệu năng.";
+                TempData["Error"] = "Một sơ đồ được tối đa 10.000 chỗ ngồi để đảm bảo hiệu năng.";
                 return RedirectToAction("SoDoChoNgoi", new { suKienId });
             }
+
             foreach (var group in zones.GroupBy(x => x.LoaiVeId))
             {
-                int soGheCuaLoai = group.Sum(x => x.SoHang * x.SoGheMoiHang);
-                if (soGheCuaLoai > loaiVeHopLe[group.Key].SoLuongTong)
+                int tongSoCuaLoai = group.Sum(x => x.LoaiKhuVuc == "ga" ? x.SucChua : x.SoHang * x.SoGheMoiHang);
+                if (tongSoCuaLoai > loaiVeHopLe[group.Key].SoLuongTong)
                 {
-                    TempData["Error"] = $"Các khu dùng vé '{loaiVeHopLe[group.Key].TenLoaiVe}' có {soGheCuaLoai} ghế nhưng số lượng vé chỉ là {loaiVeHopLe[group.Key].SoLuongTong}.";
+                    TempData["Error"] = $"Các khu dùng vé '{loaiVeHopLe[group.Key].TenLoaiVe}' phân bổ {tongSoCuaLoai} chỗ nhưng tổng số vé chỉ có {loaiVeHopLe[group.Key].SoLuongTong}.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
             }
@@ -2249,7 +2232,6 @@ public class OrganizerController : Controller
         using var transaction = connection.BeginTransaction();
         try
         {
-            // Bước 1: Xóa sơ đồ cũ triệt để (Xóa ghế -> Xóa hàng -> Xóa khu vực -> Xóa sơ đồ)
             var currentSoDoId = await connection.ExecuteScalarAsync<int?>(
                 "SELECT Id FROM SoDoChoNgoi WHERE SuKienId = @id", new { id = suKienId }, transaction);
             if (currentSoDoId.HasValue)
@@ -2261,7 +2243,6 @@ public class OrganizerController : Controller
                 await connection.ExecuteAsync("DELETE FROM SoDoChoNgoi WHERE Id = @sId", new { sId }, transaction);
             }
 
-            // "none" xóa sơ đồ và quay về bán vé theo số lượng, không gán ghế.
             if (loaiSoDo == "none")
             {
                 await connection.ExecuteAsync("UPDATE SuKien SET CoSoDoChoNgoi = 0 WHERE Id = @id", new { id = suKienId }, transaction);
@@ -2270,7 +2251,6 @@ public class OrganizerController : Controller
                 return RedirectToAction("SoDoChoNgoi", new { suKienId });
             }
 
-            // Bước 2: Tạo sơ đồ chỗ ngồi mới
             var mapId = await connection.QuerySingleAsync<int>(@"
                 INSERT INTO SoDoChoNgoi
                     (SuKienId, TenSoDo, LoaiSoDo, SanKhauX, SanKhauY, NgayTao)
@@ -2289,11 +2269,10 @@ public class OrganizerController : Controller
             int currentOverallRow = 0;
             int orderCounter      = 1;
 
-            // Bước 4: Tạo dữ liệu vật lý các ghế vào database
             foreach (var z in zones)
             {
                 if (z.LoaiVeId <= 0) continue;
-                
+
                 var zoneId = await connection.QuerySingleAsync<int>(@"
                     INSERT INTO KhuVuc
                         (SoDoChoNgoiId, LoaiVeId, TenKhuVuc, MauSac, ViTriX, ViTriY, ThuTu)
@@ -2306,45 +2285,54 @@ public class OrganizerController : Controller
                     loaiVeId = z.LoaiVeId,
                     ten      = z.Ten,
                     mau      = z.MauSac,
-                    viTriX  = z.ViTriX,
-                    viTriY  = z.ViTriY,
+                    viTriX   = z.ViTriX,
+                    viTriY   = z.ViTriY,
                     order    = orderCounter++
                 }, transaction);
 
+                // Khu vực đứng (GA): Tạo 1 hàng đặc biệt với số ghế = sức chứa tối đa
+                if (z.LoaiKhuVuc == "ga")
+                {
+                    var rowId = await connection.QuerySingleAsync<int>(@"
+                        INSERT INTO HangGhe (KhuVucId, TenHang, SoGhe, ThuTu)
+                        OUTPUT INSERTED.Id
+                        VALUES (@zoneId, N'GA', @sucChua, 1)
+                    ", new { zoneId, sucChua = z.SucChua }, transaction);
+
+                    for (int seat = 1; seat <= z.SucChua; seat++)
+                    {
+                        await connection.ExecuteAsync(@"
+                            INSERT INTO ChoNgoi (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
+                            VALUES (@rowId, @seat, @x, 1, 0)
+                        ", new { rowId, seat = seat.ToString(), x = seat }, transaction);
+                    }
+                    continue;
+                }
+
+                // Khu vực ghế ngồi cố định (Seated)
+                string prefix = string.IsNullOrWhiteSpace(z.TienToHangGhe) ? "" : z.TienToHangGhe.Trim();
+                bool rtl = z.HuongDanhSo == "rtl";
+
                 for (int r = 0; r < z.SoHang; r++)
                 {
-                    // Đặt tên hàng A..Z, AA..AZ... nên không bị giới hạn 26 hàng.
-                    string rowName = TaoTenHang(currentOverallRow);
+                    string rowLabel = TaoTenHang(currentOverallRow);
+                    string rowName  = prefix + rowLabel;
                     currentOverallRow++;
 
                     var rowId = await connection.QuerySingleAsync<int>(@"
-                        INSERT INTO HangGhe
-                            (KhuVucId, TenHang, SoGhe, ThuTu)
+                        INSERT INTO HangGhe (KhuVucId, TenHang, SoGhe, ThuTu)
                         OUTPUT INSERTED.Id
-                        VALUES
-                            (@zoneId, @rowName, @soGhe, @order)
-                    ", new
-                    {
-                        zoneId,
-                        rowName,
-                        soGhe = z.SoGheMoiHang,
-                        order = currentOverallRow
-                    }, transaction);
+                        VALUES (@zoneId, @rowName, @soGhe, @order)
+                    ", new { zoneId, rowName, soGhe = z.SoGheMoiHang, order = currentOverallRow }, transaction);
 
-                    for (int seat = 1; seat <= z.SoGheMoiHang; seat++)
+                    for (int col = 0; col < z.SoGheMoiHang; col++)
                     {
+                        int seatNum = z.SoBatDau + (rtl ? (z.SoGheMoiHang - 1 - col) : col);
+                        string seatLabel = rowName + seatNum;
                         await connection.ExecuteAsync(@"
-                            INSERT INTO ChoNgoi
-                                (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
-                            VALUES
-                                (@rowId, @seat, @x, @y, 0)
-                        ", new
-                        {
-                            rowId,
-                            seat  = rowName + seat,
-                            x     = seat,
-                            y     = currentOverallRow
-                        }, transaction);
+                            INSERT INTO ChoNgoi (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
+                            VALUES (@rowId, @seatLabel, @x, @y, 0)
+                        ", new { rowId, seatLabel, x = col + 1, y = currentOverallRow }, transaction);
                     }
                 }
             }
@@ -2375,6 +2363,11 @@ public class OrganizerController : Controller
         public int ViTriY { get; set; }
         public int RongCanvas { get; set; }
         public int CaoCanvas { get; set; }
+        public string LoaiKhuVuc { get; set; } = "seated"; // "seated" | "ga"
+        public int SucChua { get; set; }
+        public string TienToHangGhe { get; set; } = "";
+        public string HuongDanhSo { get; set; } = "ltr"; // "ltr" | "rtl"
+        public int SoBatDau { get; set; } = 1;
     }
 
     private static bool HinhChuNhatGiaoNhau(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2)
@@ -2414,6 +2407,70 @@ public class OrganizerController : Controller
         ";
         await Db.ThucThi(sql, new { seatId, suKienId });
         return RedirectToAction("SoDoChoNgoi", new { suKienId });
+    }
+
+    [HttpPost]
+    // AJAX khóa/mở một ghế — trả về JSON không reload trang.
+    public async Task<IActionResult> DoiTrangThaiGheAjax(Guid suKienId, int seatId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return Json(new { success = false, message = "Không có quyền truy cập." });
+
+        string sqlCheck = @"
+            SELECT g.TrangThai FROM ChoNgoi g
+            JOIN HangGhe h ON h.Id = g.HangGheId
+            JOIN KhuVuc  k ON k.Id = h.KhuVucId
+            JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
+            WHERE g.Id = @seatId AND sd.SuKienId = @suKienId";
+        int? trangThai = await Db.LayGiaTri<int?>(sqlCheck, new { seatId, suKienId });
+        if (trangThai == null) return Json(new { success = false, message = "Ghế không tồn tại." });
+        if (trangThai is 1 or 2) return Json(new { success = false, message = "Không thể đổi trạng thái ghế đang giữ/đã bán." });
+
+        int newStatus = trangThai == 3 ? 0 : 3;
+        string sqlUpdate = @"
+            UPDATE g SET TrangThai = @newStatus
+            FROM ChoNgoi g
+            JOIN HangGhe h ON h.Id = g.HangGheId
+            JOIN KhuVuc  k ON k.Id = h.KhuVucId
+            JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
+            WHERE g.Id = @seatId AND sd.SuKienId = @suKienId AND g.TrangThai IN (0,3)";
+        await Db.ThucThi(sqlUpdate, new { seatId, suKienId, newStatus });
+        return Json(new { success = true, newStatus });
+    }
+
+    [HttpGet]
+    // Xuất sơ đồ ghế của sự kiện ra JSON để tái sử dụng cho các sự kiện khác.
+    public async Task<IActionResult> ExportSoDo(Guid suKienId)
+    {
+        if (!await LaSuKienCuaToi(suKienId)) return Forbid();
+
+        var soDo = await Db.LayDonLe<SoDoChoNgoi>("SELECT * FROM SoDoChoNgoi WHERE SuKienId = @suKienId", new { suKienId });
+        if (soDo == null) return NotFound();
+
+        var khuVucs = await Db.LayDanhSach<KhuVuc>("SELECT * FROM KhuVuc WHERE SoDoChoNgoiId = @id ORDER BY ThuTu", new { id = soDo.Id });
+        var hangGhes = await Db.LayDanhSach<HangGhe>("SELECT h.* FROM HangGhe h JOIN KhuVuc k ON k.Id = h.KhuVucId WHERE k.SoDoChoNgoiId = @id ORDER BY h.ThuTu", new { id = soDo.Id });
+
+        var exportObj = new
+        {
+            version = "1.0",
+            tenSoDo = soDo.TenSoDo,
+            loaiSoDo = soDo.LoaiSoDo,
+            sanKhauX = soDo.SanKhauX,
+            sanKhauY = soDo.SanKhauY,
+            zones = khuVucs.Select(k => new
+            {
+                ten = k.TenKhuVuc,
+                loaiVeId = k.LoaiVeId,
+                mauSac = k.MauSac,
+                viTriX = k.ViTriX,
+                viTriY = k.ViTriY,
+                soHang = hangGhes.Count(h => h.KhuVucId == k.Id),
+                soGheMoiHang = hangGhes.Where(h => h.KhuVucId == k.Id).Select(h => h.SoGhe).FirstOrDefault()
+            })
+        };
+
+        string json = System.Text.Json.JsonSerializer.Serialize(exportObj, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        string fileName = $"seating-{suKienId}.json";
+        return File(System.Text.Encoding.UTF8.GetBytes(json), "application/json", fileName);
     }
 
     [HttpPost]

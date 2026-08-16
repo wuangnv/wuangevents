@@ -6,372 +6,968 @@
 
 @section Styles {
 <style>
-.seat-page{max-width:1280px;margin:auto;padding:34px 18px 72px}.seat-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:24px}.seat-head h1{font-size:1.65rem;font-weight:850;color:#18152d;margin:0}.seat-head p{color:#64748b;margin:7px 0 0}.stepbar{display:flex;gap:8px;align-items:center;font-size:.82rem;font-weight:750;color:#94a3b8}.stepbar .active{color:#7c3aed}.stepbar i{font-size:.65rem}.seat-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}.map-card,.summary-card{background:#fff;border:1px solid #e8e5f2;border-radius:20px;box-shadow:0 12px 35px rgba(41,31,77,.07)}.map-card{padding:24px;min-width:0}.summary-card{padding:22px;position:sticky;top:92px}.screen{max-width:720px;margin:0 auto 32px;text-align:center;color:#6d28d9;font-size:.75rem;font-weight:850;letter-spacing:3px}.screen-line{height:8px;border-radius:50% 50% 10px 10px;background:linear-gradient(90deg,#ddd6fe,#7c3aed,#ddd6fe);box-shadow:0 10px 20px rgba(124,58,237,.22);margin-bottom:9px}.map-scroll{overflow:auto;padding:4px 4px 18px}.zone-block{min-width:max-content;margin:0 auto 30px}.zone-title{text-align:center;font-size:.82rem;font-weight:850;letter-spacing:.08em;margin:0 0 13px}.seat-row{display:flex;align-items:center;justify-content:center;gap:7px;margin:8px 0}.row-label{width:30px;text-align:center;font-size:.76rem;font-weight:850;color:#94a3b8}.seat{width:45px;height:38px;border-radius:10px 10px 7px 7px;border:2px solid var(--seat-color,#7c3aed);color:var(--seat-color,#7c3aed);background:#fff;font-size:.67rem;font-weight:800;cursor:pointer;transition:.15s}.seat:hover:not(:disabled){transform:translateY(-3px);box-shadow:0 7px 14px rgba(15,23,42,.12)}.seat.selected{background:var(--seat-color,#7c3aed);color:#fff;box-shadow:0 5px 12px color-mix(in srgb,var(--seat-color) 35%,transparent)}.seat.held{background:#fef3c7;color:#92400e;border-color:#f59e0b}.seat.sold{background:#fee2e2;color:#b91c1c;border-color:#fca5a5}.seat.locked,.seat.unavailable{background:#f1f5f9;color:#94a3b8;border-color:#cbd5e1}.seat:disabled{cursor:not-allowed}.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;border-top:1px solid #eeeaf5;padding-top:18px;color:#64748b;font-size:.78rem}.legend span{display:flex;align-items:center;gap:6px}.dot{width:15px;height:15px;border-radius:5px}.ticket-legend{display:grid;gap:9px;margin-bottom:22px}.ticket-legend-item{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border:1px solid #eeeaf5;border-radius:12px}.ticket-name{display:flex;align-items:center;gap:8px;font-size:.84rem;font-weight:750}.ticket-price{font-size:.82rem;font-weight:850;color:#4c1d95}.summary-card h2{font-size:1.05rem;font-weight:850;color:#211c3d;margin:0 0 16px}.empty-selection{padding:18px;text-align:center;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;color:#64748b;font-size:.85rem}.selected-list{display:grid;gap:9px;max-height:270px;overflow:auto}.selected-item{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #f0edf6;font-size:.82rem}.selected-seat{font-weight:850;color:#312e81}.selected-type{color:#64748b;font-size:.75rem}.total-row{display:flex;justify-content:space-between;align-items:end;border-top:1px solid #e8e5f2;margin-top:17px;padding-top:17px}.total-row span{font-size:.82rem;color:#64748b}.total-row strong{font-size:1.3rem;color:#7c3aed}.continue-btn{width:100%;border:0;border-radius:13px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;padding:14px;font-weight:850;margin-top:18px;box-shadow:0 9px 22px rgba(124,58,237,.22)}.continue-btn:disabled{background:#cbd5e1;box-shadow:none}.safe-note{display:flex;gap:8px;color:#64748b;font-size:.75rem;line-height:1.45;margin-top:13px}.loading{text-align:center;color:#64748b;padding:60px 10px}.alert-modern{border-radius:14px;padding:13px 16px;margin-bottom:18px;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;font-weight:650}.back-link{color:#64748b;text-decoration:none;font-weight:700;font-size:.86rem}.back-link:hover{color:#7c3aed}@@media(max-width:900px){.seat-layout{grid-template-columns:1fr}.summary-card{position:static}.seat-head{display:block}.stepbar{margin-top:14px}.map-card{padding:18px 10px}.seat{width:39px;height:35px}}
- .purchase-layout{display:grid;grid-template-columns:repeat(12,minmax(58px,1fr));grid-template-rows:repeat(12,52px);gap:5px;align-items:stretch;min-width:840px;padding:10px;border:1px dashed #ddd6fe;border-radius:16px;background:#fbfaff}.purchase-layout .zone-block{grid-column:var(--zone-column) / span var(--zone-span-x);grid-row:var(--zone-row) / span var(--zone-span-y);min-width:0;width:100%;height:100%;max-height:none;overflow:auto;margin:0;padding:14px 10px 18px;border:2px solid var(--zone-color,#7c3aed);border-radius:16px;background:color-mix(in srgb,var(--zone-color,#7c3aed) 8%,white);box-shadow:0 7px 18px color-mix(in srgb,var(--zone-color,#7c3aed) 9%,transparent);z-index:1}.map-stage{display:grid;place-items:center;border-radius:18px 18px 8px 8px;background:linear-gradient(90deg,#5b21b6,#8b5cf6,#5b21b6);color:#fff;font-size:.66rem;font-weight:900;letter-spacing:.13em;text-align:center;padding:5px;z-index:2}.zone-subtitle{text-align:center;font-size:.7rem;font-weight:750;color:#64748b;margin:-5px 0 12px}.seat{background:color-mix(in srgb,var(--seat-color,#7c3aed) 11%,white);box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--seat-color,#7c3aed) 12%,transparent)}.purchase-theatre .zone-block{border-radius:20px}.purchase-arena .zone-block{border-radius:26px}.purchase-custom .zone-block{border-style:dashed}.purchase-cinema .zone-block{border-radius:12px 12px 18px 18px}@@media(max-width:900px){.map-scroll{padding-bottom:12px}.purchase-layout{min-width:760px;grid-template-columns:repeat(12,minmax(52px,1fr))}.summary-card{position:static}}@@media(max-width:520px){.purchase-layout{min-width:700px;grid-template-columns:repeat(12,minmax(47px,1fr))}.seat{width:39px;height:35px}.seat-row{gap:5px}}
- .library-map{padding:0;overflow:hidden;border:1px solid #e9ddff;border-radius:16px;background:radial-gradient(circle at 50% 0,#faf7ff 0,#fff 58%)}.seatmap-canvas-host{position:relative;min-width:720px;height:610px}.seatmap-canvas-host .seatmap-svg{display:block;min-width:720px;outline:0}.seatmap-canvas-host .seatmap-svg .stage .blocks .block{filter:drop-shadow(0 7px 12px rgba(49,46,129,.13))}.seatmap-canvas-host .seatmap-svg .stage .blocks .block .info .title{font-family:inherit;font-weight:850}.seatmap-canvas-host .seatmap-svg .stage .blocks .block .seats .seat{filter:none}.seatmap-canvas-host .seat-level-mask{pointer-events:none}.seatmap-event-stage rect{fill:#6d28d9;stroke:#4c1d95;stroke-width:2}.seatmap-event-stage text{fill:#fff;font-family:inherit;font-size:15px;font-weight:850;letter-spacing:2px}.seatmap-control{position:absolute;z-index:3;top:14px;right:14px;border:1px solid #ddd6fe;border-radius:10px;background:#fff;color:#5b21b6;width:38px;height:38px;box-shadow:0 6px 18px rgba(76,29,149,.14);font-size:.95rem}.seatmap-control:hover{background:#f5f3ff}.seatmap-venue-caption{position:absolute;z-index:2;left:18px;bottom:15px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.92);border:1px solid #64748b;font-size:.72rem;font-weight:750;pointer-events:none}@@media(max-width:900px){.seatmap-canvas-host,.seatmap-canvas-host .seatmap-svg{min-width:660px}}@@media(max-width:520px){.seatmap-canvas-host,.seatmap-canvas-host .seatmap-svg{min-width:600px;height:520px}}
-.seat-aisle{width:12px;min-width:12px;height:1px;display:inline-block}.map-scroll{scrollbar-color:#c4b5fd transparent;scrollbar-width:thin}.purchase-layout{box-sizing:border-box;min-width:1100px;grid-template-columns:repeat(12,minmax(86px,1fr));grid-template-rows:repeat(var(--map-row-count,9),60px);gap:6px;padding:14px;background:radial-gradient(circle at 50% 0,#ede9fe 0,transparent 32%),linear-gradient(180deg,#fcfbff,#f7f5ff)}.purchase-layout .zone-block{box-sizing:border-box;padding:8px 7px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;border-radius:15px;box-shadow:0 7px 16px color-mix(in srgb,var(--zone-color,#7c3aed) 11%,transparent)}.purchase-layout .zone-title{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.7rem;line-height:1.1;margin:0 0 4px;min-height:14px;font-weight:850}.purchase-layout .zone-subtitle{display:flex;align-self:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:2px 6px;border:1px solid color-mix(in srgb,var(--zone-color,#7c3aed) 25%,white);border-radius:999px;background:rgba(255,255,255,.78);color:#64748b;font-size:.55rem;line-height:1.1;font-weight:750;margin:0 0 4px}.purchase-layout .seat-row{display:flex;flex:0 0 auto;gap:3px;margin:1px 0;min-height:var(--seat-height);line-height:1}.purchase-layout .row-label{width:19px;min-width:19px;font-size:.58rem;line-height:var(--seat-height)}.purchase-layout .seat{box-sizing:border-box;flex:0 0 var(--seat-size);width:var(--seat-size);min-width:var(--seat-size);height:var(--seat-height);padding:0;border-width:1px;border-radius:5px 5px 3px 3px;font-size:clamp(.48rem,calc(var(--seat-size) / 28),.6rem);line-height:1}.purchase-layout .seat:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 3px 8px rgba(15,23,42,.15)}.purchase-layout .seat:focus-visible{outline:3px solid #312e81;outline-offset:2px}.purchase-layout .seat.selected{box-shadow:0 3px 9px color-mix(in srgb,var(--seat-color) 45%,transparent)}@@media(max-width:900px){.purchase-layout{min-width:1100px}.seat-aisle{width:10px;min-width:10px}}
+/* ===== CHON GHE — TICKETBOX STANDARD UX ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+body { background: #f1f5f9; }
+
+.chon-ghe-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 16px 100px;
+}
+
+/* ── Top Bar ── */
+.cghe-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.cghe-event-info .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #4f46e5;
+    font-size: .83rem;
+    font-weight: 750;
+    text-decoration: none;
+    margin-bottom: 5px;
+    transition: .15s;
+}
+.cghe-event-info .back-link:hover { color: #3730a3; }
+.cghe-event-info h1 { font-size: 1.4rem; font-weight: 850; color: #1e1b4b; margin: 0 0 4px; }
+.cghe-event-info .event-meta { color: #64748b; font-size: .84rem; font-weight: 600; }
+
+.booking-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,.03);
+}
+.step-item { font-size: .82rem; font-weight: 800; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
+.step-item.active { color: #4f46e5; }
+.step-item.active .step-num { background: #4f46e5; color: #fff; }
+.step-num { width: 22px; height: 22px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: grid; place-items: center; font-size: .72rem; font-weight: 850; }
+.step-sep { color: #cbd5e1; font-size: .75rem; }
+
+/* ── Main 2-col grid ── */
+.cghe-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ── Map Card ── */
+.map-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.04);
+    min-width: 0;
+}
+
+/* Map controls */
+.map-ctrl {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.map-hint { font-size: .82rem; color: #64748b; font-weight: 650; display: flex; align-items: center; gap: 6px; }
+.map-tools { display: flex; align-items: center; gap: 5px; }
+.mtool-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    border-radius: 8px;
+    color: #334155;
+    font-weight: 850;
+    font-size: .88rem;
+    cursor: pointer;
+    transition: .15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.mtool-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+.zoom-lbl { font-size: .78rem; font-weight: 750; color: #64748b; min-width: 44px; text-align: center; }
+
+/* ── Venue Stage Header ── */
+.venue-stage-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.stage-label {
+    display: inline-block;
+    background: #1e1b4b;
+    color: #fff;
+    padding: 8px 40px;
+    border-radius: 0 0 40% 40% / 0 0 20px 20px;
+    font-size: .78rem;
+    font-weight: 850;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(30,27,75,.2);
+}
+.perspective-line {
+    height: 3px;
+    background: linear-gradient(to right, transparent 5%, #e2e8f0 30%, #e2e8f0 70%, transparent 95%);
+    margin-top: 4px;
+    border-radius: 2px;
+}
+
+/* ── Seat Map Viewport ── */
+.map-viewport {
+    overflow: auto;
+    padding: 16px 8px;
+    background: #fafbfc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    position: relative;
+}
+
+/* ── Zone layout: stacks of zones per row separated by aisles ── */
+.zone-stage-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 700px;
+    transition: transform .2s ease;
+}
+
+/* Each "row" of zones (side by side) */
+.zone-row-group {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+.zone-row-group.single-center { justify-content: center; }
+.zone-row-group.spread { justify-content: space-between; }
+
+/* ── Zone Box ── */
+.zone-box {
+    background: #fff;
+    border: 1.5px solid var(--zc, #4f46e5);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    transition: box-shadow .15s;
+    flex-shrink: 0;
+}
+.zone-box:hover { box-shadow: 0 6px 20px rgba(0,0,0,.09); }
+
+.zone-header {
+    padding: 8px 14px 6px;
+    background: color-mix(in srgb, var(--zc, #4f46e5) 9%, #fff);
+    border-bottom: 1px solid color-mix(in srgb, var(--zc, #4f46e5) 18%, #fff);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+.zone-name {
+    font-size: .78rem;
+    font-weight: 850;
+    color: var(--zc, #4f46e5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+.zone-price-badge {
+    font-size: .7rem;
+    font-weight: 850;
+    color: #fff;
+    background: var(--zc, #4f46e5);
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* GA Zone */
+.zone-box.ga-zone .zone-seats {
+    background: repeating-linear-gradient(45deg, #fafafa, #fafafa 8px, #f1f5f9 8px, #f1f5f9 16px);
+    padding: 18px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background .15s;
+}
+.zone-box.ga-zone .zone-seats:hover { background: color-mix(in srgb, var(--zc, #4f46e5) 8%, #fff); }
+.ga-capacity-info { font-size: .84rem; font-weight: 850; color: var(--zc, #4f46e5); }
+.ga-cap-sub { font-size: .72rem; color: #64748b; margin-top: 3px; }
+.ga-qty-ctrl { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+.ga-qty-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 2px solid var(--zc, #4f46e5);
+    background: #fff; color: var(--zc, #4f46e5);
+    font-size: 1rem; font-weight: 850; cursor: pointer;
+    display: grid; place-items: center; transition: .15s;
+}
+.ga-qty-btn:hover { background: var(--zc, #4f46e5); color: #fff; }
+.ga-qty-num { font-size: 1rem; font-weight: 850; color: #1e1b4b; min-width: 24px; text-align: center; }
+
+/* Seat rows */
+.zone-seats {
+    padding: 10px 12px 12px;
+}
+.seat-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-bottom: 3px;
+    justify-content: center;
+}
+.row-lbl {
+    width: 20px;
+    text-align: right;
+    font-size: .67rem;
+    font-weight: 850;
+    color: #94a3b8;
+    flex-shrink: 0;
+    margin-right: 3px;
+}
+
+/* ── SEAT BUTTON (Ticketbox-style) ── */
+.seat-btn {
+    width: 28px;
+    height: 24px;
+    border-radius: 6px 6px 3px 3px;
+    border: 1.5px solid var(--zc, #4f46e5);
+    background: color-mix(in srgb, var(--zc, #4f46e5) 8%, #fff);
+    color: var(--zc, #4f46e5);
+    font-size: .58rem;
+    font-weight: 850;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .12s ease;
+    user-select: none;
+    outline: none;
+    position: relative;
+    flex-shrink: 0;
+    /* Chair back effect */
+    box-shadow: 0 -2px 0 0 color-mix(in srgb, var(--zc, #4f46e5) 30%, #fff) inset;
+}
+.seat-btn:hover:not(:disabled) {
+    background: var(--zc, #4f46e5);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,.15), 0 -2px 0 0 color-mix(in srgb, var(--zc, #4f46e5) 60%, #000) inset;
+}
+.seat-btn.selected {
+    background: var(--zc, #4f46e5);
+    color: #fff;
+    box-shadow: 0 0 0 2.5px #fff, 0 0 0 4.5px var(--zc, #4f46e5), 0 -2px 0 0 color-mix(in srgb, var(--zc, #4f46e5) 60%, #000) inset;
+    transform: translateY(-2px) scale(1.07);
+    z-index: 2;
+}
+.seat-btn.held {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+    cursor: not-allowed;
+    box-shadow: 0 -2px 0 0 #f59e0b inset;
+}
+.seat-btn.sold {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+    cursor: not-allowed;
+    box-shadow: 0 -2px 0 0 #fca5a5 inset;
+}
+.seat-btn.locked, .seat-btn.unavail {
+    background: #f1f5f9;
+    border-color: #dde2ec;
+    color: #c1cad8;
+    cursor: not-allowed;
+    box-shadow: 0 -2px 0 0 #dde2ec inset;
+}
+
+/* Aisle spacer */
+.aisle { width: 18px; flex-shrink: 0; }
+
+/* ── Legend ── */
+.legend-bar {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 14px;
+    padding-top: 12px;
+    font-size: .77rem;
+    color: #64748b;
+    font-weight: 650;
+}
+.legend-bar span { display: flex; align-items: center; gap: 5px; }
+.leg-box {
+    width: 20px; height: 17px;
+    border-radius: 4px 4px 2px 2px;
+    display: inline-block;
+    border: 1.5px solid;
+}
+
+/* ── Order Summary Sidebar ── */
+.order-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.03);
+    position: sticky;
+    top: 90px;
+}
+.order-title { font-size: 1.05rem; font-weight: 850; color: #1e1b4b; margin: 0 0 14px; }
+
+/* Ticket pricing chips */
+.pricing-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+.pricing-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid #f1f5f9;
+    background: #fafafa;
+}
+.pricing-badge { display: flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 750; color: #334155; }
+.pricing-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.pricing-num { font-size: .82rem; font-weight: 850; color: #4f46e5; }
+
+/* Selected seats */
+.sel-section { border-top: 1px solid #f1f5f9; padding-top: 14px; margin-bottom: 16px; }
+.sel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.sel-head strong { font-size: .9rem; color: #1e1b4b; }
+.sel-badge { padding: 3px 9px; border-radius: 999px; background: #e0e7ff; color: #4f46e5; font-size: .74rem; font-weight: 850; }
+
+.empty-state {
+    padding: 20px 14px;
+    text-align: center;
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 12px;
+    color: #94a3b8;
+    font-size: .82rem;
+}
+.empty-state i { font-size: 1.6rem; display: block; margin-bottom: 6px; }
+
+.sel-list { display: flex; flex-direction: column; gap: 7px; max-height: 230px; overflow-y: auto; }
+.sel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border-left: 4px solid var(--sc, #4f46e5);
+}
+.sel-name { font-size: .85rem; font-weight: 850; color: #1e1b4b; }
+.sel-sub { font-size: .71rem; color: #64748b; }
+.sel-right { display: flex; align-items: center; gap: 8px; }
+.sel-price { font-size: .84rem; color: #4f46e5; font-weight: 850; }
+.btn-rm {
+    border: 0; background: #fee2e2; color: #dc2626;
+    width: 20px; height: 20px; border-radius: 50%;
+    font-size: .65rem; display: grid; place-items: center;
+    cursor: pointer; transition: .15s;
+}
+.btn-rm:hover { background: #fca5a5; }
+
+.total-row {
+    border-top: 1.5px solid #f1f5f9;
+    padding-top: 14px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+.total-row span { font-size: .84rem; color: #64748b; font-weight: 700; }
+.total-row strong { font-size: 1.35rem; color: #4f46e5; font-weight: 900; }
+
+.btn-checkout {
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+    background: #4f46e5;
+    color: #fff;
+    padding: 13px 18px;
+    font-size: .92rem;
+    font-weight: 850;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background .15s, transform .1s;
+}
+.btn-checkout:hover:not(:disabled) { background: #4338ca; transform: translateY(-1px); }
+.btn-checkout:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
+
+.guarantee-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: .73rem;
+    font-weight: 650;
+    margin-top: 12px;
+    line-height: 1.4;
+}
+
+/* Tooltip */
+.seat-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: #1e293b;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: .73rem;
+    pointer-events: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    display: none;
+    transform: translate(-50%, calc(-100% - 8px));
+    white-space: nowrap;
+    line-height: 1.4;
+    text-align: center;
+}
+.seat-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -4px;
+    border: 4px solid transparent;
+    border-top-color: #1e293b;
+}
+
+@@media(max-width:992px) { .cghe-layout { grid-template-columns: 1fr; } .order-card { position: static; } }
+@@media(max-width:640px) { .cghe-topbar { flex-direction: column; align-items: flex-start; } .booking-stepper { display: none; } }
 </style>
 }
 
-<main class="seat-page">
-    <div class="seat-head">
-        <div>
-            <a class="back-link" href="/Home/ChiTiet/@Model.Id"><i class="fas fa-arrow-left me-1"></i> Chi tiết sự kiện</a>
-            <h1 class="mt-3">Chọn ghế của bạn</h1>
-            <p>@Model.TenSuKien · @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm")</p>
+<main class="chon-ghe-page">
+    <!-- Top Bar -->
+    <div class="cghe-topbar">
+        <div class="cghe-event-info">
+            <a class="back-link" href="/Home/ChiTiet/@Model.Id"><i class="fas fa-arrow-left"></i> Quay lại sự kiện</a>
+            <h1>Chọn ghế của bạn</h1>
+            <div class="event-meta">
+                <i class="fas fa-calendar-alt me-1 text-primary"></i>@Model.TenSuKien · @Model.NgayBatDau.ToString("dd/MM/yyyy HH:mm")
+            </div>
         </div>
-        <div class="stepbar"><span class="active">1. Chọn ghế</span><i class="fas fa-chevron-right"></i><span>2. Thanh toán</span></div>
+        <div class="booking-stepper">
+            <div class="step-item active"><span class="step-num">1</span><span>Chọn ghế</span></div>
+            <span class="step-sep"><i class="fas fa-chevron-right"></i></span>
+            <div class="step-item"><span class="step-num">2</span><span>Thanh toán</span></div>
+            <span class="step-sep"><i class="fas fa-chevron-right"></i></span>
+            <div class="step-item"><span class="step-num">3</span><span>Nhận vé</span></div>
+        </div>
     </div>
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert-modern"><i class="fas fa-circle-exclamation me-2"></i>@TempData["Error"]</div>
+        <div class="alert alert-danger rounded-3 py-2 px-3 mb-3 fw-bold">
+            <i class="fas fa-circle-exclamation me-2"></i>@TempData["Error"]
+        </div>
     }
 
-    <div class="seat-layout">
+    <div class="cghe-layout">
+        <!-- Seat Map Card -->
         <section class="map-card">
-            <div class="screen" id="defaultScreen"><div class="screen-line"></div>SÂN KHẤU / MÀN HÌNH</div>
-            <div id="seatLoading" class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải ghế mới nhất...</div>
-            <div id="seatMap" class="map-scroll" hidden></div>
-            <div class="legend" id="statusLegend" hidden>
-                <span><i class="dot" style="background:#7c3aed"></i>Đang chọn</span>
-                <span><i class="dot" style="background:#fef3c7;border:1px solid #f59e0b"></i>Đang giữ</span>
-                <span><i class="dot" style="background:#fee2e2;border:1px solid #fca5a5"></i>Đã bán</span>
-                <span><i class="dot" style="background:#f1f5f9;border:1px solid #cbd5e1"></i>Không khả dụng</span>
+            <div class="map-ctrl">
+                <div class="map-hint"><i class="fas fa-hand-pointer text-primary"></i> Nhấp vào ghế trống để chọn chỗ ngồi của bạn</div>
+                <div class="map-tools">
+                    <button class="mtool-btn" onclick="doZoom(-0.15)" title="Thu nhỏ">−</button>
+                    <span class="zoom-lbl" id="zoomTxt">100%</span>
+                    <button class="mtool-btn" onclick="doZoom(0.15)" title="Phóng to">+</button>
+                    <button class="mtool-btn" onclick="doZoom(0)" title="Đặt lại"><i class="fas fa-compress-arrows-alt"></i></button>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <div id="mapLoading" style="text-align:center;padding:60px 0;color:#94a3b8">
+                <i class="fas fa-spinner fa-spin fa-2x" style="color:#4f46e5;margin-bottom:12px;display:block"></i>
+                <div style="font-weight:750;font-size:.9rem">Đang tải sơ đồ...</div>
+            </div>
+
+            <!-- Map viewport -->
+            <div class="map-viewport" id="mapVp" style="display:none">
+                <!-- Stage -->
+                <div class="venue-stage-header" id="stageHeader">
+                    <div class="stage-label" id="stageLbl">SÂN KHẤU CHÍNH</div>
+                    <div class="perspective-line"></div>
+                </div>
+                <!-- Zone blocks rendered here -->
+                <div class="zone-stage-wrapper" id="zoneWrapper"></div>
+            </div>
+
+            <!-- Legend -->
+            <div class="legend-bar" id="legendBar" style="display:none">
+                <span><span class="leg-box" style="background:color-mix(in srgb,#4f46e5 8%,#fff);border-color:#4f46e5"></span>Trống (Nhấp để chọn)</span>
+                <span><span class="leg-box" style="background:#4f46e5;border-color:#4f46e5"></span>Đang chọn</span>
+                <span><span class="leg-box" style="background:#fef3c7;border-color:#f59e0b"></span>Đang giữ</span>
+                <span><span class="leg-box" style="background:#fee2e2;border-color:#fca5a5"></span>Đã bán</span>
+                <span><span class="leg-box" style="background:#f1f5f9;border-color:#dde2ec"></span>Không khả dụng</span>
             </div>
         </section>
 
-        <aside class="summary-card">
-            <h2><i class="fas fa-ticket me-2" style="color:#7c3aed"></i>Loại vé theo khu vực</h2>
-            <div class="ticket-legend" id="ticketLegend">
+        <!-- Order Summary Sidebar -->
+        <aside class="order-card">
+            <h2 class="order-title"><i class="fas fa-ticket me-2 text-primary"></i>Bảng giá vé</h2>
+            <div class="pricing-list">
                 @foreach (var ve in loaiVes)
                 {
-                    <div class="ticket-legend-item">
-                        <div class="ticket-name"><i class="dot" style="background:@(ve.MauSac ?? "#7c3aed")"></i>@ve.TenLoaiVe</div>
-                        <div class="ticket-price">@ve.GiaBan.ToString("N0")đ</div>
+                    <div class="pricing-item">
+                        <div class="pricing-badge">
+                            <span class="pricing-dot" style="background:@(ve.MauSac ?? "#4f46e5")"></span>
+                            @ve.TenLoaiVe
+                        </div>
+                        <div class="pricing-num">@ve.GiaBan.ToString("N0")đ</div>
                     </div>
                 }
             </div>
 
-            <h2>Ghế đã chọn <span id="seatCount" class="badge bg-light text-dark ms-1">0</span></h2>
-            <div id="emptySelection" class="empty-selection"><i class="fas fa-chair d-block mb-2 fs-4"></i>Chưa chọn ghế</div>
-            <div id="selectedList" class="selected-list" hidden></div>
-            <div class="total-row"><span>Tổng tạm tính</span><strong id="grandTotal">0đ</strong></div>
+            <div class="sel-section">
+                <div class="sel-head">
+                    <strong>Ghế đã chọn</strong>
+                    <span class="sel-badge" id="selCountBadge">0 ghế</span>
+                </div>
+                <div id="emptyState" class="empty-state">
+                    <i class="fas fa-chair"></i>Bạn chưa chọn ghế nào
+                </div>
+                <div id="selList" class="sel-list" style="display:none"></div>
+            </div>
 
-            <form method="post" action="/Booking/DatVe" id="seatForm">
+            <div class="total-row">
+                <span>Tổng tạm tính</span>
+                <strong id="grandTotal">0đ</strong>
+            </div>
+
+            <form method="post" action="/Booking/DatVe" id="bookingForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="suKienId" value="@Model.Id" />
-                <div id="seatInputs"></div>
-                <button class="continue-btn" id="continueBtn" disabled type="submit">Tiếp tục thanh toán <i class="fas fa-arrow-right ms-1"></i></button>
+                <div id="hiddenSeats"></div>
+                <button type="submit" class="btn-checkout" id="btnCheckout" disabled>
+                    <span id="btnCheckoutTxt">Tiếp tục thanh toán</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
             </form>
+
+            <div class="guarantee-note">
+                <i class="fas fa-shield-halved text-success fs-5"></i>
+                <span>Ghế được giữ độc quyền trong 10–15 phút khi chuyển sang thanh toán.</span>
+            </div>
         </aside>
     </div>
 </main>
 
+<div id="seatTooltip" class="seat-tooltip"></div>
+
 @section Scripts {
 <script>
-const eventId = '@Model.Id';
-const selected = new Map();
-const typeCounts = new Map();
+const EVENT_ID = '@Model.Id';
+const MAX_SEATS = 8;
+const selectedSeats = new Map();   // seatId → { id, label, zoneName, ticketName, ticketId, price, color }
+const typeCounts = new Map();      // ticketTypeId → count
+const money = v => new Intl.NumberFormat('vi-VN').format(v) + 'đ';
+const vo = (o, a, b) => o[a] ?? o[b];  // camelCase / PascalCase fallback
 
-const valueOf = (obj, camel, pascal) => obj[camel] ?? obj[pascal];
-const money = value => new Intl.NumberFormat('vi-VN').format(value) + 'đ';
+let curZoom = 1;
 
-async function loadSeats(){
-    try{
-        const response = await fetch('/Booking/LaySoDoGheTheoSuKien?suKienId=' + eventId);
-        if(!response.ok) throw new Error('Không tải được dữ liệu ghế');
-        const seats = await response.json();
+// ── Tooltip ──────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('seatTooltip');
+function showTip(e, html) {
+    tooltip.innerHTML = html;
+    tooltip.style.left = e.clientX + 'px';
+    tooltip.style.top  = e.clientY + 'px';
+    tooltip.style.display = 'block';
+}
+function hideTip() { tooltip.style.display = 'none'; }
+
+// ── Zoom ──────────────────────────────────────────────────────────────────────
+function doZoom(delta) {
+    if (delta === 0) { curZoom = 1; }
+    else { curZoom = Math.max(0.6, Math.min(1.6, curZoom + delta)); }
+    document.getElementById('zoomTxt').textContent = Math.round(curZoom * 100) + '%';
+    const w = document.getElementById('zoneWrapper');
+    if (w) { w.style.transform = `scale(${curZoom})`; w.style.transformOrigin = 'top center'; }
+}
+
+// ── Load & render ─────────────────────────────────────────────────────────────
+async function loadMap() {
+    try {
+        const res = await fetch('/Booking/LaySoDoGheTheoSuKien?suKienId=' + EVENT_ID);
+        if (!res.ok) throw new Error('Lỗi tải dữ liệu');
+        const seats = await res.json();
         renderMap(seats);
-    }catch(error){
-        document.getElementById('seatLoading').innerHTML = '<i class="fas fa-triangle-exclamation me-2"></i>' + error.message;
+    } catch (err) {
+        document.getElementById('mapLoading').innerHTML =
+            `<div style="color:#dc2626;font-weight:750"><i class="fas fa-triangle-exclamation me-2"></i>${err.message}</div>`;
     }
 }
 
-async function renderMapWithSeatmapCanvas(seats){
-    const model=buildSeatmapModel(seats);
-    const map=document.getElementById('seatMap');
-    map.className='map-scroll library-map';
-    map.innerHTML='<div class="seatmap-canvas-host"><button type="button" id="seatMapZoomOut" class="seatmap-control" title="Xem toàn bộ sơ đồ" aria-label="Xem toàn bộ sơ đồ"><i class="fas fa-compress"></i></button><div id="seatMapCanvas"></div><span class="seatmap-venue-caption">Sơ đồ khu vực</span></div>';
-    map.hidden=false;
+function renderMap(seats) {
+    const loading = document.getElementById('mapLoading');
+    const vp      = document.getElementById('mapVp');
+    const wrapper = document.getElementById('zoneWrapper');
+    const legend  = document.getElementById('legendBar');
 
-    const {SeatMapCanvas}=await import('/lib/seatmap-canvas/seatmap.canvas.js');
-    if(typeof SeatMapCanvas !== 'function') throw new Error('Không nhận được lớp sơ đồ ghế');
-    const canvas=new SeatMapCanvas('#seatMapCanvas',{
-        min_zoom:.34,max_zoom:2.8,animation_speed:160,legend:false,canvas_stageout_control:false,
-        style:{
-            seat:{shape:'rect',size:28,corner_radius:8,color:'#e0e7ff',hover:'#c4b5fd',selected:'#5b21b6',not_salable:'#cbd5e1',check_color:'#fff'},
-            block:{title_color:'#1e1b4b'},label:{color:'#312e81',bg:'#fff',font_size:11,radius:10}
-        }
-    });
-    canvas.data.addBulkBlock(toSeatmapBlocks(model));
-    document.getElementById('seatMapZoomOut').addEventListener('click',()=>canvas.zoomManager.zoomToVenue(true));
-
-    const screen=document.getElementById('defaultScreen');
-    screen.hidden=true;
-    document.getElementById('seatLoading').hidden=true;
-    document.getElementById('statusLegend').hidden=false;
-    renderTicketLegend(model.zones);
-
-    // Chờ SVG được dựng xong trước khi nối hành động vào từng ghế.
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    renderSeatmapStage(model);
-    bindSeatmapInteractions(canvas);
-}
-
-function buildSeatmapModel(seats){
-    const allowedLayouts=['auditorium','theatre','cinema','concert','arena','custom'];
-    const savedLayout=valueOf(seats[0],'loaiSoDo','LoaiSoDo');
-    const layout=allowedLayouts.includes(savedLayout)?savedLayout:'custom';
-    const savedStageX=Number(valueOf(seats[0],'sanKhauX','SanKhauX'));
-    const savedStageY=Number(valueOf(seats[0],'sanKhauY','SanKhauY'));
-    const hasCanvas=savedStageX>=1&&savedStageX<=9&&savedStageY>=1&&savedStageY<=12;
-    const zones=new Map();
-
-    seats.forEach(seat=>{
-        const zoneId=valueOf(seat,'khuVucId','KhuVucId');
-        const rowId=valueOf(seat,'hangGheId','HangGheId');
-        if(!zones.has(zoneId)) zones.set(zoneId,{
-            id:zoneId,name:valueOf(seat,'tenKhuVuc','TenKhuVuc'),color:valueOf(seat,'mauSac','MauSac')||'#7c3aed',
-            order:valueOf(seat,'thuTuKhuVuc','ThuTuKhuVuc')||0,x:valueOf(seat,'khuVucViTriX','KhuVucViTriX'),y:valueOf(seat,'khuVucViTriY','KhuVucViTriY'),
-            ticket:valueOf(seat,'tenLoaiVe','TenLoaiVe'),price:Number(valueOf(seat,'giaBan','GiaBan')),rows:new Map()
-        });
-        const zone=zones.get(zoneId);
-        if(!zone.rows.has(rowId)) zone.rows.set(rowId,{name:valueOf(seat,'tenHang','TenHang'),order:valueOf(seat,'thuTuHang','ThuTuHang')||0,seats:[]});
-        zone.rows.get(rowId).seats.push(seat);
-    });
-    return {layout,hasCanvas,stage:{x:hasCanvas?savedStageX:5,y:hasCanvas?savedStageY:1},zones:[...zones.values()].sort((a,b)=>a.order-b.order)};
-}
-
-function toSeatmapBlocks(model){
-    return model.zones.map((zone,index)=>{
-        const position=resolveZonePosition(model.layout,zone.x,zone.y,index,model.hasCanvas);
-        const rows=[...zone.rows.values()].sort((a,b)=>a.order-b.order);
-        return {
-            id:'zone-'+zone.id,title:zone.name,color:zone.color,border_color:zone.color,gap:26,labels:[],
-            seats:rows.flatMap((row,rowIndex)=>row.seats.map((seat,seatIndex)=>({
-                id:'seat-'+valueOf(seat,'id','Id'),title:valueOf(seat,'soGhe','SoGhe'),
-                x:(position.x-1)*96+seatIndex*36,y:(position.y-2)*115+rowIndex*39,
-                salable:isSeatSelectable(seat),color:zone.color,
-                note:valueOf(seat,'tenLoaiVe','TenLoaiVe')+' · '+money(valueOf(seat,'giaBan','GiaBan')),
-                custom_data:{source:seat,color:zone.color}
-            })))
-        };
-    });
-}
-
-function bindSeatmapInteractions(canvas,attempt=0){
-    let renderedSeats=0;
-    canvas.data.getBlocks().forEach(block=>{
-        const blockNode=document.getElementById(block.id);
-        if(blockNode && !blockNode.dataset.seatmapZoomBound){
-            blockNode.dataset.seatmapZoomBound='true';
-            blockNode.addEventListener('click',event=>{
-                if(event.target.closest('.seat')) return;
-                canvas.zoomManager.zoomToBlock(block.id,true);
-            });
-        }
-        block.seats.forEach(librarySeat=>{
-            const source=librarySeat.custom_data?.source;
-            const node=librarySeat.svg?.node?.node?.();
-            if(!source || !node) return;
-            renderedSeats++;
-            if(node.dataset.seatmapBound) return;
-            node.dataset.seatmapBound='true';
-            const color=librarySeat.custom_data.color||'#7c3aed';
-            const status=valueOf(source,'trangThai','TrangThai');
-            const displayColor=!librarySeat.salable ? (status===1?'#f59e0b':status===2?'#ef4444':'#cbd5e1') : color;
-            librarySeat.svg.setColor(displayColor);
-            node.setAttribute('aria-label','Ghế '+valueOf(source,'soGhe','SoGhe'));
-            node.addEventListener('mouseenter',()=>librarySeat.svg.setColor(selected.has(valueOf(source,'id','Id')) ? '#5b21b6' : displayColor));
-            node.addEventListener('mouseleave',()=>librarySeat.svg.setColor(selected.has(valueOf(source,'id','Id')) ? '#5b21b6' : displayColor));
-            node.addEventListener('click',event=>{
-                event.stopPropagation();
-                if(!librarySeat.salable) return;
-                const id=valueOf(source,'id','Id');
-                const wasSelected=selected.has(id);
-                toggleSeat({classList:{add(){},remove(){}}},source,color);
-                if(wasSelected!==selected.has(id)) selected.has(id) ? librarySeat.svg.select() : librarySeat.svg.unSelect();
-            });
-        });
-    });
-    if(!renderedSeats && attempt<8) requestAnimationFrame(()=>bindSeatmapInteractions(canvas,attempt+1));
-}
-
-function renderSeatmapStage(model){
-    const stageRoot=document.querySelector('#seatMapCanvas .seatmap-svg .stage');
-    if(!stageRoot) return;
-    const svgNamespace='http://www.w3.org/2000/svg';
-    const group=document.createElementNS(svgNamespace,'g');
-    group.setAttribute('class','seatmap-event-stage');
-    group.setAttribute('transform',`translate(${(model.stage.x-1)*96},${(model.stage.y-1)*115})`);
-    group.setAttribute('pointer-events','none');
-    const rect=document.createElementNS(svgNamespace,'rect');
-    rect.setAttribute('width','384');rect.setAttribute('height','52');rect.setAttribute('rx','16');
-    const text=document.createElementNS(svgNamespace,'text');
-    text.setAttribute('x','192');text.setAttribute('y','32');text.setAttribute('text-anchor','middle');
-    text.textContent=model.layout==='cinema'?'MÀN HÌNH':'SÂN KHẤU';
-    group.append(rect,text);
-    stageRoot.insertBefore(group,stageRoot.firstChild);
-}
-
-function isSeatSelectable(seat){
-    return valueOf(seat,'trangThai','TrangThai')===0 && valueOf(seat,'loaiVeDangBan','LoaiVeDangBan') && valueOf(seat,'trongThoiGianBan','TrongThoiGianBan') && valueOf(seat,'soVeConLai','SoVeConLai')>0;
-}
-
-function renderMap(seats){
-    const map = document.getElementById('seatMap');
-    map.innerHTML = '';
-    if(!seats.length){
-        document.getElementById('seatLoading').textContent = 'Sơ đồ chưa có ghế.';
+    if (!seats || !seats.length) {
+        loading.innerHTML = '<div style="color:#94a3b8;font-weight:700">Sự kiện này chưa có sơ đồ chỗ ngồi.</div>';
         return;
     }
 
-    const allowedLayouts=['auditorium','theatre','cinema','concert','arena','custom'];
-    const savedLayout=valueOf(seats[0],'loaiSoDo','LoaiSoDo');
-    const layout=allowedLayouts.includes(savedLayout)?savedLayout:'custom';
-    map.className='map-scroll purchase-layout purchase-'+layout;
-    const savedStageX=Number(valueOf(seats[0],'sanKhauX','SanKhauX'));
-    const savedStageY=Number(valueOf(seats[0],'sanKhauY','SanKhauY'));
-    const hasCanvas=savedStageX>=1&&savedStageX<=9&&savedStageY>=1&&savedStageY<=12;
-    const stage={x:hasCanvas?savedStageX:5,y:hasCanvas?savedStageY:1};
+    // Stage label
+    const layout = vo(seats[0], 'loaiSoDo', 'LoaiSoDo') || '';
+    document.getElementById('stageLbl').textContent =
+        layout === 'cinema' ? 'MÀN HÌNH CHIẾU CHÍNH' :
+        layout === 'arena'  ? 'SÀN ĐẤU TRUNG TÂM / ARENA' :
+        'SÂN KHẤU CHÍNH / MAIN STAGE';
 
-    const zones = new Map();
+    loading.style.display = 'none';
+    vp.style.display = '';
+    legend.style.display = '';
+
+    // Build zone map: zoneId → zone object
+    const zonesMap = new Map();
     seats.forEach(seat => {
-        const zoneId = valueOf(seat,'khuVucId','KhuVucId');
-        const rowId = valueOf(seat,'hangGheId','HangGheId');
-        if(!zones.has(zoneId)) zones.set(zoneId, {
-            name:valueOf(seat,'tenKhuVuc','TenKhuVuc'),
-            color:valueOf(seat,'mauSac','MauSac') || '#7c3aed',
-            order:valueOf(seat,'thuTuKhuVuc','ThuTuKhuVuc') || 0,
-            x:valueOf(seat,'khuVucViTriX','KhuVucViTriX'),
-            y:valueOf(seat,'khuVucViTriY','KhuVucViTriY'),
-            ticket:valueOf(seat,'tenLoaiVe','TenLoaiVe'),
-            price:Number(valueOf(seat,'giaBan','GiaBan')),
-            rows:new Map()
-        });
-        const zone = zones.get(zoneId);
-        if(!zone.rows.has(rowId)) zone.rows.set(rowId,{name:valueOf(seat,'tenHang','TenHang'), order:valueOf(seat,'thuTuHang','ThuTuHang') || 0,seats:[]});
-        zone.rows.get(rowId).seats.push(seat);
+        const zId = vo(seat, 'khuVucId', 'KhuVucId');
+        if (!zonesMap.has(zId)) {
+            zonesMap.set(zId, {
+                id: zId,
+                name: vo(seat, 'tenKhuVuc', 'TenKhuVuc'),
+                color: vo(seat, 'mauSac', 'MauSac') || '#4f46e5',
+                order: Number(vo(seat, 'thuTuKhuVuc', 'ThuTuKhuVuc') || 0),
+                viTriX: Number(vo(seat, 'khuVucViTriX', 'KhuVucViTriX') || 0),
+                viTriY: Number(vo(seat, 'khuVucViTriY', 'KhuVucViTriY') || 0),
+                ticketName: vo(seat, 'tenLoaiVe', 'TenLoaiVe'),
+                ticketId: vo(seat, 'loaiVeId', 'LoaiVeId'),
+                price: Number(vo(seat, 'giaBan', 'GiaBan')),
+                rows: new Map()
+            });
+        }
+        const z = zonesMap.get(zId);
+        const rId = vo(seat, 'hangGheId', 'HangGheId');
+        if (!z.rows.has(rId)) {
+            z.rows.set(rId, {
+                id: rId,
+                name: vo(seat, 'tenHang', 'TenHang'),
+                order: Number(vo(seat, 'thuTuHang', 'ThuTuHang') || 0),
+                seats: []
+            });
+        }
+        z.rows.get(rId).seats.push(seat);
     });
 
-    const stageBlock=document.createElement('div');stageBlock.className='map-stage';stageBlock.style.gridColumn=stage.x+' / span 4';stageBlock.style.gridRow=stage.y;stageBlock.textContent=layout==='cinema'?'MÀN HÌNH':'SÂN KHẤU';map.appendChild(stageBlock);
-    const zoneLayouts=[...zones.values()].sort((a,b)=>a.order-b.order).map((zone,index)=>{
-        const rows=[...zone.rows.values()].sort((a,b)=>a.order-b.order);
-        const maxSeats=Math.max(1,...rows.map(row=>row.seats.length));
-        return {zone,index,rows,maxSeats,spanX:Math.max(1,Math.min(12,Math.ceil(maxSeats/3))),spanY:Math.max(1,Math.min(12,Math.ceil(rows.length/2))),rawPosition:resolveZonePosition(layout,zone.x,zone.y,index,hasCanvas)};
-    });
-    const compactedRows=compactMapRows(zoneLayouts,stage.y);
-    map.style.setProperty('--map-row-count',compactedRows.count);
-    zoneLayouts.forEach(item => {
-        const {zone,index,rows,maxSeats,spanX,spanY}=item;
-        const position={x:item.rawPosition.x,y:compactedRows.positions.get(item.rawPosition.y)??item.rawPosition.y};
-        // Mỗi khu tự co ghế theo số hàng/cột để không tạo thanh cuộn bên trong khu.
-        const zoneWidth=spanX*86+(spanX-1)*6-14;
-        const zoneHeight=spanY*60+(spanY-1)*6-16;
-        const seatByWidth=(zoneWidth-19-12-Math.max(0,maxSeats-1)*3)/maxSeats;
-        const seatByHeight=(zoneHeight-35-Math.max(0,rows.length-1)*2)/Math.max(1,rows.length);
-        const seatSize=Math.max(14,Math.min(27,Math.floor(Math.min(seatByWidth,seatByHeight))));
-        const block = document.createElement('div'); block.className='zone-block'; block.style.setProperty('--zone-color',zone.color); block.style.setProperty('--zone-column',position.x); block.style.setProperty('--zone-row',position.y);block.style.setProperty('--zone-span-x',spanX);block.style.setProperty('--zone-span-y',spanY);block.style.setProperty('--seat-size',seatSize+'px');block.style.setProperty('--seat-height',Math.max(13,Math.floor(seatSize*.82))+'px');
-        const title = document.createElement('div'); title.className='zone-title'; title.style.color=zone.color; title.textContent=zone.name; block.appendChild(title);
-        const subtitle=document.createElement('div'); subtitle.className='zone-subtitle'; subtitle.textContent=zone.ticket+' · '+money(zone.price); block.appendChild(subtitle);
-        rows.forEach(rowData => {
-            const row=document.createElement('div'); row.className='seat-row';
-            const label=document.createElement('span'); label.className='row-label'; label.textContent=rowData.name; row.appendChild(label);
-            const aisleAfter=Math.floor(rowData.seats.length/2)-1;
-            rowData.seats.forEach((seat,index) => {row.appendChild(createSeatButton(seat,zone.color));if(index===aisleAfter){const aisle=document.createElement('span');aisle.className='seat-aisle';aisle.setAttribute('aria-hidden','true');row.appendChild(aisle);}});
-            block.appendChild(row);
-        });
-        map.appendChild(block);
-    });
+    // Sort zones by order
+    const sortedZones = [...zonesMap.values()].sort((a, b) => a.order - b.order);
 
-    document.getElementById('defaultScreen').hidden=true;
-    document.getElementById('seatLoading').hidden=true;
-    map.hidden=false;
-    document.getElementById('statusLegend').hidden=false;
-    renderTicketLegend([...zones.values()]);
-}
-
-function compactMapRows(zoneLayouts,stageY){
-    // Các mẫu cũ có hàng trống để thao tác kéo thả. Khi mua vé, nén chúng thành một sơ đồ liền mạch.
-    if(stageY!==1 || !zoneLayouts.length) return {positions:new Map(),count:12};
-    const groups=new Map();
-    zoneLayouts.forEach(item=>groups.set(item.rawPosition.y,Math.max(groups.get(item.rawPosition.y)||0,item.spanY)));
-    const positions=new Map(),startRows=[...groups.keys()].sort((a,b)=>a-b);
-    let nextRow=3;
-    startRows.forEach(row=>{positions.set(row,nextRow);nextRow+=(groups.get(row)||1);});
-    return {positions,count:Math.max(9,nextRow-1)};
-}
-
-function renderTicketLegend(zones){
-    const legend=document.getElementById('ticketLegend');
-    legend.innerHTML='';
-    zones.sort((a,b)=>a.order-b.order).forEach(zone=>{
-        const item=document.createElement('div');item.className='ticket-legend-item';
-        const name=document.createElement('div');name.className='ticket-name';
-        const dot=document.createElement('i');dot.className='dot';dot.style.background=zone.color;
-        name.append(dot,document.createTextNode(zone.ticket+' · '+zone.name));
-        const price=document.createElement('div');price.className='ticket-price';price.textContent=money(zone.price);
-        item.append(name,price);legend.appendChild(item);
-    });
-}
-
-function resolveZonePosition(layout, rawX, rawY, order, hasCanvas){
-    const x=Number(rawX), y=Number(rawY);
-    if(hasCanvas&&x>=1 && x<=12 && y>=1 && y<=12) return {x,y};
-    const presets={
-        auditorium:[[1,3],[5,3],[9,3]],
-        theatre:[[5,3],[1,7],[9,7],[5,10]],
-        cinema:[[2,3],[5,6],[2,10]],
-        concert:[[5,3],[1,7],[9,7],[5,11]],
-        arena:[[5,3],[1,6],[9,6],[5,10]]
+    // Detect GA zones (row name == 'GA')
+    const isGA = zone => {
+        const rows = [...zone.rows.values()];
+        return rows.length === 1 && rows[0].name === 'GA';
     };
-    const position=(presets[layout]||[])[order];
-    return position ? {x:position[0],y:position[1]} : {x:(order%3)*4+1,y:Math.floor(order/3)*5+3};
+
+    // Group zones into visual rows for layout (by viTriY bucket, or auto-group for 2-per-row)
+    // Strategy: zones are sorted by order; group into rows of max 3 per row
+    // For wings layout: 2 side zones + 1 center = 3 per row
+    const zoneGroups = [];
+    const ZONES_PER_ROW = 3;
+    for (let i = 0; i < sortedZones.length; i += ZONES_PER_ROW) {
+        zoneGroups.push(sortedZones.slice(i, i + ZONES_PER_ROW));
+    }
+
+    wrapper.innerHTML = '';
+    zoneGroups.forEach((group, gIdx) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'zone-row-group';
+        if (group.length === 1) rowDiv.classList.add('single-center');
+        else rowDiv.classList.add('spread');
+
+        group.forEach(zone => {
+            const zoneEl = buildZoneEl(zone, isGA(zone));
+            rowDiv.appendChild(zoneEl);
+        });
+        wrapper.appendChild(rowDiv);
+    });
 }
 
-function createSeatButton(seat,color){
-    const id=valueOf(seat,'id','Id'), status=valueOf(seat,'trangThai','TrangThai');
-    const availableType=isSeatSelectable(seat);
-    const button=document.createElement('button'); button.type='button'; button.className='seat'; button.style.setProperty('--seat-color',color);
-    button.textContent=valueOf(seat,'soGhe','SoGhe');
-    if(status===1) button.classList.add('held'); else if(status===2) button.classList.add('sold'); else if(status===3) button.classList.add('locked'); else if(!availableType) button.classList.add('unavailable');
-    button.disabled=status!==0 || !availableType;
-    button.title=button.disabled ? (status===1?'Ghế đang được giữ':status===2?'Ghế đã bán':status===3?'Ghế bị khóa':'Loại vé chưa mở bán hoặc đã hết') : `${valueOf(seat,'tenLoaiVe','TenLoaiVe')} - ${money(valueOf(seat,'giaBan','GiaBan'))}`;
-    button.addEventListener('click',()=>toggleSeat(button,seat,color));
-    return button;
+function buildZoneEl(zone, ga) {
+    const box = document.createElement('div');
+    box.className = 'zone-box' + (ga ? ' ga-zone' : '');
+    box.style.setProperty('--zc', zone.color);
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'zone-header';
+    hdr.innerHTML = `
+        <span class="zone-name">${zone.name}</span>
+        <span class="zone-price-badge">${money(zone.price)}</span>
+    `;
+    box.appendChild(hdr);
+
+    const seatsArea = document.createElement('div');
+    seatsArea.className = 'zone-seats';
+
+    if (ga) {
+        // GA Zone: Show capacity and quantity picker
+        const rows = [...zone.rows.values()];
+        const totalCap = rows.reduce((s, r) => s + r.seats.length, 0);
+        const available = rows.reduce((s, r) => s + r.seats.filter(s2 => vo(s2, 'trangThai', 'TrangThai') === 0).length, 0);
+
+        seatsArea.dataset.zoneId = zone.id;
+        seatsArea.dataset.available = available;
+        seatsArea.innerHTML = `
+            <div class="ga-capacity-info">
+                <i class="fas fa-person-walking me-1"></i>Khu đứng tự do · ${available > 0 ? available + ' chỗ trống' : 'Hết chỗ'}
+            </div>
+            <div class="ga-cap-sub">${zone.ticketName}</div>
+            ${available > 0 ? `
+            <div class="ga-qty-ctrl">
+                <button class="ga-qty-btn" onclick="gaQtyChange(this,-1,'${zone.id}')" style="--zc:${zone.color}">−</button>
+                <span class="ga-qty-num" id="ga-qty-${zone.id}">0</span>
+                <button class="ga-qty-btn" onclick="gaQtyChange(this,1,'${zone.id}')" style="--zc:${zone.color}">+</button>
+            </div>` : ''}
+        `;
+        // Store GA meta for checkout
+        seatsArea.dataset.ticketId   = zone.ticketId;
+        seatsArea.dataset.price      = zone.price;
+        seatsArea.dataset.ticketName = zone.ticketName;
+        seatsArea.dataset.zoneName   = zone.name;
+        seatsArea.dataset.color      = zone.color;
+        seatsArea.dataset.gaSeats    = JSON.stringify([...zone.rows.values()][0].seats.filter(s => vo(s,'trangThai','TrangThai') === 0).map(s => vo(s,'id','Id')));
+        box.appendChild(seatsArea);
+        return box;
+    }
+
+    // Seated zone: render rows
+    const rowsArr = [...zone.rows.values()].sort((a, b) => a.order - b.order);
+    rowsArr.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'seat-row';
+        // Row label
+        const lbl = document.createElement('span');
+        lbl.className = 'row-lbl';
+        lbl.textContent = row.name;
+        rowDiv.appendChild(lbl);
+
+        // Seats
+        row.seats.forEach(seat => {
+            const btn = makeSeatBtn(seat, zone);
+            rowDiv.appendChild(btn);
+        });
+
+        seatsArea.appendChild(rowDiv);
+    });
+
+    box.appendChild(seatsArea);
+    return box;
 }
 
-function toggleSeat(button,seat,color){
-    const id=valueOf(seat,'id','Id'), typeId=valueOf(seat,'loaiVeId','LoaiVeId');
-    if(selected.has(id)){
-        selected.delete(id); typeCounts.set(typeId,(typeCounts.get(typeId)||1)-1); button.classList.remove('selected');
-    }else{
-        const count=typeCounts.get(typeId)||0;
-        const max=Math.min(valueOf(seat,'gioiHanMoiDon','GioiHanMoiDon'),valueOf(seat,'soVeConLai','SoVeConLai'));
-        if(count>=max){ WuangUI.toast(`Loại vé ${valueOf(seat,'tenLoaiVe','TenLoaiVe')} được chọn tối đa ${max} ghế trong một đơn.`, 'error'); return; }
-        selected.set(id,{id,label:valueOf(seat,'soGhe','SoGhe'),zone:valueOf(seat,'tenKhuVuc','TenKhuVuc'),type:valueOf(seat,'tenLoaiVe','TenLoaiVe'),typeId,price:Number(valueOf(seat,'giaBan','GiaBan')),color});
-        typeCounts.set(typeId,count+1); button.classList.add('selected');
+function isSeatAvail(seat) {
+    return vo(seat,'trangThai','TrangThai') === 0
+        && vo(seat,'loaiVeDangBan','LoaiVeDangBan')
+        && vo(seat,'trongThoiGianBan','TrongThoiGianBan')
+        && Number(vo(seat,'soVeConLai','SoVeConLai')) > 0;
+}
+
+function makeSeatBtn(seat, zone) {
+    const id     = vo(seat,'id','Id');
+    const label  = vo(seat,'soGhe','SoGhe');
+    const status = vo(seat,'trangThai','TrangThai');
+    const avail  = isSeatAvail(seat);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'seat-btn';
+    btn.style.setProperty('--zc', zone.color);
+    btn.textContent = label;
+    btn.dataset.seatId = id;
+    btn.title = '';
+
+    if (status === 1) btn.classList.add('held');
+    else if (status === 2) btn.classList.add('sold');
+    else if (status === 3) btn.classList.add('locked');
+    else if (!avail) btn.classList.add('unavail');
+
+    btn.disabled = status !== 0 || !avail;
+
+    const tipHtml = `<strong>${label}</strong><br>${zone.name}<br>${zone.ticketName} · ${money(zone.price)}`;
+    btn.addEventListener('mouseenter', e => showTip(e, tipHtml));
+    btn.addEventListener('mousemove',  e => showTip(e, tipHtml));
+    btn.addEventListener('mouseleave', hideTip);
+    btn.addEventListener('click', () => { hideTip(); toggleSeat(btn, seat, zone); });
+
+    return btn;
+}
+
+// ── GA quantity picker ────────────────────────────────────────────────────────
+const gaSelections = new Map(); // zoneId → { count, seats[] }
+
+function gaQtyChange(btn, delta, zoneId) {
+    const area = btn.closest('.zone-seats');
+    const available = Number(area.dataset.available);
+    const numEl = document.getElementById('ga-qty-' + zoneId);
+    const cur = gaSelections.get(zoneId) || { count: 0, seats: JSON.parse(area.dataset.gaSeats || '[]') };
+    let newCount = Math.max(0, Math.min(Math.min(cur.count + delta, MAX_SEATS - selectedSeats.size - gaCountExcluding(zoneId)), available, 4));
+
+    cur.count = newCount;
+    gaSelections.set(zoneId, cur);
+    numEl.textContent = newCount;
+
+    // Rebuild GA selections in the order summary
+    updateGAInSummary(zoneId, area, cur);
+}
+
+function gaCountExcluding(excl) {
+    let c = 0;
+    for (const [k, v] of gaSelections) { if (k !== excl) c += v.count; }
+    return c;
+}
+
+function updateGAInSummary(zoneId, area, cur) {
+    // Remove old GA items for this zone
+    for (const [id, s] of selectedSeats) {
+        if (s.gaZoneId === zoneId) selectedSeats.delete(id);
+    }
+    // Add new GA seat placeholders
+    const available = cur.seats.slice(0, cur.count);
+    available.forEach((id, i) => {
+        selectedSeats.set('ga_' + zoneId + '_' + i, {
+            id,
+            label: '#' + (i + 1),
+            zoneName: area.dataset.zoneName,
+            ticketName: area.dataset.ticketName,
+            ticketId: area.dataset.ticketId,
+            price: Number(area.dataset.price),
+            color: area.dataset.color,
+            gaZoneId: zoneId
+        });
+    });
+    updateSummary();
+}
+
+// ── Seat selection ────────────────────────────────────────────────────────────
+function toggleSeat(btn, seat, zone) {
+    const id       = vo(seat,'id','Id');
+    const label    = vo(seat,'soGhe','SoGhe');
+    const ticketId = vo(seat,'loaiVeId','LoaiVeId');
+    const price    = Number(vo(seat,'giaBan','GiaBan'));
+
+    if (selectedSeats.has(id)) {
+        selectedSeats.delete(id);
+        typeCounts.set(ticketId, Math.max(0, (typeCounts.get(ticketId) || 1) - 1));
+        btn.classList.remove('selected');
+    } else {
+        const totalSelected = selectedSeats.size;
+        if (totalSelected >= MAX_SEATS) {
+            if (typeof WuangUI !== 'undefined') WuangUI.toast(`Tối đa ${MAX_SEATS} ghế trong một đơn hàng.`, 'error');
+            return;
+        }
+        const maxPerType = Math.min(vo(seat,'gioiHanMoiDon','GioiHanMoiDon') || MAX_SEATS, vo(seat,'soVeConLai','SoVeConLai') || MAX_SEATS);
+        const curCount = typeCounts.get(ticketId) || 0;
+        if (curCount >= maxPerType) {
+            if (typeof WuangUI !== 'undefined') WuangUI.toast(`Loại vé "${zone.ticketName}" tối đa ${maxPerType} vé.`, 'error');
+            return;
+        }
+        selectedSeats.set(id, { id, label, zoneName: zone.name, ticketName: zone.ticketName, ticketId, price, color: zone.color });
+        typeCounts.set(ticketId, curCount + 1);
+        btn.classList.add('selected');
     }
     updateSummary();
 }
 
-function updateSummary(){
-    const values=[...selected.values()], list=document.getElementById('selectedList'), inputs=document.getElementById('seatInputs');
-    document.getElementById('seatCount').textContent=values.length;
-    document.getElementById('emptySelection').hidden=values.length>0; list.hidden=values.length===0;
-    list.innerHTML=''; inputs.innerHTML='';
-    values.forEach(item=>{
-        const row=document.createElement('div'); row.className='selected-item';
-        const left=document.createElement('div'); const seat=document.createElement('div'); seat.className='selected-seat'; seat.textContent='Ghế '+item.label;
-        const type=document.createElement('div'); type.className='selected-type'; type.textContent=item.zone+' · '+item.type; left.append(seat,type);
-        const price=document.createElement('strong'); price.textContent=money(item.price); row.append(left,price); list.appendChild(row);
-        const input=document.createElement('input'); input.type='hidden'; input.name='choNgoiIds'; input.value=item.id; inputs.appendChild(input);
-    });
-    document.getElementById('grandTotal').textContent=money(values.reduce((sum,item)=>sum+item.price,0));
-    document.getElementById('continueBtn').disabled=values.length===0;
+function removeSeat(seatId) {
+    const s = selectedSeats.get(seatId);
+    if (!s) return;
+    selectedSeats.delete(seatId);
+    typeCounts.set(s.ticketId, Math.max(0, (typeCounts.get(s.ticketId) || 1) - 1));
+    const btn = document.querySelector(`.seat-btn[data-seat-id="${seatId}"]`);
+    if (btn) btn.classList.remove('selected');
+    updateSummary();
 }
 
-loadSeats();
+// ── Summary panel update ──────────────────────────────────────────────────────
+function updateSummary() {
+    const list   = document.getElementById('selList');
+    const empty  = document.getElementById('emptyState');
+    const badge  = document.getElementById('selCountBadge');
+    const total  = document.getElementById('grandTotal');
+    const btn    = document.getElementById('btnCheckout');
+    const hidden = document.getElementById('hiddenSeats');
+    const btnTxt = document.getElementById('btnCheckoutTxt');
+
+    const seats = [...selectedSeats.values()];
+    badge.textContent = seats.length + ' ghế';
+    list.innerHTML = '';
+    hidden.innerHTML = '';
+
+    if (!seats.length) {
+        empty.style.display = '';
+        list.style.display  = 'none';
+        total.textContent   = '0đ';
+        btn.disabled = true;
+        btnTxt.textContent = 'Tiếp tục thanh toán';
+        return;
+    }
+
+    empty.style.display = 'none';
+    list.style.display  = '';
+
+    let sum = 0;
+    seats.forEach(s => {
+        sum += s.price;
+
+        const row = document.createElement('div');
+        row.className = 'sel-item';
+        row.style.setProperty('--sc', s.color);
+        row.innerHTML = `
+            <div>
+                <div class="sel-name">Ghế ${s.label}</div>
+                <div class="sel-sub">${s.zoneName} · ${s.ticketName}</div>
+            </div>
+            <div class="sel-right">
+                <span class="sel-price">${money(s.price)}</span>
+                <button type="button" class="btn-rm" onclick="removeSeat(${JSON.stringify(s.id)})" title="Bỏ chọn"><i class="fas fa-xmark"></i></button>
+            </div>
+        `;
+        list.appendChild(row);
+
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'choNgoiIds';
+        inp.value = s.id;
+        hidden.appendChild(inp);
+    });
+
+    total.textContent = money(sum);
+    btn.disabled = false;
+    btnTxt.textContent = `Tiếp tục thanh toán (${seats.length} vé)`;
+}
+
+// ── Math.clamp polyfill (older browsers) ──────────────────────────────────────
+Math.clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+loadMap();
 </script>
 }
