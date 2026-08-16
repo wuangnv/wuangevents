@@ -7,6 +7,8 @@ public class BookingDraft
     public Guid SuKienId { get; set; }
     public Dictionary<int, int> SoLuongTheoLoaiVe { get; set; } = new();
     public List<int> ChoNgoiIds { get; set; } = new();
+    // Khu đứng chọn số lượng theo Id KhuVuc. Không tạo ChoNgoi giả cho GA.
+    public Dictionary<int, int> SoLuongTheoKhuVucDung { get; set; } = new();
     public string? MaGiamGia { get; set; }
 }
 
@@ -33,6 +35,7 @@ public class GheDatVeViewModel
     public int LoaiVeId { get; set; }
     public string TenLoaiVe { get; set; } = "";
     public decimal GiaBan { get; set; }
+    public bool LaKhuDung { get; set; }
 }
 
 // Dữ liệu duy nhất mà View ThanhToan cần để hiển thị bản nháp.

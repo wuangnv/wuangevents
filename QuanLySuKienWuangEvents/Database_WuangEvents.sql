@@ -299,13 +299,18 @@ BEGIN TRY
         [SuKienId]        UNIQUEIDENTIFIER  NOT NULL,
         [TenSoDo]         NVARCHAR(200)     NOT NULL,
         [LoaiSoDo]        NVARCHAR(30)      NOT NULL DEFAULT N'custom',
+        [CanvasRong]      INT               NOT NULL DEFAULT 960,
+        [CanvasCao]       INT               NOT NULL DEFAULT 650,
         [SanKhauX]        INT               NULL,
         [SanKhauY]        INT               NULL,
+        [SanKhauRong]     INT               NOT NULL DEFAULT 280,
+        [SanKhauCao]      INT               NOT NULL DEFAULT 44,
+        [NhanSanKhau]     NVARCHAR(100)     NOT NULL DEFAULT N'SÂN KHẤU',
         [NgayTao]         DATETIME2(7)      NOT NULL DEFAULT GETUTCDATE(),
 
         CONSTRAINT [PK_SoDoChoNgoi] PRIMARY KEY CLUSTERED ([Id]),
         CONSTRAINT [UQ_SoDoChoNgoi_SuKienId] UNIQUE ([SuKienId]),
-        CONSTRAINT [CK_SoDoChoNgoi_LoaiSoDo] CHECK ([LoaiSoDo] IN (N'auditorium', N'theatre', N'cinema', N'arena', N'custom')),
+        CONSTRAINT [CK_SoDoChoNgoi_LoaiSoDo] CHECK ([LoaiSoDo] IN (N'concert', N'auditorium', N'theatre', N'cinema', N'arena', N'custom')),
         CONSTRAINT [FK_SoDoChoNgoi_SuKien] FOREIGN KEY ([SuKienId]) REFERENCES [dbo].[SuKien]([Id]) ON DELETE CASCADE
     );
 
@@ -318,12 +323,21 @@ BEGIN TRY
         [MauSac]          VARCHAR(7)        NULL,
         [ViTriX]          INT               NULL,
         [ViTriY]          INT               NULL,
+        [Rong]            INT               NOT NULL DEFAULT 0,
+        [Cao]             INT               NOT NULL DEFAULT 0,
+        [LoaiKhuVuc]      VARCHAR(10)       NOT NULL DEFAULT 'seated',
+        [SucChua]         INT               NULL,
+        [TienToHangGhe]   NVARCHAR(10)      NOT NULL DEFAULT N'',
+        [KieuDanhSo]      VARCHAR(10)       NOT NULL DEFAULT 'ltr',
+        [SoBatDau]        INT               NOT NULL DEFAULT 1,
+        [BoQuaChuDeNham]  BIT               NOT NULL DEFAULT 1,
         [ThuTu]           INT               NOT NULL DEFAULT 0,
 
         CONSTRAINT [PK_KhuVuc] PRIMARY KEY CLUSTERED ([Id]),
         CONSTRAINT [UQ_KhuVuc_SoDo_Ten] UNIQUE ([SoDoChoNgoiId], [TenKhuVuc]),
         CONSTRAINT [FK_KhuVuc_SoDoChoNgoi] FOREIGN KEY ([SoDoChoNgoiId]) REFERENCES [dbo].[SoDoChoNgoi]([Id]) ON DELETE CASCADE,
-        CONSTRAINT [FK_KhuVuc_LoaiVe] FOREIGN KEY ([LoaiVeId]) REFERENCES [dbo].[LoaiVe]([Id])
+        CONSTRAINT [FK_KhuVuc_LoaiVe] FOREIGN KEY ([LoaiVeId]) REFERENCES [dbo].[LoaiVe]([Id]),
+        CONSTRAINT [CK_KhuVuc_LoaiKhuVuc] CHECK ([LoaiKhuVuc] IN ('seated', 'ga'))
     );
 
     -- 10. HangGhe

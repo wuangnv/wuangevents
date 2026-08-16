@@ -21,6 +21,8 @@ var builder = WebApplication.CreateBuilder(args);
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Thiếu ConnectionStrings:DefaultConnection.");
 Db.Init(connectionString);
+await Db.DamBaoSchemaSoDoChoNgoiStudioAsync();
+await Db.ChuanHoaBoCucSoDoCuAsync();
 
 // Đăng ký MVC: cho phép dùng Controller và Razor View.
 builder.Services.AddControllersWithViews(options =>

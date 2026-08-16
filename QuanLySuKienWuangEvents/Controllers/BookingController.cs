@@ -72,6 +72,7 @@ public class BookingController : Controller
     public async Task<IActionResult> DatVe(
         Guid suKienId,
         Dictionary<int, int>? veChon,
+        Dictionary<int, int>? khuDungChon,
         List<int>? choNgoiIds)
     {
         // Không quay lại action POST sau đăng nhập vì trình duyệt sẽ dùng GET và gây 404.
@@ -101,15 +102,17 @@ public class BookingController : Controller
             SuKienId = suKienId,
             ChoNgoiIds = (choNgoiIds ?? new List<int>()).Where(x => x > 0).Distinct().ToList(),
             SoLuongTheoLoaiVe = (veChon ?? new Dictionary<int, int>())
-                .Where(x => x.Value > 0).ToDictionary(x => x.Key, x => x.Value)
+                .Where(x => x.Key > 0 && x.Value > 0).ToDictionary(x => x.Key, x => x.Value),
+            SoLuongTheoKhuVucDung = (khuDungChon ?? new Dictionary<int, int>())
+                .Where(x => x.Key > 0 && x.Value > 0).ToDictionary(x => x.Key, x => x.Value)
         };
 
         if (suKien.CoSoDoChoNgoi)
         {
             draft.SoLuongTheoLoaiVe.Clear();
-            if (draft.ChoNgoiIds.Count == 0)
+            if (draft.ChoNgoiIds.Count == 0 && draft.SoLuongTheoKhuVucDung.Count == 0)
             {
-                TempData["Error"] = "Vui lòng chọn ít nhất một ghế trên sơ đồ.";
+                TempData["Error"] = "Vui lòng chọn ghế hoặc số lượng tại khu đứng.";
                 return RedirectToAction("ChonGhe", new { suKienId });
             }
         }
@@ -161,7 +164,7 @@ public class BookingController : Controller
         {
             XoaBanNhap(token);
             TempData["Error"] = ketQua.Error;
-            return draft.ChoNgoiIds.Count > 0
+            return draft.ChoNgoiIds.Count > 0 || draft.SoLuongTheoKhuVucDung.Count > 0
                 ? RedirectToAction("ChonGhe", new { suKienId = draft.SuKienId })
                 : RedirectToAction("ChiTiet", "Home", new { id = draft.SuKienId });
         }
@@ -266,27 +269,69 @@ public class BookingController : Controller
     public async Task<IActionResult> LaySoDoGheTheoSuKien(Guid suKienId)
     {
         await GiaiPhongDonHangHetHan();
-        var ghe = await Db.LayDanhSach<dynamic>(@"
-            SELECT g.Id, g.HangGheId, g.SoGhe, g.TrangThai,
-                   h.TenHang, h.ThuTu AS ThuTuHang,
-                   k.Id AS KhuVucId, k.TenKhuVuc, k.MauSac,
-                   k.ViTriX AS KhuVucViTriX, k.ViTriY AS KhuVucViTriY,
-                   k.ThuTu AS ThuTuKhuVuc,
-                   sdn.LoaiSoDo, sdn.SanKhauX, sdn.SanKhauY,
-                   k.LoaiVeId, lv.TenLoaiVe, lv.GiaBan, lv.GioiHanMoiDon,
+        var soDo = await Db.LayDonLe<SoDoChoNgoi>(
+            "SELECT * FROM SoDoChoNgoi WHERE SuKienId = @suKienId", new { suKienId });
+        if (soDo == null) return NotFound();
+
+        var zones = await Db.LayDanhSach<SeatMapZoneDto>(@"
+            SELECT k.*, lv.TenLoaiVe, lv.GiaBan, lv.GioiHanMoiDon,
                    lv.SoLuongTong - lv.SoLuongDaBan - lv.SoLuongGiuCho AS SoVeConLai,
                    lv.TrangThai AS LoaiVeDangBan,
                    CASE WHEN (lv.NgayBatDauBan IS NULL OR lv.NgayBatDauBan <= DATEADD(HOUR, 7, GETUTCDATE()))
                           AND (lv.NgayKetThucBan IS NULL OR lv.NgayKetThucBan >= DATEADD(HOUR, 7, GETUTCDATE()))
                         THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END AS TrongThoiGianBan
+            FROM KhuVuc k
+            JOIN LoaiVe lv ON lv.Id = k.LoaiVeId
+            WHERE k.SoDoChoNgoiId = @soDoId
+            ORDER BY k.ThuTu, k.Id", new { soDoId = soDo.Id });
+
+        var seats = await Db.LayDanhSach<SeatMapSeatDto>(@"
+            SELECT g.Id, g.SoGhe, g.TrangThai, h.KhuVucId,
+                   h.TenHang, h.ThuTu AS ThuTuHang, g.ViTriX, g.ViTriY
             FROM ChoNgoi g
-            JOIN HangGhe h ON g.HangGheId = h.Id
-            JOIN KhuVuc k ON h.KhuVucId = k.Id
-            JOIN SoDoChoNgoi sdn ON k.SoDoChoNgoiId = sdn.Id
-            JOIN LoaiVe lv ON k.LoaiVeId = lv.Id
-            WHERE sdn.SuKienId = @suKienId
-            ORDER BY k.ThuTu, h.ThuTu, g.ViTriX, g.Id", new { suKienId });
-        return Json(ghe);
+            JOIN HangGhe h ON h.Id = g.HangGheId
+            JOIN KhuVuc k ON k.Id = h.KhuVucId
+            WHERE k.SoDoChoNgoiId = @soDoId
+            ORDER BY h.KhuVucId, h.ThuTu, g.ViTriX, g.Id", new { soDoId = soDo.Id });
+
+        return Json(new
+        {
+            map = new
+            {
+                type = soDo.LoaiSoDo,
+                width = soDo.CanvasRong > 0 ? soDo.CanvasRong : 960,
+                height = soDo.CanvasCao > 0 ? soDo.CanvasCao : 650,
+                stageX = soDo.SanKhauX ?? 340,
+                stageY = soDo.SanKhauY ?? 36,
+                stageWidth = soDo.SanKhauRong > 0 ? soDo.SanKhauRong : 280,
+                stageHeight = soDo.SanKhauCao > 0 ? soDo.SanKhauCao : 44,
+                stageLabel = string.IsNullOrWhiteSpace(soDo.NhanSanKhau) ? "SÂN KHẤU" : soDo.NhanSanKhau
+            },
+            zones = zones.Select(zone => new
+            {
+                id = zone.Id,
+                name = zone.TenKhuVuc,
+                color = zone.MauSac ?? "#4f46e5",
+                type = zone.LoaiKhuVuc,
+                capacity = zone.SucChua ?? 0,
+                x = zone.ViTriX ?? 0,
+                y = zone.ViTriY ?? 0,
+                width = zone.Rong > 0 ? zone.Rong : 260,
+                height = zone.Cao > 0 ? zone.Cao : 180,
+                order = zone.ThuTu,
+                ticketId = zone.LoaiVeId,
+                ticketName = zone.TenLoaiVe,
+                price = zone.GiaBan,
+                limitPerOrder = zone.GioiHanMoiDon,
+                available = Math.Max(0, Math.Min(zone.SoVeConLai, zone.LoaiKhuVuc == "ga" ? zone.SucChua ?? 0 : int.MaxValue)),
+                enabled = zone.LoaiVeDangBan && zone.TrongThoiGianBan,
+                rows = seats.Where(seat => seat.KhuVucId == zone.Id)
+                    .GroupBy(seat => new { seat.ThuTuHang, seat.TenHang })
+                    .OrderBy(row => row.Key.ThuTuHang)
+                    .Select(row => new { name = row.Key.TenHang, seats = row.Select(seat => new { id = seat.Id, label = seat.SoGhe, status = seat.TrangThai }).ToList() })
+                    .ToList()
+            }).ToList()
+        });
     }
 
     // API cũ được giữ để các liên kết cũ không lỗi.
@@ -322,31 +367,66 @@ public class BookingController : Controller
             if (loiSuKien != null) throw new Exception(loiSuKien);
 
             var gheDaChon = new List<GheDatVeViewModel>();
+            var khuDungDaChon = new List<GaZoneBookingDto>();
             Dictionary<int, int> soLuongTheoLoai;
 
             if (suKien.CoSoDoChoNgoi)
             {
                 var ids = draft.ChoNgoiIds.Distinct().ToList();
-                if (ids.Count == 0) throw new Exception("Bạn chưa chọn ghế.");
+                var khuDungChon = draft.SoLuongTheoKhuVucDung
+                    .Where(x => x.Key > 0 && x.Value > 0).ToDictionary(x => x.Key, x => x.Value);
+                if (ids.Count == 0 && khuDungChon.Count == 0)
+                    throw new Exception("Bạn chưa chọn ghế hoặc khu đứng.");
 
-                gheDaChon = (await connection.QueryAsync<GheDatVeViewModel>(@"
-                    SELECT g.Id, g.SoGhe, g.TrangThai, h.TenHang,
-                           k.TenKhuVuc, k.MauSac, k.LoaiVeId,
-                           lv.TenLoaiVe, lv.GiaBan
-                    FROM ChoNgoi g WITH (UPDLOCK, HOLDLOCK)
-                    JOIN HangGhe h ON h.Id = g.HangGheId
-                    JOIN KhuVuc k ON k.Id = h.KhuVucId
-                    JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
-                    JOIN LoaiVe lv ON lv.Id = k.LoaiVeId
-                    WHERE sd.SuKienId = @suKienId AND g.Id IN @ids",
-                    new { suKienId = draft.SuKienId, ids }, transaction)).ToList();
+                if (ids.Count > 0)
+                {
+                    gheDaChon = (await connection.QueryAsync<GheDatVeViewModel>(@"
+                        SELECT g.Id, g.SoGhe, g.TrangThai, h.TenHang,
+                               k.TenKhuVuc, k.MauSac, k.LoaiVeId,
+                               lv.TenLoaiVe, lv.GiaBan
+                        FROM ChoNgoi g WITH (UPDLOCK, HOLDLOCK)
+                        JOIN HangGhe h ON h.Id = g.HangGheId
+                        JOIN KhuVuc k ON k.Id = h.KhuVucId
+                        JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
+                        JOIN LoaiVe lv ON lv.Id = k.LoaiVeId
+                        WHERE sd.SuKienId = @suKienId AND g.Id IN @ids",
+                        new { suKienId = draft.SuKienId, ids }, transaction)).ToList();
 
-                if (gheDaChon.Count != ids.Count || gheDaChon.Any(x => x.TrangThai != 0))
-                    throw new Exception("Có ghế vừa được người khác giữ hoặc không thuộc sự kiện. Vui lòng chọn lại.");
+                    if (gheDaChon.Count != ids.Count || gheDaChon.Any(x => x.TrangThai != 0))
+                        throw new Exception("Có ghế vừa được người khác giữ hoặc không thuộc sự kiện. Vui lòng chọn lại.");
+                }
+
+                if (khuDungChon.Count > 0)
+                {
+                    var khuIds = khuDungChon.Keys.ToList();
+                    khuDungDaChon = (await connection.QueryAsync<GaZoneBookingDto>(@"
+                        SELECT k.Id, k.LoaiVeId, k.TenKhuVuc, k.SucChua,
+                               lv.TenLoaiVe, lv.GiaBan
+                        FROM KhuVuc k WITH (UPDLOCK, HOLDLOCK)
+                        JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
+                        JOIN LoaiVe lv ON lv.Id = k.LoaiVeId
+                        WHERE sd.SuKienId = @suKienId
+                          AND k.LoaiKhuVuc = 'ga' AND k.Id IN @khuIds",
+                        new { suKienId = draft.SuKienId, khuIds }, transaction)).ToList();
+                    if (khuDungDaChon.Count != khuIds.Count)
+                        throw new Exception("Khu đứng không hợp lệ hoặc đã được thay đổi. Vui lòng chọn lại.");
+                    foreach (var khu in khuDungDaChon)
+                    {
+                        khu.SoLuongChon = khuDungChon[khu.Id];
+                        if (khu.SoLuongChon > (khu.SucChua ?? 0))
+                            throw new Exception($"Khu đứng '{khu.TenKhuVuc}' không đủ sức chứa.");
+                    }
+                }
 
                 soLuongTheoLoai = gheDaChon
                     .GroupBy(x => x.LoaiVeId)
                     .ToDictionary(x => x.Key, x => x.Count());
+                foreach (var khuDung in khuDungDaChon)
+                {
+                    if (soLuongTheoLoai.ContainsKey(khuDung.LoaiVeId))
+                        throw new Exception("Một loại vé không thể đồng thời dùng cho ghế ngồi và khu đứng.");
+                    soLuongTheoLoai[khuDung.LoaiVeId] = khuDung.SoLuongChon;
+                }
             }
             else
             {
@@ -445,12 +525,31 @@ public class BookingController : Controller
                     }, transaction);
                 }
 
-                int soGheDaGiu = await connection.ExecuteAsync(@"
-                    UPDATE ChoNgoi SET TrangThai = 1
-                    WHERE Id IN @ids AND TrangThai = 0",
-                    new { ids = gheDaChon.Select(x => x.Id).ToList() }, transaction);
-                if (soGheDaGiu != gheDaChon.Count)
-                    throw new Exception("Có ghế vừa được người khác chọn. Vui lòng chọn lại.");
+                foreach (var khuDung in khuDungDaChon)
+                {
+                    for (int i = 0; i < khuDung.SoLuongChon; i++)
+                    {
+                        await connection.ExecuteAsync(sqlChiTiet, new
+                        {
+                            donHangId = donHang.Id,
+                            loaiVeId = khuDung.LoaiVeId,
+                            choNgoiId = (int?)null,
+                            giaVe = cacLoaiVe[khuDung.LoaiVeId].GiaBan,
+                            hoTen = donHang.HoTenNguoiMua,
+                            email = donHang.EmailNguoiMua
+                        }, transaction);
+                    }
+                }
+
+                if (gheDaChon.Count > 0)
+                {
+                    int soGheDaGiu = await connection.ExecuteAsync(@"
+                        UPDATE ChoNgoi SET TrangThai = 1
+                        WHERE Id IN @ids AND TrangThai = 0",
+                        new { ids = gheDaChon.Select(x => x.Id).ToList() }, transaction);
+                    if (soGheDaGiu != gheDaChon.Count)
+                        throw new Exception("Có ghế vừa được người khác chọn. Vui lòng chọn lại.");
+                }
             }
             else
             {
@@ -537,25 +636,72 @@ public class BookingController : Controller
         if (suKien.CoSoDoChoNgoi)
         {
             var ids = draft.ChoNgoiIds.Distinct().ToList();
-            if (ids.Count == 0) return (null, "Bạn chưa chọn ghế.");
+            var khuDungChon = draft.SoLuongTheoKhuVucDung
+                .Where(x => x.Key > 0 && x.Value > 0).ToDictionary(x => x.Key, x => x.Value);
+            if (ids.Count == 0 && khuDungChon.Count == 0)
+                return (null, "Bạn chưa chọn ghế hoặc khu đứng.");
 
-            model.GheDaChon = await Db.LayDanhSach<GheDatVeViewModel>(@"
-                SELECT g.Id, g.SoGhe, g.TrangThai, h.TenHang,
-                       k.TenKhuVuc, k.MauSac, k.LoaiVeId,
-                       lv.TenLoaiVe, lv.GiaBan
-                FROM ChoNgoi g
-                JOIN HangGhe h ON h.Id = g.HangGheId
-                JOIN KhuVuc k ON k.Id = h.KhuVucId
-                JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
-                JOIN LoaiVe lv ON lv.Id = k.LoaiVeId
-                WHERE sd.SuKienId = @suKienId AND g.Id IN @ids
-                ORDER BY k.ThuTu, h.ThuTu, g.ViTriX, g.Id",
-                new { suKienId = draft.SuKienId, ids });
-            if (model.GheDaChon.Count != ids.Count || model.GheDaChon.Any(x => x.TrangThai != 0))
-                return (null, "Một hoặc nhiều ghế vừa được người khác giữ. Vui lòng chọn lại.");
+            if (ids.Count > 0)
+            {
+                model.GheDaChon = await Db.LayDanhSach<GheDatVeViewModel>(@"
+                    SELECT g.Id, g.SoGhe, g.TrangThai, h.TenHang,
+                           k.TenKhuVuc, k.MauSac, k.LoaiVeId,
+                           lv.TenLoaiVe, lv.GiaBan
+                    FROM ChoNgoi g
+                    JOIN HangGhe h ON h.Id = g.HangGheId
+                    JOIN KhuVuc k ON k.Id = h.KhuVucId
+                    JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
+                    JOIN LoaiVe lv ON lv.Id = k.LoaiVeId
+                    WHERE sd.SuKienId = @suKienId AND g.Id IN @ids
+                    ORDER BY k.ThuTu, h.ThuTu, g.ViTriX, g.Id",
+                    new { suKienId = draft.SuKienId, ids });
+                if (model.GheDaChon.Count != ids.Count || model.GheDaChon.Any(x => x.TrangThai != 0))
+                    return (null, "Một hoặc nhiều ghế vừa được người khác giữ. Vui lòng chọn lại.");
+            }
 
-            soLuongTheoLoai = model.GheDaChon.GroupBy(x => x.LoaiVeId)
+            var khuDungDaChon = new List<GaZoneBookingDto>();
+            if (khuDungChon.Count > 0)
+            {
+                var khuIds = khuDungChon.Keys.ToList();
+                khuDungDaChon = await Db.LayDanhSach<GaZoneBookingDto>(@"
+                    SELECT k.Id, k.LoaiVeId, k.TenKhuVuc, k.SucChua,
+                           lv.TenLoaiVe, lv.GiaBan
+                    FROM KhuVuc k
+                    JOIN SoDoChoNgoi sd ON sd.Id = k.SoDoChoNgoiId
+                    JOIN LoaiVe lv ON lv.Id = k.LoaiVeId
+                    WHERE sd.SuKienId = @suKienId
+                      AND k.LoaiKhuVuc = 'ga' AND k.Id IN @khuIds",
+                    new { suKienId = draft.SuKienId, khuIds });
+                if (khuDungDaChon.Count != khuIds.Count)
+                    return (null, "Khu đứng không hợp lệ hoặc đã được thay đổi. Vui lòng chọn lại.");
+                foreach (var khu in khuDungDaChon)
+                {
+                    khu.SoLuongChon = khuDungChon[khu.Id];
+                    if (khu.SoLuongChon > (khu.SucChua ?? 0))
+                        return (null, $"Khu đứng '{khu.TenKhuVuc}' không đủ sức chứa.");
+                    for (int i = 0; i < khu.SoLuongChon; i++)
+                    {
+                        model.GheDaChon.Add(new GheDatVeViewModel
+                        {
+                            TenKhuVuc = khu.TenKhuVuc,
+                            MauSac = "#4f46e5",
+                            LoaiVeId = khu.LoaiVeId,
+                            TenLoaiVe = khu.TenLoaiVe,
+                            GiaBan = khu.GiaBan,
+                            LaKhuDung = true
+                        });
+                    }
+                }
+            }
+
+            soLuongTheoLoai = model.GheDaChon.Where(x => !x.LaKhuDung).GroupBy(x => x.LoaiVeId)
                 .ToDictionary(x => x.Key, x => x.Count());
+            foreach (var khuDung in khuDungDaChon)
+            {
+                if (soLuongTheoLoai.ContainsKey(khuDung.LoaiVeId))
+                    return (null, "Một loại vé không thể đồng thời dùng cho ghế ngồi và khu đứng.");
+                soLuongTheoLoai[khuDung.LoaiVeId] = khuDung.SoLuongChon;
+            }
         }
         else
         {
@@ -1489,6 +1635,41 @@ public class BookingController : Controller
     {
         public int LoaiVeId { get; set; }
         public int SoLuong { get; set; }
+    }
+
+    // DTO chỉ dùng cho API sơ đồ công khai; không lộ dữ liệu người mua/đơn hàng.
+    private sealed class SeatMapZoneDto : KhuVuc
+    {
+        public string TenLoaiVe { get; set; } = "";
+        public decimal GiaBan { get; set; }
+        public int GioiHanMoiDon { get; set; }
+        public int SoVeConLai { get; set; }
+        public bool LoaiVeDangBan { get; set; }
+        public bool TrongThoiGianBan { get; set; }
+    }
+
+    private sealed class SeatMapSeatDto
+    {
+        public int Id { get; set; }
+        public string SoGhe { get; set; } = "";
+        public byte TrangThai { get; set; }
+        public int KhuVucId { get; set; }
+        public string TenHang { get; set; } = "";
+        public int ThuTuHang { get; set; }
+        public int? ViTriX { get; set; }
+        public int? ViTriY { get; set; }
+    }
+
+    // Khu đứng giữ tồn kho qua LoaiVe, không có ChoNgoiId.
+    private sealed class GaZoneBookingDto
+    {
+        public int Id { get; set; }
+        public int LoaiVeId { get; set; }
+        public string TenKhuVuc { get; set; } = "";
+        public int? SucChua { get; set; }
+        public string TenLoaiVe { get; set; } = "";
+        public decimal GiaBan { get; set; }
+        public int SoLuongChon { get; set; }
     }
 
     public sealed class ZaloPayCallbackRequest

@@ -2047,6 +2047,7 @@ public class OrganizerController : Controller
         ViewBag.Ghe       = new List<ChoNgoi>();
         ViewBag.Hang      = new Dictionary<int, string>();
         ViewBag.KhuVucTheoHang = new Dictionary<int, KhuVuc>();
+        ViewBag.KhuVucs = new List<KhuVuc>();
         var sk = await Db.LayDonLe<SuKien>("SELECT TrangThai, NgayKetThuc FROM SuKien WHERE Id = @id", new { id = sId });
         ViewBag.TrangThaiSuKien = sk != null ? (int)sk.TrangThai : 0;
         ViewBag.NgayKetThucSuKien = sk?.NgayKetThuc;
@@ -2055,6 +2056,9 @@ public class OrganizerController : Controller
             "SELECT * FROM SoDoChoNgoi WHERE SuKienId = @id", new { id = sId }
         );
         if (model == null) return View(new SoDoChoNgoi { SuKienId = sId });
+
+        ViewBag.KhuVucs = await Db.LayDanhSach<KhuVuc>(
+            "SELECT * FROM KhuVuc WHERE SoDoChoNgoiId = @id ORDER BY ThuTu, Id", new { id = model.Id });
 
         var seats = new List<ChoNgoi>();
         var rows  = new Dictionary<int, string>();
@@ -2069,6 +2073,10 @@ public class OrganizerController : Controller
                    k.MauSac,
                    k.ViTriX AS KhuVucViTriX,
                    k.ViTriY AS KhuVucViTriY,
+                   k.Rong AS KhuVucRong,
+                   k.Cao AS KhuVucCao,
+                   k.LoaiKhuVuc,
+                   k.SucChua,
                    k.ThuTu AS ThuTuKhuVuc
             FROM ChoNgoi g
             JOIN HangGhe h ON h.Id = g.HangGheId
@@ -2101,6 +2109,10 @@ public class OrganizerController : Controller
                 MauSac = seat.MauSac,
                 ViTriX = seat.KhuVucViTriX,
                 ViTriY = seat.KhuVucViTriY,
+                Rong = seat.KhuVucRong,
+                Cao = seat.KhuVucCao,
+                LoaiKhuVuc = seat.LoaiKhuVuc,
+                SucChua = seat.SucChua,
                 ThuTu = seat.ThuTuKhuVuc
             };
         }
@@ -2124,13 +2136,21 @@ public class OrganizerController : Controller
         List<string>? zoneMauSac,
         List<int>? zoneViTriX,
         List<int>? zoneViTriY,
+        List<int>? zoneRong,
+        List<int>? zoneCao,
         List<string>? zoneLoaiKhuVuc,
         List<int>? zoneSucChua,
         List<string>? zoneTienTo,
         List<string>? zoneHuongDanhSo,
         List<int>? zoneSoBatDau,
+        List<string>? zoneBoQuaChuDeNham,
         int? sanKhauX,
-        int? sanKhauY)
+        int? sanKhauY,
+        int? sanKhauRong,
+        int? sanKhauCao,
+        int? canvasRong,
+        int? canvasCao,
+        string? nhanSanKhau)
     {
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
 
@@ -2154,15 +2174,33 @@ public class OrganizerController : Controller
             return RedirectToAction("SoDoChoNgoi", new { suKienId });
         }
 
-        int stageX = sanKhauX ?? 5;
-        int stageY = sanKhauY ?? 1;
+        int mapWidth = Math.Clamp(canvasRong ?? 960, 720, 1600);
+        int mapHeight = Math.Clamp(canvasCao ?? 650, 500, 1100);
+        int stageWidth = Math.Clamp(sanKhauRong ?? 280, 160, 520);
+        int stageHeight = Math.Clamp(sanKhauCao ?? 44, 32, 100);
+        int stageX = Math.Clamp(sanKhauX ?? ((mapWidth - stageWidth) / 2), 0, mapWidth - stageWidth);
+        int stageY = Math.Clamp(sanKhauY ?? 36, 0, mapHeight - stageHeight);
+        string stageLabel = string.IsNullOrWhiteSpace(nhanSanKhau) ? "SÂN KHẤU" : nhanSanKhau.Trim();
+        if (stageLabel.Length > 100) stageLabel = stageLabel[..100];
         var zones = new List<ZoneDefinition>();
         if (loaiSoDo != "none")
         {
             int count = zoneTen?.Count ?? 0;
             bool mangKhongKhop = count == 0 || count > 30
                 || zoneLoaiVeId?.Count != count
-                || zoneMauSac?.Count != count;
+                || zoneSoHang?.Count != count
+                || zoneSoGheMoiHang?.Count != count
+                || zoneMauSac?.Count != count
+                || zoneViTriX?.Count != count
+                || zoneViTriY?.Count != count
+                || zoneRong?.Count != count
+                || zoneCao?.Count != count
+                || zoneLoaiKhuVuc?.Count != count
+                || zoneSucChua?.Count != count
+                || zoneTienTo?.Count != count
+                || zoneHuongDanhSo?.Count != count
+                || zoneSoBatDau?.Count != count
+                || zoneBoQuaChuDeNham?.Count != count;
             if (mangKhongKhop)
             {
                 TempData["Error"] = "Dữ liệu khu vực không hợp lệ. Sơ đồ cần từ 1 đến 30 khu vực.";
@@ -2175,36 +2213,63 @@ public class OrganizerController : Controller
             for (int i = 0; i < count; i++)
             {
                 int loaiVeId = zoneLoaiVeId![i];
-                string loaiKhu = zoneLoaiKhuVuc?.ElementAtOrDefault(i) ?? "seated";
+                string loaiKhu = zoneLoaiKhuVuc![i].Trim().ToLowerInvariant();
+                if (loaiKhu is not ("seated" or "ga"))
+                {
+                    TempData["Error"] = "Loại khu vực không hợp lệ.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
                 bool isGA = loaiKhu == "ga";
-                int soHang = isGA ? 0 : (zoneSoHang?.ElementAtOrDefault(i) ?? 1);
-                int soGhe  = isGA ? 0 : (zoneSoGheMoiHang?.ElementAtOrDefault(i) ?? 1);
-                int sucChua = isGA ? Math.Max(1, zoneSucChua?.ElementAtOrDefault(i) ?? 100) : 0;
+                int soHang = isGA ? 0 : zoneSoHang![i];
+                int soGhe  = isGA ? 0 : zoneSoGheMoiHang![i];
+                int sucChua = isGA ? zoneSucChua![i] : 0;
 
                 if (!loaiVeHopLe.ContainsKey(loaiVeId) || string.IsNullOrWhiteSpace(zoneTen![i]))
                 {
                     TempData["Error"] = "Mỗi khu phải dùng loại vé hợp lệ của sự kiện."; 
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
-                if (!isGA && (soHang is < 1 or > 50 || soGhe is < 1 or > 60))
+                if (!isGA && (soHang is < 1 or > 20 || soGhe is < 1 or > 30))
                 {
-                    TempData["Error"] = "Khu ghế ngồi phải có 1–50 hàng và 1–60 ghế mỗi hàng.";
+                    TempData["Error"] = "Khu ghế ngồi phải có 1–20 hàng và 1–30 ghế mỗi hàng.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
+                if (isGA && sucChua is < 1 or > 10000)
+                {
+                    TempData["Error"] = "Sức chứa khu đứng phải từ 1 đến 10.000 người.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+
                 string mau = string.IsNullOrWhiteSpace(zoneMauSac![i]) ? "#7c3aed" : zoneMauSac[i]!;
                 if (!System.Text.RegularExpressions.Regex.IsMatch(mau, "^#[0-9a-fA-F]{6}$")) mau = "#7c3aed";
-                int viTriX = zoneViTriX?.ElementAtOrDefault(i) ?? ((i % 3) * 4 + 1);
-                int viTriY = zoneViTriY?.ElementAtOrDefault(i) ?? ((i / 3) * 3 + 2);
-                string tienTo = zoneTienTo?.ElementAtOrDefault(i) ?? "";
-                string huong  = zoneHuongDanhSo?.ElementAtOrDefault(i) ?? "ltr";
-                int soBD = Math.Max(1, zoneSoBatDau?.ElementAtOrDefault(i) ?? 1);
+                int viTriX = zoneViTriX![i];
+                int viTriY = zoneViTriY![i];
+                int rong = zoneRong![i];
+                int cao = zoneCao![i];
+                int minRong = isGA ? 180 : Math.Max(180, 74 + soGhe * 22);
+                int minCao = isGA ? 120 : Math.Max(112, 76 + soHang * 28);
+                if (rong is < 120 or > 900 || cao is < 80 or > 900
+                    || rong < minRong || cao < minCao
+                    || viTriX < 0 || viTriY < 0 || viTriX + rong > mapWidth || viTriY + cao > mapHeight)
+                {
+                    TempData["Error"] = "Có khu vực vượt khỏi canvas hoặc kích thước chưa đủ để hiển thị ghế.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+                string tienTo = (zoneTienTo![i] ?? "").Trim();
+                if (tienTo.Length > 10) tienTo = tienTo[..10];
+                string huong  = zoneHuongDanhSo![i].Trim().ToLowerInvariant();
+                if (huong is not ("ltr" or "rtl" or "odd" or "even")) huong = "ltr";
+                int soBD = Math.Clamp(zoneSoBatDau![i], 1, 9999);
+                bool boQuaChuDeNham = zoneBoQuaChuDeNham![i].Equals("yes", StringComparison.OrdinalIgnoreCase);
                 zones.Add(new ZoneDefinition
                 {
                     Ten = zoneTen![i].Trim(), LoaiVeId = loaiVeId,
                     SoHang = soHang, SoGheMoiHang = soGhe, MauSac = mau,
                     ViTriX = viTriX, ViTriY = viTriY,
                     LoaiKhuVuc = loaiKhu, SucChua = sucChua,
-                    TienToHangGhe = tienTo, HuongDanhSo = huong, SoBatDau = soBD
+                    Rong = rong, Cao = cao,
+                    TienToHangGhe = tienTo, HuongDanhSo = huong, SoBatDau = soBD,
+                    BoQuaChuDeNham = boQuaChuDeNham
                 });
             }
 
@@ -2219,12 +2284,44 @@ public class OrganizerController : Controller
             foreach (var group in zones.GroupBy(x => x.LoaiVeId))
             {
                 int tongSoCuaLoai = group.Sum(x => x.LoaiKhuVuc == "ga" ? x.SucChua : x.SoHang * x.SoGheMoiHang);
+                bool coKhuDung = group.Any(x => x.LoaiKhuVuc == "ga");
+                if (coKhuDung && (group.Count() != 1 || tongSoCuaLoai != loaiVeHopLe[group.Key].SoLuongTong))
+                {
+                    TempData["Error"] = $"Vé khu đứng '{loaiVeHopLe[group.Key].TenLoaiVe}' phải gán cho đúng một khu và sức chứa phải bằng tổng số vé.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
                 if (tongSoCuaLoai > loaiVeHopLe[group.Key].SoLuongTong)
                 {
                     TempData["Error"] = $"Các khu dùng vé '{loaiVeHopLe[group.Key].TenLoaiVe}' phân bổ {tongSoCuaLoai} chỗ nhưng tổng số vé chỉ có {loaiVeHopLe[group.Key].SoLuongTong}.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
             }
+
+            foreach (var loaiVe in loaiVeHopLe.Values.Where(x => x.TrangThai))
+            {
+                if (!zones.Any(x => x.LoaiVeId == loaiVe.Id))
+                {
+                    TempData["Error"] = $"Loại vé '{loaiVe.TenLoaiVe}' chưa được gán vào khu vực nào trên sơ đồ.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+            }
+
+            foreach (var zone in zones)
+            {
+                if (HinhChuNhatGiaoNhau(zone.ViTriX, zone.ViTriY, zone.Rong, zone.Cao, stageX, stageY, stageWidth, stageHeight))
+                {
+                    TempData["Error"] = "Khu vực không được đè lên sân khấu/màn hình.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+            }
+            for (int i = 0; i < zones.Count; i++)
+            for (int j = i + 1; j < zones.Count; j++)
+                if (HinhChuNhatGiaoNhau(zones[i].ViTriX, zones[i].ViTriY, zones[i].Rong, zones[i].Cao,
+                                         zones[j].ViTriX, zones[j].ViTriY, zones[j].Rong, zones[j].Cao))
+                {
+                    TempData["Error"] = "Các khu vực đang chồng lên nhau. Hãy kéo lại trước khi lưu.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
         }
 
         using var connection = Db.TaoKetNoi();
@@ -2253,20 +2350,26 @@ public class OrganizerController : Controller
 
             var mapId = await connection.QuerySingleAsync<int>(@"
                 INSERT INTO SoDoChoNgoi
-                    (SuKienId, TenSoDo, LoaiSoDo, SanKhauX, SanKhauY, NgayTao)
+                    (SuKienId, TenSoDo, LoaiSoDo, CanvasRong, CanvasCao,
+                     SanKhauX, SanKhauY, SanKhauRong, SanKhauCao, NhanSanKhau, NgayTao)
                 OUTPUT INSERTED.Id
                 VALUES
-                    (@suKienId, @tenSoDo, @loaiSoDo, @stageX, @stageY, GETUTCDATE())
+                    (@suKienId, @tenSoDo, @loaiSoDo, @mapWidth, @mapHeight,
+                     @stageX, @stageY, @stageWidth, @stageHeight, @stageLabel, GETUTCDATE())
             ", new
             {
                 suKienId,
                 loaiSoDo,
+                mapWidth,
+                mapHeight,
                 stageX,
                 stageY,
+                stageWidth,
+                stageHeight,
+                stageLabel,
                 tenSoDo = string.IsNullOrEmpty(tenSoDo) ? "Sơ đồ ghế mặc định" : tenSoDo.Trim()
             }, transaction);
 
-            int currentOverallRow = 0;
             int orderCounter      = 1;
 
             foreach (var z in zones)
@@ -2275,10 +2378,14 @@ public class OrganizerController : Controller
 
                 var zoneId = await connection.QuerySingleAsync<int>(@"
                     INSERT INTO KhuVuc
-                        (SoDoChoNgoiId, LoaiVeId, TenKhuVuc, MauSac, ViTriX, ViTriY, ThuTu)
+                        (SoDoChoNgoiId, LoaiVeId, TenKhuVuc, MauSac, ViTriX, ViTriY,
+                         Rong, Cao, LoaiKhuVuc, SucChua, TienToHangGhe, KieuDanhSo,
+                         SoBatDau, BoQuaChuDeNham, ThuTu)
                     OUTPUT INSERTED.Id
                     VALUES
-                        (@mapId, @loaiVeId, @ten, @mau, @viTriX, @viTriY, @order)
+                        (@mapId, @loaiVeId, @ten, @mau, @viTriX, @viTriY,
+                         @rong, @cao, @loaiKhuVuc, @sucChua, @tienTo, @kieuDanhSo,
+                         @soBatDau, @boQuaChuDeNham, @order)
                 ", new
                 {
                     mapId,
@@ -2287,52 +2394,50 @@ public class OrganizerController : Controller
                     mau      = z.MauSac,
                     viTriX   = z.ViTriX,
                     viTriY   = z.ViTriY,
+                    rong     = z.Rong,
+                    cao      = z.Cao,
+                    loaiKhuVuc = z.LoaiKhuVuc,
+                    sucChua  = z.LoaiKhuVuc == "ga" ? z.SucChua : (int?)null,
+                    tienTo   = z.TienToHangGhe,
+                    kieuDanhSo = z.HuongDanhSo,
+                    soBatDau = z.SoBatDau,
+                    boQuaChuDeNham = z.BoQuaChuDeNham,
                     order    = orderCounter++
                 }, transaction);
 
-                // Khu vực đứng (GA): Tạo 1 hàng đặc biệt với số ghế = sức chứa tối đa
+                // Khu đứng là sức chứa của KhuVuc, không tạo hàng/ghế giả.
                 if (z.LoaiKhuVuc == "ga")
                 {
-                    var rowId = await connection.QuerySingleAsync<int>(@"
-                        INSERT INTO HangGhe (KhuVucId, TenHang, SoGhe, ThuTu)
-                        OUTPUT INSERTED.Id
-                        VALUES (@zoneId, N'GA', @sucChua, 1)
-                    ", new { zoneId, sucChua = z.SucChua }, transaction);
-
-                    for (int seat = 1; seat <= z.SucChua; seat++)
-                    {
-                        await connection.ExecuteAsync(@"
-                            INSERT INTO ChoNgoi (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
-                            VALUES (@rowId, @seat, @x, 1, 0)
-                        ", new { rowId, seat = seat.ToString(), x = seat }, transaction);
-                    }
                     continue;
                 }
 
                 // Khu vực ghế ngồi cố định (Seated)
                 string prefix = string.IsNullOrWhiteSpace(z.TienToHangGhe) ? "" : z.TienToHangGhe.Trim();
                 bool rtl = z.HuongDanhSo == "rtl";
+                int buocDanhSo = z.HuongDanhSo is "odd" or "even" ? 2 : 1;
+                int soBatDau = z.SoBatDau;
+                if (z.HuongDanhSo == "odd" && soBatDau % 2 == 0) soBatDau++;
+                if (z.HuongDanhSo == "even" && soBatDau % 2 != 0) soBatDau++;
 
                 for (int r = 0; r < z.SoHang; r++)
                 {
-                    string rowLabel = TaoTenHang(currentOverallRow);
+                    string rowLabel = TaoTenHang(r, z.BoQuaChuDeNham);
                     string rowName  = prefix + rowLabel;
-                    currentOverallRow++;
 
                     var rowId = await connection.QuerySingleAsync<int>(@"
                         INSERT INTO HangGhe (KhuVucId, TenHang, SoGhe, ThuTu)
                         OUTPUT INSERTED.Id
                         VALUES (@zoneId, @rowName, @soGhe, @order)
-                    ", new { zoneId, rowName, soGhe = z.SoGheMoiHang, order = currentOverallRow }, transaction);
+                    ", new { zoneId, rowName, soGhe = z.SoGheMoiHang, order = r + 1 }, transaction);
 
                     for (int col = 0; col < z.SoGheMoiHang; col++)
                     {
-                        int seatNum = z.SoBatDau + (rtl ? (z.SoGheMoiHang - 1 - col) : col);
+                        int seatNum = soBatDau + (rtl ? (z.SoGheMoiHang - 1 - col) : col) * buocDanhSo;
                         string seatLabel = rowName + seatNum;
                         await connection.ExecuteAsync(@"
                             INSERT INTO ChoNgoi (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
                             VALUES (@rowId, @seatLabel, @x, @y, 0)
-                        ", new { rowId, seatLabel, x = col + 1, y = currentOverallRow }, transaction);
+                        ", new { rowId, seatLabel, x = col + 1, y = r + 1 }, transaction);
                     }
                 }
             }
@@ -2361,24 +2466,28 @@ public class OrganizerController : Controller
         public string MauSac { get; set; } = "#198754";
         public int ViTriX { get; set; }
         public int ViTriY { get; set; }
-        public int RongCanvas { get; set; }
-        public int CaoCanvas { get; set; }
+        public int Rong { get; set; }
+        public int Cao { get; set; }
         public string LoaiKhuVuc { get; set; } = "seated"; // "seated" | "ga"
         public int SucChua { get; set; }
         public string TienToHangGhe { get; set; } = "";
-        public string HuongDanhSo { get; set; } = "ltr"; // "ltr" | "rtl"
+        public string HuongDanhSo { get; set; } = "ltr"; // "ltr" | "rtl" | "odd" | "even"
         public int SoBatDau { get; set; } = 1;
+        public bool BoQuaChuDeNham { get; set; } = true;
     }
 
     private static bool HinhChuNhatGiaoNhau(int x1, int y1, int width1, int height1, int x2, int y2, int width2, int height2)
         => x1 <= x2 + width2 - 1 && x1 + width1 - 1 >= x2
         && y1 <= y2 + height2 - 1 && y1 + height1 - 1 >= y2;
 
-    private static string TaoTenHang(int index)
+    private static string TaoTenHang(int index, bool boQuaChuDeNham = false)
     {
+        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        string kyTuDuocDung = boQuaChuDeNham ? "ABCDEFGHJKLMNPRSTWXYZ" : alphabet;
         string result = "";
-        for (int value = index + 1; value > 0; value = (value - 1) / 26)
-            result = (char)('A' + (value - 1) % 26) + result;
+        int coSo = kyTuDuocDung.Length;
+        for (int value = index + 1; value > 0; value = (value - 1) / coSo)
+            result = kyTuDuocDung[(value - 1) % coSo] + result;
         return result;
     }
 
@@ -2451,11 +2560,20 @@ public class OrganizerController : Controller
 
         var exportObj = new
         {
-            version = "1.0",
+            version = "2.0",
             tenSoDo = soDo.TenSoDo,
             loaiSoDo = soDo.LoaiSoDo,
+            canvas = new { width = soDo.CanvasRong, height = soDo.CanvasCao },
             sanKhauX = soDo.SanKhauX,
             sanKhauY = soDo.SanKhauY,
+            stage = new
+            {
+                x = soDo.SanKhauX,
+                y = soDo.SanKhauY,
+                width = soDo.SanKhauRong,
+                height = soDo.SanKhauCao,
+                title = soDo.NhanSanKhau
+            },
             zones = khuVucs.Select(k => new
             {
                 ten = k.TenKhuVuc,
@@ -2463,6 +2581,14 @@ public class OrganizerController : Controller
                 mauSac = k.MauSac,
                 viTriX = k.ViTriX,
                 viTriY = k.ViTriY,
+                rong = k.Rong,
+                cao = k.Cao,
+                loaiKhuVuc = k.LoaiKhuVuc,
+                sucChua = k.SucChua,
+                tienTo = k.TienToHangGhe,
+                huongDanhSo = k.KieuDanhSo,
+                soBatDau = k.SoBatDau,
+                boQuaChuDeNham = k.BoQuaChuDeNham,
                 soHang = hangGhes.Count(h => h.KhuVucId == k.Id),
                 soGheMoiHang = hangGhes.Where(h => h.KhuVucId == k.Id).Select(h => h.SoGhe).FirstOrDefault()
             })
