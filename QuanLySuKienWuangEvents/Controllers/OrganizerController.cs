@@ -2177,8 +2177,10 @@ public class OrganizerController : Controller
 
         int mapWidth = Math.Clamp(canvasRong ?? 960, 720, 1600);
         int mapHeight = Math.Clamp(canvasCao ?? 650, 500, 1100);
-        int stageWidth = Math.Clamp(sanKhauRong ?? 280, 160, 520);
-        int stageHeight = Math.Clamp(sanKhauCao ?? 44, 32, 100);
+        // Một số mẫu (khán phòng/sân thể thao) cần sân khấu hoặc sân đấu lớn hơn
+        // mẫu dải ngang cũ. Vẫn giới hạn trong canvas để sơ đồ an toàn khi lưu.
+        int stageWidth = Math.Clamp(sanKhauRong ?? 280, 160, Math.Min(900, mapWidth));
+        int stageHeight = Math.Clamp(sanKhauCao ?? 44, 32, Math.Min(280, mapHeight));
         int stageX = Math.Clamp(sanKhauX ?? ((mapWidth - stageWidth) / 2), 0, mapWidth - stageWidth);
         int stageY = Math.Clamp(sanKhauY ?? 36, 0, mapHeight - stageHeight);
         string stageLabel = string.IsNullOrWhiteSpace(nhanSanKhau) ? "SÂN KHẤU" : nhanSanKhau.Trim();

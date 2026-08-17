@@ -304,17 +304,17 @@
             <div class="studio-sidebar">
                 <p class="sb-section-title">Mẫu địa điểm</p>
                 <div class="preset-list" id="presetList">
+                    <button type="button" class="preset-btn" data-preset="auditorium" onclick="selectPreset('auditorium')">
+                        <span class="preset-icon"><i class="fas fa-landmark"></i></span>
+                        <span class="ptxt"><strong>Khán phòng / hội trường</strong><small>Sân khấu giữa, hai cánh và hàng trước</small></span>
+                    </button>
                     <button type="button" class="preset-btn active" data-preset="concert" onclick="selectPreset('concert')">
                         <span class="preset-icon"><i class="fas fa-music"></i></span>
-                        <span class="ptxt"><strong>Live show / sân khấu</strong><small>VIP trung tâm, khán đài và hàng sau</small></span>
+                        <span class="ptxt"><strong>Ghế đặt trước / concert</strong><small>Sân khấu giữa, hai cánh và khu VIP</small></span>
                     </button>
                     <button type="button" class="preset-btn" data-preset="theatre" onclick="selectPreset('theatre')">
                         <span class="preset-icon"><i class="fas fa-masks-theater"></i></span>
-                        <span class="ptxt"><strong>Nhà hát biểu diễn</strong><small>Tầng trệt, lô cánh và ban công</small></span>
-                    </button>
-                    <button type="button" class="preset-btn" data-preset="auditorium" onclick="selectPreset('auditorium')">
-                        <span class="preset-icon"><i class="fas fa-landmark"></i></span>
-                        <span class="ptxt"><strong>Hội nghị / hội trường</strong><small>Ba khối ghế, lối đi và màn hình</small></span>
+                        <span class="ptxt"><strong>Tiệc cưới / banquet</strong><small>Khu gia đình, bạn bè và khách mời</small></span>
                     </button>
                     <button type="button" class="preset-btn" data-preset="arena" onclick="selectPreset('arena')">
                         <span class="preset-icon"><i class="fas fa-trophy"></i></span>
@@ -868,30 +868,59 @@ function centerZone(z, y) {
 // chỉ làm khu rộng/cao hơn, không được đảo lộn "vai trò" của từng khu.
 function layoutPresetZones(preset, items) {
     if (!items.length) return;
-    const top = stageConfig.y + stageConfig.height + 38;
     const sideMargin = 30;
     const sideGap = 30;
 
+    if (preset === 'auditorium' && items.length >= 3) {
+        // Khán phòng: sân khấu/màn hình ở giữa, hai dãy cánh hai bên và hàng ghế trung tâm.
+        const [front, leftWing, rightWing] = items;
+        placeZone(leftWing, 40, 100);
+        placeZone(rightWing, MAP_WIDTH - 40 - calcZoneSize(rightWing).w, 100);
+        centerZone(front, stageConfig.y + stageConfig.height + 42);
+        return;
+    }
+
+    if (preset === 'concert' && items.length >= 3) {
+        // Mẫu ghế đặt trước: sân khấu ở trung tâm, khối vé thường ở hai cánh,
+        // khu VIP nằm chính diện phía trước sân khấu.
+        const [vip, leftWing, rightWing] = items;
+        placeZone(leftWing, 40, 90);
+        placeZone(rightWing, MAP_WIDTH - 40 - calcZoneSize(rightWing).w, 90);
+        centerZone(vip, stageConfig.y + stageConfig.height + 42);
+        return;
+    }
+
+    if (preset === 'theatre' && items.length >= 5) {
+        // Tiệc cưới/banquet: bàn gia tiên ở đầu sơ đồ, khách mời được chia thành
+        // bốn khu gia đình - bạn bè đối xứng, giữ lối đi trung tâm thông thoáng.
+        const [vip, brideFamily, groomFamily, brideFriends, groomFriends] = items;
+        centerZone(vip, 180);
+        placeZone(brideFamily, 60, 420);
+        placeZone(groomFamily, MAP_WIDTH - 60 - calcZoneSize(groomFamily).w, 420);
+        placeZone(brideFriends, 60, 600);
+        placeZone(groomFriends, MAP_WIDTH - 60 - calcZoneSize(groomFriends).w, 600);
+        return;
+    }
+
     if (preset === 'arena') {
         const vip = items[0];
-        centerZone(vip, 60);
-        const bottomY = stageConfig.y + stageConfig.height + 38;
+        centerZone(vip, 20);
         const others = items.slice(1);
-        if (others.length === 1) {
-            centerZone(others[0], bottomY);
+        if (others.length >= 4) {
+            const [west, east, southLeft, southRight] = others;
+            placeZone(west, 20, stageConfig.y);
+            placeZone(east, MAP_WIDTH - 20 - calcZoneSize(east).w, stageConfig.y);
+            placeZone(southLeft, 220, stageConfig.y + stageConfig.height + 100);
+            placeZone(southRight, MAP_WIDTH - 220 - calcZoneSize(southRight).w, stageConfig.y + stageConfig.height + 100);
         } else if (others.length === 2) {
-            const left = others[0], right = others[1];
-            placeZone(left, sideMargin, bottomY);
-            placeZone(right, MAP_WIDTH - sideMargin - calcZoneSize(right).w, bottomY);
-        } else if (others.length === 3) {
-            const [left, center, right] = others;
-            placeZone(left, sideMargin, bottomY);
-            centerZone(center, bottomY);
-            placeZone(right, MAP_WIDTH - sideMargin - calcZoneSize(right).w, bottomY);
+            const [west, east] = others;
+            placeZone(west, 20, stageConfig.y + stageConfig.height + 40);
+            placeZone(east, MAP_WIDTH - 20 - calcZoneSize(east).w, stageConfig.y + stageConfig.height + 40);
         }
         return;
     }
 
+    const top = stageConfig.y + stageConfig.height + 38;
     const primary = items[0];
     centerZone(primary, top);
     const afterPrimary = top + calcZoneSize(primary).h + sideGap;
@@ -927,34 +956,36 @@ function buildPresetZones(preset) {
     };
     let result;
     if (preset === 'concert') {
-        stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };
+        stageConfig = { x: 350, y: 240, width: 500, height: 90, title: 'SÂN KHẤU' };
         result = [
-            zone('Khu VIP trung tâm', 0, 5, 10, 415, 125),
-            zone('Khu vé thường trái', 1, 10, 10, 150, 390),
-            zone('Khu vé thường phải', 1, 10, 10, 680, 390)
+            zone('Khu VIP chính diện', 0, 5, 10, 415, 370),
+            zone('Khu ghế cánh trái', 1, 15, 7, 40, 90),
+            zone('Khu ghế cánh phải', 1, 15, 7, 886, 90)
         ];
     } else if (preset === 'theatre') {
-        stageConfig = { x: 420, y: 36, width: 360, height: 48, title: 'SÂN KHẤU' };
+        stageConfig = { x: 400, y: 70, width: 400, height: 80, title: 'BÀN GIA TIÊN / SÂN KHẤU' };
         result = [
-            zone('Tầng trệt VIP', 0, 5, 10, 415, 125),
-            zone('Tầng trệt tiêu chuẩn', 1, 10, 10, 415, 360),
-            zone('Ban công trái', 1, 5, 10, 30, 360),
-            zone('Ban công phải', 1, 5, 10, 800, 360)
+            zone('Khu khách mời danh dự', 0, 5, 10, 415, 180),
+            zone('Gia đình cô dâu', 1, 4, 13, 60, 420),
+            zone('Gia đình chú rể', 1, 4, 13, 674, 420),
+            zone('Bạn bè cô dâu', 1, 4, 13, 60, 600),
+            zone('Bạn bè chú rể', 1, 4, 13, 674, 600)
         ];
     } else if (preset === 'auditorium') {
-        stageConfig = { x: 410, y: 36, width: 380, height: 48, title: 'SÂN KHẤU / MÀN HÌNH' };
+        stageConfig = { x: 350, y: 100, width: 500, height: 100, title: 'SÂN KHẤU / MÀN HÌNH' };
         result = [
-            zone('Khu khách mời', 0, 5, 10, 415, 125),
-            zone('Khối ghế A', 1, 10, 10, 150, 390),
-            zone('Khối ghế B', 1, 10, 10, 680, 390)
+            zone('Hàng ghế trung tâm', 0, 5, 10, 415, 250),
+            zone('Cánh khán phòng trái', 1, 15, 7, 40, 100),
+            zone('Cánh khán phòng phải', 1, 15, 7, 886, 100)
         ];
     } else if (preset === 'arena') {
-        stageConfig = { x: 420, y: 345, width: 360, height: 88, title: 'SÀN ĐẤU / SÂN KHẤU' };
+        stageConfig = { x: 300, y: 260, width: 600, height: 220, title: 'SÂN THI ĐẤU' };
         result = [
-            zone('Khán đài Bắc - VIP', 0, 5, 10, 415, 60),
-            zone('Khán đài Tây', 1, 7, 10, 30, 480),
-            zone('Khán đài Nam', 1, 7, 10, 415, 480),
-            zone('Khán đài Đông', 1, 7, 10, 800, 480)
+            zone('Khán đài Bắc - VIP', 0, 5, 10, 415, 20),
+            zone('Khán đài Tây', 1, 8, 7, 20, 260),
+            zone('Khán đài Đông', 1, 8, 7, 906, 260),
+            zone('Khán đài Nam trái', 1, 5, 10, 220, 580),
+            zone('Khán đài Nam phải', 1, 5, 10, 610, 580)
         ];
     } else {
         stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };
@@ -1361,9 +1392,9 @@ function selectPreset(preset) {
 
     const names = {
         concert: 'Sơ đồ Live Concert - ' + EVENT_NAME,
-        theatre: 'Sơ đồ Nhà hát Hòa nhạc - ' + EVENT_NAME,
-        auditorium: 'Sơ đồ Hội nghị - ' + EVENT_NAME,
-        arena: 'Sơ đồ Nhà thi đấu 4 hướng - ' + EVENT_NAME,
+        theatre: 'Sơ đồ Tiệc cưới - ' + EVENT_NAME,
+        auditorium: 'Sơ đồ Khán phòng - ' + EVENT_NAME,
+        arena: 'Sơ đồ Nhà thi đấu - ' + EVENT_NAME,
         custom: 'Sơ đồ tùy chỉnh - ' + EVENT_NAME,
     };
     document.getElementById('tenSoDoField').value = names[preset] || 'Sơ đồ - ' + EVENT_NAME;
