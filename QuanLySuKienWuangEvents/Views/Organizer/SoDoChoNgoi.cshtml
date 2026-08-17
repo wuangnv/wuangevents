@@ -10,7 +10,7 @@
     var hang = ViewBag.Hang as Dictionary<int, string> ?? new();
     var khuVucTheoHang = ViewBag.KhuVucTheoHang as Dictionary<int, KhuVuc> ?? new();
     var cacKhuVuc = ViewBag.KhuVucs as List<KhuVuc> ?? khuVucTheoHang.Values.GroupBy(x => x.Id).Select(x => x.First()).OrderBy(x => x.ThuTu).ToList();
-    var cacBoCuc = new[] { "concert", "auditorium", "theatre", "cinema", "arena", "custom" };
+    var cacBoCuc = new[] { "workshop", "auditorium", "concert", "gala", "theatre", "cinema", "arena", "custom" };
     string boCucDaLuu = cacBoCuc.Contains(Model.LoaiSoDo) ? Model.LoaiSoDo : "custom";
     int soTrong = ghe.Count(x => x.TrangThai == 0), dangGiu = ghe.Count(x => x.TrangThai == 1);
     int daBan = ghe.Count(x => x.TrangThai == 2), daKhoa = ghe.Count(x => x.TrangThai == 3);
@@ -58,6 +58,7 @@
 .org-stage{position:absolute;z-index:5;background:linear-gradient(120deg,#4c1d95,#7c3aed 60%,#a855f7);color:white;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 12px;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-align:center;box-shadow:0 8px 18px rgba(109,40,217,.2)}
 .org-zone{position:absolute;box-sizing:border-box;border:2px solid var(--zcolor,#4f46e5);border-radius:13px;overflow:hidden;background:color-mix(in srgb,var(--zcolor,#4f46e5) 6%,#fff);box-shadow:0 9px 21px color-mix(in srgb,var(--zcolor,#4f46e5) 14%,transparent)}
 .org-zone .rows-wrap{height:calc(100% - 41px);overflow:auto}.org-zone .seat-row{justify-content:flex-start}.org-zone .ga-info-box{height:calc(100% - 41px);display:flex;flex-direction:column;justify-content:center}
+.org-zone.banquet-zone{overflow:visible;border:0;background:transparent;box-shadow:none}.org-banquet-title{position:absolute;left:50%;top:3px;transform:translateX(-50%);max-width:100%;font-size:.68rem;font-weight:850;color:var(--zcolor,#4f46e5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.org-banquet-core{position:absolute;left:50%;top:50%;width:54px;height:36px;transform:translate(-50%,-42%);border:2px solid var(--zcolor,#4f46e5);border-radius:50%;background:color-mix(in srgb,var(--zcolor,#4f46e5) 12%,#fff);display:grid;place-items:center;font-size:.58rem;font-weight:900;color:var(--zcolor,#4f46e5)}.org-banquet-seat{position:absolute!important;width:19px!important;height:16px!important;border-radius:5px 5px 3px 3px!important;font-size:.46rem!important;z-index:2}.org-banquet-ticket{position:absolute;left:50%;bottom:1px;transform:translateX(-50%);font-size:.55rem;font-weight:800;color:#64748b;white-space:nowrap}
 
 /* Stage header (organizer view) */
 .org-stage-hdr{text-align:center;margin-bottom:20px}
@@ -255,27 +256,48 @@
                             int zoneHeight = zone.Cao > 0 ? zone.Cao : 180;
                             int zoneX = zone.ViTriX ?? 0;
                             int zoneY = zone.ViTriY ?? 0;
-                            <section class="org-zone" style="--zcolor:@zc;left:@zoneX.ToString()px;top:@zoneY.ToString()px;width:@zoneWidth.ToString()px;height:@zoneHeight.ToString()px">
-                                <div class="zone-header"><span class="zone-name">@zone.TenKhuVuc</span><span class="zone-ticket">@(ve?.TenLoaiVe ?? "Loại vé")</span></div>
-                                @if (zone.LoaiKhuVuc == "ga")
+                            <section class="org-zone @(zone.LoaiKhuVuc == "banquet" ? "banquet-zone" : "")" style="--zcolor:@zc;left:@zoneX.ToString()px;top:@zoneY.ToString()px;width:@zoneWidth.ToString()px;height:@zoneHeight.ToString()px">
+                                @if (zone.LoaiKhuVuc == "banquet")
                                 {
-                                    <div class="ga-info-box"><div class="ga-info-lbl"><i class="fas fa-person-walking me-1"></i>Khu đứng</div><div class="ga-info-sub">Sức chứa @((zone.SucChua ?? 0).ToString("N0")) người · @(ve?.TenLoaiVe)</div></div>
+                                    var tableSeats = zoneRows.SelectMany(row => row).ToList();
+                                    <div class="org-banquet-title">@zone.TenKhuVuc</div>
+                                    <div class="org-banquet-core">BÀN</div>
+                                    @for (int seatIndex = 0; seatIndex < tableSeats.Count; seatIndex++)
+                                    {
+                                        var seat = tableSeats[seatIndex];
+                                        var angle = -Math.PI / 2d + 2d * Math.PI * seatIndex / Math.Max(1, tableSeats.Count);
+                                        var seatLeft = (int)Math.Round(zoneWidth / 2d + Math.Cos(angle) * 55d - 10d);
+                                        var seatTop = (int)Math.Round(zoneHeight / 2d + Math.Sin(angle) * 38d - 8d);
+                                        string cls = seat.TrangThai == 1 ? "cseat held org-banquet-seat" : seat.TrangThai == 2 ? "cseat sold org-banquet-seat" : seat.TrangThai == 3 ? "cseat locked org-banquet-seat" : "cseat org-banquet-seat";
+                                        bool dis = isLocked || seat.TrangThai is 1 or 2;
+                                        string tip = seat.TrangThai == 0 ? "Khóa ghế này" : seat.TrangThai == 3 ? "Mở khóa ghế này" : seat.TrangThai == 1 ? "Đang giữ" : "Đã bán";
+                                        <button type="button" class="@cls" id="sb-@seat.Id" disabled="@dis" title="@tip" onclick="seatToggle(@seat.Id)" style="--zcolor:@zc;left:@seatLeft.ToString()px;top:@seatTop.ToString()px">@(seat.SoGhe.Contains('-') ? seat.SoGhe[(seat.SoGhe.LastIndexOf('-') + 1)..] : seat.SoGhe)</button>
+                                    }
+                                    <span class="org-banquet-ticket">@(ve?.TenLoaiVe ?? "Loại vé") · @tableSeats.Count ghế</span>
                                 }
                                 else
                                 {
-                                    <div class="rows-wrap">
-                                        @foreach (var row in zoneRows)
-                                        {
-                                            <div class="seat-row"><span class="row-label">@hang.GetValueOrDefault(row.Key)</span>
-                                            @foreach (var seat in row)
+                                    <div class="zone-header"><span class="zone-name">@zone.TenKhuVuc</span><span class="zone-ticket">@(ve?.TenLoaiVe ?? "Loại vé")</span></div>
+                                    @if (zone.LoaiKhuVuc == "ga")
+                                    {
+                                        <div class="ga-info-box"><div class="ga-info-lbl"><i class="fas fa-person-walking me-1"></i>Khu đứng</div><div class="ga-info-sub">Sức chứa @((zone.SucChua ?? 0).ToString("N0")) người · @(ve?.TenLoaiVe)</div></div>
+                                    }
+                                    else
+                                    {
+                                        <div class="rows-wrap">
+                                            @foreach (var row in zoneRows)
                                             {
-                                                string cls = seat.TrangThai == 1 ? "cseat held" : seat.TrangThai == 2 ? "cseat sold" : seat.TrangThai == 3 ? "cseat locked" : "cseat";
-                                                bool dis = isLocked || seat.TrangThai is 1 or 2;
-                                                string tip = seat.TrangThai == 0 ? "Khóa ghế này" : seat.TrangThai == 3 ? "Mở khóa ghế này" : seat.TrangThai == 1 ? "Đang giữ" : "Đã bán";
-                                                <button type="button" class="@cls" id="sb-@seat.Id" disabled="@dis" title="@tip" onclick="seatToggle(@seat.Id)" style="--zcolor:@zc">@seat.SoGhe</button>
-                                            }</div>
-                                        }
-                                    </div>
+                                                <div class="seat-row"><span class="row-label">@hang.GetValueOrDefault(row.Key)</span>
+                                                @foreach (var seat in row)
+                                                {
+                                                    string cls = seat.TrangThai == 1 ? "cseat held" : seat.TrangThai == 2 ? "cseat sold" : seat.TrangThai == 3 ? "cseat locked" : "cseat";
+                                                    bool dis = isLocked || seat.TrangThai is 1 or 2;
+                                                    string tip = seat.TrangThai == 0 ? "Khóa ghế này" : seat.TrangThai == 3 ? "Mở khóa ghế này" : seat.TrangThai == 1 ? "Đang giữ" : "Đã bán";
+                                                    <button type="button" class="@cls" id="sb-@seat.Id" disabled="@dis" title="@tip" onclick="seatToggle(@seat.Id)" style="--zcolor:@zc">@seat.SoGhe</button>
+                                                }</div>
+                                            }
+                                        </div>
+                                    }
                                 }
                             </section>
                         }
@@ -304,17 +326,21 @@
             <div class="studio-sidebar">
                 <p class="sb-section-title">Mẫu địa điểm</p>
                 <div class="preset-list" id="presetList">
+                    <button type="button" class="preset-btn active" data-preset="workshop" onclick="selectPreset('workshop')">
+                        <span class="preset-icon"><i class="fas fa-chalkboard-user"></i></span>
+                        <span class="ptxt"><strong>Phòng Workshop</strong><small>Một hoặc hai dãy, lối đi chính giữa</small></span>
+                    </button>
                     <button type="button" class="preset-btn" data-preset="auditorium" onclick="selectPreset('auditorium')">
                         <span class="preset-icon"><i class="fas fa-landmark"></i></span>
-                        <span class="ptxt"><strong>Khán phòng / hội trường</strong><small>Sân khấu giữa, hai cánh và hàng trước</small></span>
+                        <span class="ptxt"><strong>Hội trường 3 dãy</strong><small>Khối trái, giữa, phải và hai lối đi</small></span>
                     </button>
-                    <button type="button" class="preset-btn active" data-preset="concert" onclick="selectPreset('concert')">
+                    <button type="button" class="preset-btn" data-preset="concert" onclick="selectPreset('concert')">
                         <span class="preset-icon"><i class="fas fa-music"></i></span>
-                        <span class="ptxt"><strong>Ghế đặt trước / concert</strong><small>Sân khấu giữa, hai cánh và khu VIP</small></span>
+                        <span class="ptxt"><strong>Sân khấu biểu diễn</strong><small>VIP/GA sát sân khấu, vé thường phía sau</small></span>
                     </button>
-                    <button type="button" class="preset-btn" data-preset="theatre" onclick="selectPreset('theatre')">
-                        <span class="preset-icon"><i class="fas fa-masks-theater"></i></span>
-                        <span class="ptxt"><strong>Tiệc cưới / banquet</strong><small>Khu gia đình, bạn bè và khách mời</small></span>
+                    <button type="button" class="preset-btn" data-preset="gala" onclick="selectPreset('gala')">
+                        <span class="preset-icon"><i class="fas fa-utensils"></i></span>
+                        <span class="ptxt"><strong>Tiệc Gala / bàn tròn</strong><small>Bàn 6–10 ghế, lối đi trung tâm</small></span>
                     </button>
                     <button type="button" class="preset-btn" data-preset="arena" onclick="selectPreset('arena')">
                         <span class="preset-icon"><i class="fas fa-trophy"></i></span>
@@ -328,6 +354,7 @@
                 <hr class="sb-divider">
                 <p class="sb-section-title">Khu vực trong sơ đồ</p>
                 <button type="button" class="sb-btn-add" onclick="addSeatedZone()"><i class="fas fa-chair"></i> Thêm khu ghế ngồi</button>
+                <button type="button" class="sb-btn-add" onclick="addBanquetTable()" style="background:#fff7ed;border-color:#fb923c;color:#c2410c;margin-top:0"><i class="fas fa-utensils"></i> Thêm bàn tiệc</button>
                 <button type="button" class="sb-btn-add" onclick="addGAZone()" style="background:#fff8f0;border-color:#f59e0b;color:#d97706;margin-top:0"><i class="fas fa-person-walking"></i> Thêm khu đứng (GA)</button>
                 <button type="button" class="sb-btn-add" onclick="autoAllocateSeatsForTickets()" style="background:#f0fdf4;border-color:#86efac;color:#047857;margin-top:0"><i class="fas fa-wand-magic-sparkles"></i> Tự cân số ghế theo vé</button>
                 <div class="sb-zone-list" id="sbZoneList"></div>
@@ -352,8 +379,8 @@
                 <form method="post" action="/Organizer/TaoSoDo" id="studioForm">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="suKienId" value="@suKienId" />
-                    <input type="hidden" name="loaiSoDo" id="loaiSoDoInput" value="concert" />
-                    <input type="hidden" name="sanKhauX" id="skXInput" value="440" />
+                    <input type="hidden" name="loaiSoDo" id="loaiSoDoInput" value="workshop" />
+                    <input type="hidden" name="sanKhauX" id="skXInput" value="400" />
                     <input type="hidden" name="sanKhauY" id="skYInput" value="36" />
                     <input type="hidden" name="sanKhauRong" id="skWidthInput" value="320" />
                     <input type="hidden" name="sanKhauCao" id="skHeightInput" value="48" />
@@ -419,8 +446,9 @@
                         <div class="pf">
                             <label>Kiểu khu vực</label>
                             <div class="zone-type-switch">
-                                <button class="zt-btn active" id="ztSeated" onclick="setZoneType('seated')"><i class="fas fa-chair me-1"></i>Ghế ngồi</button>
-                                <button class="zt-btn" id="ztGA" onclick="setZoneType('ga')"><i class="fas fa-person-walking me-1"></i>Khu đứng (GA)</button>
+                                <button type="button" class="zt-btn active" id="ztSeated" onclick="setZoneType('seated')"><i class="fas fa-chair me-1"></i>Ghế ngồi</button>
+                                <button type="button" class="zt-btn" id="ztBanquet" onclick="setZoneType('banquet')"><i class="fas fa-utensils me-1"></i>Bàn tiệc</button>
+                                <button type="button" class="zt-btn" id="ztGA" onclick="setZoneType('ga')"><i class="fas fa-person-walking me-1"></i>Khu đứng (GA)</button>
                             </div>
                         </div>
                         <div class="pf" id="gaCapField" style="display:none">
@@ -431,13 +459,13 @@
 
                     <!-- Tab Hàng & Ghế -->
                     <div class="props-body hidden" id="tabBodySeats">
-                        <div class="pf-grid2">
-                            <div class="pf"><label>Tổng số ghế</label><input type="number" id="pSeatCount" min="1" max="600" oninput="updateSelectedZone('seatCount',this.value)" /></div>
-                            <div class="pf"><label>Số hàng</label><input type="number" id="pRows" min="1" max="20" oninput="updateSelectedZone('rows',this.value)" /></div>
+                        <div class="pf-grid2" id="pSeatShapeFields">
+                            <div class="pf"><label id="pSeatCountLabel">Tổng số ghế</label><input type="number" id="pSeatCount" min="1" max="600" oninput="updateSelectedZone('seatCount',this.value)" /></div>
+                            <div class="pf" id="pRowsField"><label>Số hàng</label><input type="number" id="pRows" min="1" max="20" oninput="updateSelectedZone('rows',this.value)" /></div>
                         </div>
-                        <div class="pf"><label>Ghế / hàng (tự tính)</label><input type="number" id="pCols" readonly tabindex="-1" /></div>
-                        <div class="pf"><label>Tiền tố tên hàng</label><input type="text" id="pPrefix" maxlength="10" placeholder="Bỏ trống = A, B, C..." oninput="updateSelectedZone('prefix',this.value)" /></div>
-                        <div class="pf">
+                        <div class="pf" id="pColsField"><label>Ghế / hàng (tự tính)</label><input type="number" id="pCols" readonly tabindex="-1" /></div>
+                        <div class="pf" id="pPrefixField"><label>Tiền tố tên hàng</label><input type="text" id="pPrefix" maxlength="10" placeholder="Bỏ trống = A, B, C..." oninput="updateSelectedZone('prefix',this.value)" /></div>
+                        <div class="pf" id="pNumSchemeField">
                             <label>Kiểu đánh số ghế</label>
                             <select id="pNumScheme" onchange="updateSelectedZone('numScheme',this.value)">
                                 <option value="ltr">Liên tục Trái → Phải (1, 2, 3...)</option>
@@ -446,8 +474,8 @@
                                 <option value="even">Chẵn (2, 4, 6...)</option>
                             </select>
                         </div>
-                        <div class="pf"><label>Số ghế bắt đầu</label><input type="number" id="pStartNum" min="1" max="999" value="1" oninput="updateSelectedZone('startNum',this.value)" /></div>
-                        <div class="pf">
+                        <div class="pf" id="pStartNumField"><label>Số ghế bắt đầu</label><input type="number" id="pStartNum" min="1" max="999" value="1" oninput="updateSelectedZone('startNum',this.value)" /></div>
+                        <div class="pf" id="pSkipLettersField">
                             <label>Bỏ qua chữ dễ nhầm (I, O, Q)</label>
                             <select id="pSkipLetters" onchange="updateSelectedZone('skipLetters',this.value)">
                                 <option value="yes">Có (Chuẩn quốc tế)</option>
@@ -480,13 +508,13 @@ const SEAT_W = 28, SEAT_H = 24, SEAT_GAP = 4;
 const ROW_LABEL_W = 26, ROW_GAP = 6;
 const ZONE_PAD = 12, ZONE_HEADER_H = 32;
 
-let currentPreset = 'concert';
+let currentPreset = 'workshop';
 let zones = []; // Array of zone objects
 let selectedZoneId = null;
 let undoStack = [], redoStack = [];
 let konvaStage, konvaLayer, konvaBgLayer;
 let stageGroup = null;
-let stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };
+let stageConfig = { x: 400, y: 36, width: 400, height: 64, title: 'BỤC DIỄN GIẢ / MÀN HÌNH' };
 
 function saveStudioDraft() {
     if (!document.getElementById('studioForm')) return;
@@ -697,7 +725,7 @@ function getZoneCapacity(z) {
 // Tổng số ghế là nguồn dữ liệu chính. Số hàng chỉ quyết định cách dàn ghế;
 // hàng cuối tự ngắn hơn khi cần để số ghế luôn đúng tuyệt đối.
 function normalizeSeatedZone(z) {
-    if (z.type === 'ga') return;
+    if (z.type !== 'seated') return;
     const total = Math.max(1, Math.min(MAX_SEATED_SEATS_PER_ZONE, Number(z.seatCount ?? (z.rows * z.cols) ?? 1)));
     const minRows = Math.ceil(total / 30);
     z.rows = Math.max(minRows, Math.min(20, Number(z.rows || minRows)));
@@ -797,6 +825,8 @@ function fitPresetCapacities(items) {
 // để không có khu nào chồng lên nhau, vượt canvas hoặc nằm quá xa nhau.
 function reflowZonesWhenNeeded(items) {
     if (!items.length) return;
+    // Bàn tiệc đã có vị trí không gian cố định quanh lối đi; không được tự dồn lại thành lưới.
+    if (items.some(z => z.type === 'banquet')) return;
 
     const isOutside = z => {
         const { w, h } = calcZoneSize(z);
@@ -815,7 +845,7 @@ function reflowZonesWhenNeeded(items) {
     // khu đứng cạnh nhau trên canvas 1.200px, đồng thời không kéo sơ đồ quá cao.
     const targetCols = items.length <= 2 ? 24 : 15;
     items.forEach(z => {
-        if (z.type === 'ga') return;
+        if (z.type !== 'seated') return;
         z.rows = Math.max(1, Math.min(20, Math.ceil(getZoneCapacity(z) / targetCols)));
         normalizeSeatedZone(z);
     });
@@ -835,7 +865,7 @@ function reflowZonesWhenNeeded(items) {
         }
 
         // Nếu chiều cao chưa phù hợp, dàn nhiều hàng hơn để khu hẹp và thấp vừa canvas.
-        if (y + size.h > MAP_HEIGHT - padding && z.type !== 'ga') {
+        if (y + size.h > MAP_HEIGHT - padding && z.type === 'seated') {
             z.rows = 20;
             normalizeSeatedZone(z);
             size = calcZoneSize(z);
@@ -863,133 +893,115 @@ function centerZone(z, y) {
     placeZone(z, (MAP_WIDTH - size.w) / 2, y);
 }
 
-// Bố cục mẫu ưu tiên đúng quy ước thực tế: khu VIP/khách mời ở phía trước,
-// các khối vé phổ thông xếp cân xứng và có lối đi rõ ràng. Số ghế thay đổi
-// chỉ làm khu rộng/cao hơn, không được đảo lộn "vai trò" của từng khu.
+// Mỗi preset mô phỏng một không gian thực tế. Sân khấu là mốc căn giữa,
+// còn khối ghế luôn giữ đúng vai trò (VIP gần sân khấu, khán đài ở các phía).
 function layoutPresetZones(preset, items) {
-    if (!items.length) return;
-    const sideMargin = 30;
-    const sideGap = 30;
-
-    if (preset === 'auditorium' && items.length >= 3) {
-        // Khán phòng: sân khấu/màn hình ở giữa, hai dãy cánh hai bên và hàng ghế trung tâm.
-        const [front, leftWing, rightWing] = items;
-        placeZone(leftWing, 40, 100);
-        placeZone(rightWing, MAP_WIDTH - 40 - calcZoneSize(rightWing).w, 100);
-        centerZone(front, stageConfig.y + stageConfig.height + 42);
+    if (!items.length || preset === 'gala') return;
+    const side = 30;
+    if (preset === 'workshop' || preset === 'concert') {
+        const [vip, left, right] = items;
+        if (vip) centerZone(vip, stageConfig.y + stageConfig.height + 38);
+        if (left) placeZone(left, 190, 400);
+        if (right) placeZone(right, MAP_WIDTH - 190 - calcZoneSize(right).w, 400);
         return;
     }
-
-    if (preset === 'concert' && items.length >= 3) {
-        // Mẫu ghế đặt trước: sân khấu ở trung tâm, khối vé thường ở hai cánh,
-        // khu VIP nằm chính diện phía trước sân khấu.
-        const [vip, leftWing, rightWing] = items;
-        placeZone(leftWing, 40, 90);
-        placeZone(rightWing, MAP_WIDTH - 40 - calcZoneSize(rightWing).w, 90);
-        centerZone(vip, stageConfig.y + stageConfig.height + 42);
+    if (preset === 'auditorium') {
+        const [vip, left, center, right] = items;
+        if (vip) centerZone(vip, stageConfig.y + stageConfig.height + 30);
+        if (left) placeZone(left, side, 380);
+        if (center) centerZone(center, 380);
+        if (right) placeZone(right, MAP_WIDTH - side - calcZoneSize(right).w, 380);
         return;
     }
-
-    if (preset === 'theatre' && items.length >= 5) {
-        // Tiệc cưới/banquet: bàn gia tiên ở đầu sơ đồ, khách mời được chia thành
-        // bốn khu gia đình - bạn bè đối xứng, giữ lối đi trung tâm thông thoáng.
-        const [vip, brideFamily, groomFamily, brideFriends, groomFriends] = items;
-        centerZone(vip, 180);
-        placeZone(brideFamily, 60, 420);
-        placeZone(groomFamily, MAP_WIDTH - 60 - calcZoneSize(groomFamily).w, 420);
-        placeZone(brideFriends, 60, 600);
-        placeZone(groomFriends, MAP_WIDTH - 60 - calcZoneSize(groomFriends).w, 600);
-        return;
-    }
-
     if (preset === 'arena') {
-        const vip = items[0];
-        centerZone(vip, 20);
-        const others = items.slice(1);
-        if (others.length >= 4) {
-            const [west, east, southLeft, southRight] = others;
-            placeZone(west, 20, stageConfig.y);
-            placeZone(east, MAP_WIDTH - 20 - calcZoneSize(east).w, stageConfig.y);
-            placeZone(southLeft, 220, stageConfig.y + stageConfig.height + 100);
-            placeZone(southRight, MAP_WIDTH - 220 - calcZoneSize(southRight).w, stageConfig.y + stageConfig.height + 100);
-        } else if (others.length === 2) {
-            const [west, east] = others;
-            placeZone(west, 20, stageConfig.y + stageConfig.height + 40);
-            placeZone(east, MAP_WIDTH - 20 - calcZoneSize(east).w, stageConfig.y + stageConfig.height + 40);
-        }
+        const [north, west, east, southLeft, southRight] = items;
+        if (north) centerZone(north, 40);
+        if (west) placeZone(west, 70, 230);
+        if (east) placeZone(east, MAP_WIDTH - 70 - calcZoneSize(east).w, 230);
+        if (southLeft) placeZone(southLeft, 210, 560);
+        if (southRight) placeZone(southRight, MAP_WIDTH - 210 - calcZoneSize(southRight).w, 560);
         return;
     }
-
-    const top = stageConfig.y + stageConfig.height + 38;
-    const primary = items[0];
-    centerZone(primary, top);
-    const afterPrimary = top + calcZoneSize(primary).h + sideGap;
-    const others = items.slice(1);
-
-    if (preset === 'theatre' && others.length >= 3) {
-        // Nhà hát: khu đẹp nhất ở trung tâm, tầng trệt sau đó và hai lô/ban công hai bên.
-        const [floor, leftBox, rightBox] = others;
-        centerZone(floor, afterPrimary);
-        placeZone(leftBox, sideMargin, afterPrimary);
-        placeZone(rightBox, MAP_WIDTH - sideMargin - calcZoneSize(rightBox).w, afterPrimary);
-        return;
-    }
-
-    if (others.length === 1) {
-        centerZone(others[0], afterPrimary);
-        return;
-    }
-    if (others.length === 2) {
-        const [left, right] = others;
-        placeZone(left, sideMargin, afterPrimary);
-        placeZone(right, MAP_WIDTH - sideMargin - calcZoneSize(right).w, afterPrimary);
-        return;
-    }
+    const top = stageConfig.y + stageConfig.height + 42;
+    items.forEach((item, index) => placeZone(item, 60 + (index % 3) * 390, top + Math.floor(index / 3) * 270));
 }
 
-// Các mẫu là điểm xuất phát có bố cục thực tế; người tổ chức vẫn chọn loại vé trong bảng thuộc tính.
+function buildGalaTables() {
+    stageConfig = { x: 380, y: 36, width: 440, height: 76, title: 'SÂN KHẤU / KHU VỰC TRUNG TÂM' };
+    const result = [];
+    let tableNumber = 1;
+    activeTicketTypes().forEach(ticket => {
+        let remaining = Number(ticket.total || 0);
+        while (remaining > 0 && result.length < 30) {
+            const seats = Math.min(10, remaining);
+            const label = String(tableNumber).padStart(2, '0');
+            const table = makeZone(`Bàn ${label}`, ticket.id, 'banquet', 1, seats, 0, 0, ticket.color);
+            table.prefix = `B${label}`;
+            result.push(table);
+            remaining -= seats;
+            tableNumber++;
+        }
+    });
+    // Tối đa 30 bàn × 10 ghế = 300 chỗ: đúng quy mô tiệc gala của mẫu này.
+    if (activeTicketTypes().reduce((sum, ticket) => sum + Number(ticket.total || 0), 0) > 300 && typeof WuangUI !== 'undefined') {
+        WuangUI.toast('Mẫu Gala hiển thị tối đa 300 ghế. Với sự kiện lớn hơn, hãy chọn Tự thiết kế.', 'warning');
+    }
+    const topSlots = [180, 350, 520, 690, 860];
+    const lowerX = [50, 225, 400, 650, 825]; // khoảng giữa là lối đi chính
+    result.forEach((table, index) => {
+        if (index < topSlots.length) placeZone(table, topSlots[index], 155);
+        else {
+            const slot = index - topSlots.length;
+            placeZone(table, lowerX[slot % lowerX.length], 300 + Math.floor(slot / lowerX.length) * 100);
+        }
+    });
+    return result;
+}
+
+// Các mẫu là điểm khởi đầu có cấu trúc không gian rõ ràng; số ghế vẫn tự cân
+// đúng theo tổng vé của từng loại để khi lưu không xảy ra thiếu hoặc vượt ghế.
 function buildPresetZones(preset) {
     if (!TICKET_TYPES.length) return [];
+    if (preset === 'gala') return buildGalaTables();
     const zone = (name, ticketIndex, rows, cols, x, y, color) => {
         const ticket = ticketAt(ticketIndex);
         return makeZone(name, ticket.id, 'seated', rows, cols, x, y, color || ticket.color);
     };
     let result;
-    if (preset === 'concert') {
-        stageConfig = { x: 350, y: 240, width: 500, height: 90, title: 'SÂN KHẤU' };
+    if (preset === 'workshop') {
+        stageConfig = { x: 400, y: 36, width: 400, height: 64, title: 'BỤC DIỄN GIẢ / MÀN HÌNH' };
         result = [
-            zone('Khu VIP chính diện', 0, 5, 10, 415, 370),
-            zone('Khu ghế cánh trái', 1, 15, 7, 40, 90),
-            zone('Khu ghế cánh phải', 1, 15, 7, 886, 90)
-        ];
-    } else if (preset === 'theatre') {
-        stageConfig = { x: 400, y: 70, width: 400, height: 80, title: 'BÀN GIA TIÊN / SÂN KHẤU' };
-        result = [
-            zone('Khu khách mời danh dự', 0, 5, 10, 415, 180),
-            zone('Gia đình cô dâu', 1, 4, 13, 60, 420),
-            zone('Gia đình chú rể', 1, 4, 13, 674, 420),
-            zone('Bạn bè cô dâu', 1, 4, 13, 60, 600),
-            zone('Bạn bè chú rể', 1, 4, 13, 674, 600)
+            zone('Hàng đầu / khách mời', 0, 5, 10, 415, 140),
+            zone('Lớp học bên trái', 1, 10, 10, 190, 400),
+            zone('Lớp học bên phải', 1, 10, 10, 640, 400)
         ];
     } else if (preset === 'auditorium') {
-        stageConfig = { x: 350, y: 100, width: 500, height: 100, title: 'SÂN KHẤU / MÀN HÌNH' };
+        stageConfig = { x: 350, y: 36, width: 500, height: 76, title: 'SÂN KHẤU / MÀN HÌNH' };
         result = [
-            zone('Hàng ghế trung tâm', 0, 5, 10, 415, 250),
-            zone('Cánh khán phòng trái', 1, 15, 7, 40, 100),
-            zone('Cánh khán phòng phải', 1, 15, 7, 886, 100)
+            zone('Khu VIP phía trước', 0, 5, 10, 415, 145),
+            zone('Khối ghế trái', 1, 8, 10, 30, 380),
+            zone('Khối ghế giữa', 1, 8, 10, 415, 380),
+            zone('Khối ghế phải', 1, 8, 10, 800, 380)
+        ];
+    } else if (preset === 'concert') {
+        stageConfig = { x: 320, y: 36, width: 560, height: 82, title: 'SÂN KHẤU BIỂU DIỄN' };
+        result = [
+            zone('Khu VIP sát sân khấu', 0, 5, 10, 415, 155),
+            zone('Khu vé thường trái', 1, 10, 10, 190, 400),
+            zone('Khu vé thường phải', 1, 10, 10, 640, 400)
         ];
     } else if (preset === 'arena') {
-        stageConfig = { x: 300, y: 260, width: 600, height: 220, title: 'SÂN THI ĐẤU' };
+        stageConfig = { x: 350, y: 300, width: 500, height: 180, title: 'SÀN THI ĐẤU / SÂN KHẤU 360°' };
         result = [
-            zone('Khán đài Bắc - VIP', 0, 5, 10, 415, 20),
-            zone('Khán đài Tây', 1, 8, 7, 20, 260),
-            zone('Khán đài Đông', 1, 8, 7, 906, 260),
-            zone('Khán đài Nam trái', 1, 5, 10, 220, 580),
-            zone('Khán đài Nam phải', 1, 5, 10, 610, 580)
+            zone('Khán đài Bắc - VIP', 0, 5, 10, 415, 40),
+            zone('Khán đài Tây', 1, 10, 5, 70, 230),
+            zone('Khán đài Đông', 1, 10, 5, 946, 230),
+            zone('Khán đài Nam trái', 1, 5, 10, 210, 560),
+            zone('Khán đài Nam phải', 1, 5, 10, 620, 560)
         ];
     } else {
         stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };
-        result = TICKET_TYPES.slice(0, 6).map((ticket, index) =>
+        result = activeTicketTypes().slice(0, 6).map((ticket, index) =>
             makeZone('Khu ' + ticket.name, ticket.id, 'seated', 5, 10,
                 60 + (index % 3) * 390, 155 + Math.floor(index / 3) * 300, ticket.color));
     }
@@ -998,23 +1010,25 @@ function buildPresetZones(preset) {
 
 function makeZone(name, ticketId, type, rows, cols, x, y, color, capacity = 200) {
     const t = getTicketById(ticketId);
+    const isGA = type === 'ga', isBanquet = type === 'banquet';
+    const banquetSeats = Math.max(2, Math.min(12, Number(cols || rows || 10)));
     const zone = {
         id: nextZoneId(),
         name,
         ticketId: Number(ticketId),
-        type, // 'seated' | 'ga'
-        rows: type === 'ga' ? 0 : Math.max(1, rows),
-        cols: type === 'ga' ? 0 : Math.max(1, cols),
-        seatCount: type === 'ga' ? 0 : Math.max(1, rows * cols),
-        capacity: type === 'ga' ? capacity : 0,
+        type, // 'seated' | 'ga' | 'banquet'
+        rows: isGA ? 0 : isBanquet ? 1 : Math.max(1, rows),
+        cols: isGA ? 0 : isBanquet ? banquetSeats : Math.max(1, cols),
+        seatCount: isGA ? 0 : isBanquet ? banquetSeats : Math.max(1, rows * cols),
+        capacity: isGA ? capacity : 0,
         color: color || t.color || '#4f46e5',
-        x: Math.max(20, x),
-        y: Math.max(20, y),
+        x: Math.max(0, x),
+        y: Math.max(0, y),
         prefix: '',
         numScheme: 'ltr',
         startNum: 1,
         skipLetters: 'yes',
-        group: null // Konva group ref
+        group: null
     };
     normalizeSeatedZone(zone);
     return zone;
@@ -1049,6 +1063,7 @@ function renderCanvas() {
 
 function calcZoneSize(z) {
     if (z.type === 'ga') return { w: 240, h: 130 };
+    if (z.type === 'banquet') return { w: 150, h: 100 };
     const cols = Math.max(1, z.cols);
     const rows = Math.max(1, z.rows);
     const w = ZONE_PAD * 2 + ROW_LABEL_W + cols * (SEAT_W + SEAT_GAP);
@@ -1085,37 +1100,55 @@ function renderZone(z) {
     }
     grp.add(bg);
 
-    // Zone header bar
-    const headerBg = new Konva.Rect({ x: 0, y: 0, width: w, height: ZONE_HEADER_H, fill: hexToRgba(z.color, 0.1), cornerRadius: [12, 12, 0, 0] });
-    grp.add(headerBg);
-
     const ticket = getTicketById(z.ticketId);
-    const zoneName = new Konva.Text({ x: 10, y: 8, text: z.name, fill: z.color, fontSize: 11, fontStyle: 'bold', fontFamily: 'Inter,system-ui,sans-serif', width: w - 20, ellipsis: true });
-    const zoneTicket = new Konva.Text({ x: 10, y: 20, text: (z.type === 'ga' ? '🧍 GA · ' : '') + ticket.name, fill: '#64748b', fontSize: 9.5, fontFamily: 'Inter,system-ui,sans-serif', width: w - 20, ellipsis: true });
-    grp.add(zoneName, zoneTicket);
-
-    if (z.type === 'ga') {
-        const gaIcon = new Konva.Text({ x: 0, y: 36, width: w, height: h - 36, text: `${z.capacity || 100} người`, fill: z.color, fontSize: 14, fontStyle: 'bold', fontFamily: 'Inter,system-ui,sans-serif', align: 'center', verticalAlign: 'middle' });
-        grp.add(gaIcon);
+    if (z.type === 'banquet') {
+        // Bàn tiệc vẫn là các ghế thật trong CSDL; hình tròn chỉ là cách trực quan hóa.
+        bg.fill('rgba(255,255,255,.01)');
+        bg.shadowBlur(0);
+        const tableCore = new Konva.Ellipse({ x: w / 2, y: h / 2 + 2, radiusX: 30, radiusY: 20, fill: hexToRgba(z.color, .14), stroke: z.color, strokeWidth: 1.5 });
+        const tableText = new Konva.Text({ x: w / 2 - 25, y: h / 2 - 4, width: 50, text: 'BÀN', align: 'center', fill: z.color, fontSize: 9, fontStyle: 'bold', listening: false });
+        const title = new Konva.Text({ x: 0, y: 2, width: w, text: z.name, align: 'center', fill: z.color, fontSize: 10, fontStyle: 'bold', ellipsis: true, listening: false });
+        grp.add(tableCore, tableText, title);
+        const count = getZoneCapacity(z);
+        for (let index = 0; index < count; index++) {
+            const angle = -Math.PI / 2 + (Math.PI * 2 * index / Math.max(1, count));
+            const sx = w / 2 + Math.cos(angle) * 53 - 8;
+            const sy = h / 2 + 2 + Math.sin(angle) * 35 - 6;
+            grp.add(new Konva.Rect({ x: sx, y: sy, width: 16, height: 12, fill: '#fff', stroke: z.color, strokeWidth: 1, cornerRadius: 4, listening: false }));
+            grp.add(new Konva.Text({ x: sx, y: sy + 1, width: 16, text: String(index + 1), fill: z.color, fontSize: 5.8, fontStyle: 'bold', align: 'center', listening: false }));
+        }
+        grp.add(new Konva.Text({ x: 0, y: h - 13, width: w, text: `${ticket.name} · ${count} ghế`, align: 'center', fill: '#64748b', fontSize: 7.5, listening: false }));
     } else {
-        // Hàng cuối có thể ngắn hơn để tổng ghế đúng bằng cấu hình của khu vực.
-        for (let r = 0; r < z.rows; r++) {
-            const rowLabel = makeRowLabel(r, z.skipLetters === 'yes');
-            const rowLabelTxt = new Konva.Text({ x: ZONE_PAD, y: ZONE_PAD + ZONE_HEADER_H + r * (SEAT_H + ROW_GAP) + (SEAT_H - 10) / 2, text: rowLabel, fill: '#94a3b8', fontSize: 9, fontStyle: 'bold', fontFamily: 'Inter,system-ui', width: ROW_LABEL_W, align: 'center', listening: false });
-            grp.add(rowLabelTxt);
-            const seatsThisRow = seatsInRow(z, r);
-            for (let c = 0; c < seatsThisRow; c++) {
-                const sx = ZONE_PAD + ROW_LABEL_W + c * (SEAT_W + SEAT_GAP);
-                const sy = ZONE_PAD + ZONE_HEADER_H + r * (SEAT_H + ROW_GAP);
-                const seatRect = new Konva.Rect({ x: sx, y: sy, width: SEAT_W, height: SEAT_H, fill: hexToRgba(z.color, 0.1), stroke: z.color, strokeWidth: 1, cornerRadius: 5, listening: false });
-                const numScheme = z.numScheme || 'ltr';
-                let seatNum;
-                if (numScheme === 'rtl') seatNum = z.startNum + (seatsThisRow - 1 - c);
-                else if (numScheme === 'odd') seatNum = z.startNum + c * 2;
-                else if (numScheme === 'even') seatNum = (z.startNum || 2) + c * 2;
-                else seatNum = z.startNum + c;
-                const seatTxt = new Konva.Text({ x: sx, y: sy, width: SEAT_W, height: SEAT_H, text: String(seatNum), fill: z.color, fontSize: 8, fontStyle: 'bold', fontFamily: 'Inter', align: 'center', verticalAlign: 'middle', listening: false });
-                grp.add(seatRect, seatTxt);
+        // Zone header bar
+        const headerBg = new Konva.Rect({ x: 0, y: 0, width: w, height: ZONE_HEADER_H, fill: hexToRgba(z.color, 0.1), cornerRadius: [12, 12, 0, 0] });
+        grp.add(headerBg);
+        const zoneName = new Konva.Text({ x: 10, y: 8, text: z.name, fill: z.color, fontSize: 11, fontStyle: 'bold', fontFamily: 'Inter,system-ui,sans-serif', width: w - 20, ellipsis: true });
+        const zoneTicket = new Konva.Text({ x: 10, y: 20, text: (z.type === 'ga' ? '🧍 GA · ' : '') + ticket.name, fill: '#64748b', fontSize: 9.5, fontFamily: 'Inter,system-ui,sans-serif', width: w - 20, ellipsis: true });
+        grp.add(zoneName, zoneTicket);
+
+        if (z.type === 'ga') {
+            const gaIcon = new Konva.Text({ x: 0, y: 36, width: w, height: h - 36, text: `${z.capacity || 100} người`, fill: z.color, fontSize: 14, fontStyle: 'bold', fontFamily: 'Inter,system-ui,sans-serif', align: 'center', verticalAlign: 'middle' });
+            grp.add(gaIcon);
+        } else {
+            // Hàng cuối có thể ngắn hơn để tổng ghế đúng bằng cấu hình của khu vực.
+            for (let r = 0; r < z.rows; r++) {
+                const rowLabel = makeRowLabel(r, z.skipLetters === 'yes');
+                const rowLabelTxt = new Konva.Text({ x: ZONE_PAD, y: ZONE_PAD + ZONE_HEADER_H + r * (SEAT_H + ROW_GAP) + (SEAT_H - 10) / 2, text: rowLabel, fill: '#94a3b8', fontSize: 9, fontStyle: 'bold', fontFamily: 'Inter,system-ui', width: ROW_LABEL_W, align: 'center', listening: false });
+                grp.add(rowLabelTxt);
+                const seatsThisRow = seatsInRow(z, r);
+                for (let c = 0; c < seatsThisRow; c++) {
+                    const sx = ZONE_PAD + ROW_LABEL_W + c * (SEAT_W + SEAT_GAP);
+                    const sy = ZONE_PAD + ZONE_HEADER_H + r * (SEAT_H + ROW_GAP);
+                    const seatRect = new Konva.Rect({ x: sx, y: sy, width: SEAT_W, height: SEAT_H, fill: hexToRgba(z.color, 0.1), stroke: z.color, strokeWidth: 1, cornerRadius: 5, listening: false });
+                    const numScheme = z.numScheme || 'ltr';
+                    let seatNum;
+                    if (numScheme === 'rtl') seatNum = z.startNum + (seatsThisRow - 1 - c);
+                    else if (numScheme === 'odd') seatNum = z.startNum + c * 2;
+                    else if (numScheme === 'even') seatNum = (z.startNum || 2) + c * 2;
+                    else seatNum = z.startNum + c;
+                    const seatTxt = new Konva.Text({ x: sx, y: sy, width: SEAT_W, height: SEAT_H, text: String(seatNum), fill: z.color, fontSize: 8, fontStyle: 'bold', fontFamily: 'Inter', align: 'center', verticalAlign: 'middle', listening: false });
+                    grp.add(seatRect, seatTxt);
+                }
             }
         }
     }
@@ -1165,7 +1198,7 @@ function selectZone(id) {
     document.getElementById('pName').value = z.name;
     document.getElementById('pTicket').value = z.ticketId;
     document.getElementById('pColor').value = z.color;
-    document.getElementById('pRows').value = z.rows || 5;
+    document.getElementById('pRows').value = z.rows || 1;
     document.getElementById('pSeatCount').value = getZoneCapacity(z) || 1;
     document.getElementById('pCols').value = z.cols || 1;
     document.getElementById('pPrefix').value = z.prefix || '';
@@ -1198,7 +1231,12 @@ function updateSelectedZone(field, value) {
     else if (field === 'ticketId') z.ticketId = Number(value);
     else if (field === 'color') { z.color = value; document.getElementById('propsZoneColorDot').style.background = value; }
     else if (field === 'rows') z.rows = Math.max(1, Math.min(20, Number(value)));
-    else if (field === 'seatCount') z.seatCount = Math.max(1, Math.min(MAX_SEATED_SEATS_PER_ZONE, Number(value)));
+    else if (field === 'seatCount') {
+        z.seatCount = z.type === 'banquet'
+            ? Math.max(2, Math.min(12, Number(value)))
+            : Math.max(1, Math.min(MAX_SEATED_SEATS_PER_ZONE, Number(value)));
+        if (z.type === 'banquet') { z.rows = 1; z.cols = z.seatCount; }
+    }
     else if (field === 'prefix') z.prefix = value;
     else if (field === 'numScheme') z.numScheme = value;
     else if (field === 'startNum') z.startNum = Math.max(1, Number(value));
@@ -1224,8 +1262,14 @@ function setZoneType(type) {
     pushUndo();
     z.type = type;
     setZoneTypeUI(type);
-    if (type === 'ga') { z.rows = 0; z.cols = 0; z.capacity = z.capacity || 200; }
-    else {
+    if (type === 'ga') { z.rows = 0; z.cols = 0; z.seatCount = 0; z.capacity = z.capacity || 200; }
+    else if (type === 'banquet') {
+        z.rows = 1;
+        z.seatCount = Math.max(2, Math.min(12, Number(z.seatCount || 8)));
+        z.cols = z.seatCount;
+        z.capacity = 0;
+        if (!z.prefix) z.prefix = 'B' + String(zones.filter(item => item.type === 'banquet').indexOf(z) + 1).padStart(2, '0');
+    } else {
         z.rows = z.rows || 5;
         z.seatCount = z.seatCount || 50;
         normalizeSeatedZone(z);
@@ -1239,8 +1283,18 @@ function setZoneType(type) {
 
 function setZoneTypeUI(type) {
     document.getElementById('ztSeated').classList.toggle('active', type === 'seated');
+    document.getElementById('ztBanquet').classList.toggle('active', type === 'banquet');
     document.getElementById('ztGA').classList.toggle('active', type === 'ga');
     document.getElementById('gaCapField').style.display = type === 'ga' ? '' : 'none';
+    const banquet = type === 'banquet';
+    document.getElementById('pSeatCountLabel').textContent = banquet ? 'Ghế tại bàn' : 'Tổng số ghế';
+    document.getElementById('pSeatCount').min = banquet ? '2' : '1';
+    document.getElementById('pSeatCount').max = banquet ? '12' : String(MAX_SEATED_SEATS_PER_ZONE);
+    ['pRowsField','pColsField','pNumSchemeField','pStartNumField','pSkipLettersField'].forEach(id => {
+        document.getElementById(id).style.display = banquet ? 'none' : '';
+    });
+    document.getElementById('pPrefixField').querySelector('label').textContent = banquet ? 'Mã bàn' : 'Tiền tố tên hàng';
+    document.getElementById('pPrefix').placeholder = banquet ? 'Vd: B01' : 'Bỏ trống = A, B, C...';
 }
 
 function addSeatedZone() {
@@ -1260,6 +1314,22 @@ function addGAZone() {
     pushUndo();
     const t = TICKET_TYPES[0];
     const z = makeZone('Khu đứng (GA) ' + (zones.length + 1), t.id, 'ga', 0, 0, 20 + zones.length * 40, 100 + zones.length * 20, t.color || '#f59e0b', 300);
+    keepZoneInsideCanvas(z);
+    zones.push(z);
+    renderZone(z);
+    konvaLayer.batchDraw();
+    updateStats();
+    updateSbZoneList();
+    selectZone(z.id);
+}
+
+function addBanquetTable() {
+    pushUndo();
+    const t = TICKET_TYPES[0];
+    const tableNo = zones.filter(z => z.type === 'banquet').length + 1;
+    const z = makeZone('Bàn ' + String(tableNo).padStart(2, '0'), t.id, 'banquet', 1, 10,
+        80 + ((tableNo - 1) % 5) * 180, 180 + Math.floor((tableNo - 1) / 5) * 120, t.color || '#c2410c');
+    z.prefix = 'B' + String(tableNo).padStart(2, '0');
     keepZoneInsideCanvas(z);
     zones.push(z);
     renderZone(z);
@@ -1334,7 +1404,8 @@ function updateSbZoneList() {
         const item = document.createElement('div');
         item.className = 'sb-zone-item' + (z.id === selectedZoneId ? ' selected' : '');
         item.style.setProperty('--zc', z.color);
-        item.innerHTML = `<span class="sb-zone-name">${z.type === 'ga' ? '🧍 ' : ''}${z.name}</span>
+        const marker = z.type === 'ga' ? '🧍 ' : z.type === 'banquet' ? '🍽️ ' : '';
+        item.innerHTML = `<span class="sb-zone-name">${marker}${z.name}</span>
             <button class="sb-zone-del" onclick="event.stopPropagation();removeZone(${z.id})" title="Xóa khu này">✕</button>`;
         item.addEventListener('click', () => selectZone(z.id));
         list.appendChild(item);
@@ -1382,7 +1453,7 @@ function selectPreset(preset) {
     zones.forEach(z => { if (z.group) z.group.destroy(); });
     zones = buildPresetZones(preset);
 
-    const presetToDb = { concert: 'concert', theatre: 'theatre', auditorium: 'auditorium', arena: 'arena', custom: 'custom' };
+    const presetToDb = { workshop: 'workshop', auditorium: 'auditorium', concert: 'concert', gala: 'gala', arena: 'arena', custom: 'custom' };
     document.getElementById('loaiSoDoInput').value = presetToDb[preset] || 'custom';
     document.getElementById('skXInput').value = stageConfig.x;
     document.getElementById('skYInput').value = stageConfig.y;
@@ -1391,9 +1462,10 @@ function selectPreset(preset) {
     document.getElementById('stageLabelInput').value = stageConfig.title;
 
     const names = {
+        workshop: 'Sơ đồ Workshop - ' + EVENT_NAME,
         concert: 'Sơ đồ Live Concert - ' + EVENT_NAME,
-        theatre: 'Sơ đồ Tiệc cưới - ' + EVENT_NAME,
-        auditorium: 'Sơ đồ Khán phòng - ' + EVENT_NAME,
+        gala: 'Sơ đồ Tiệc Gala - ' + EVENT_NAME,
+        auditorium: 'Sơ đồ Hội trường - ' + EVENT_NAME,
         arena: 'Sơ đồ Nhà thi đấu - ' + EVENT_NAME,
         custom: 'Sơ đồ tùy chỉnh - ' + EVENT_NAME,
     };
@@ -1409,8 +1481,12 @@ function autoAllocateSeatsForTickets() {
         return;
     }
     pushUndo();
-    zones = fitPresetCapacities(zones);
-    reflowZonesWhenNeeded(zones);
+    if (currentPreset === 'gala' || zones.some(z => z.type === 'banquet')) {
+        zones = buildGalaTables();
+    } else {
+        zones = fitPresetCapacities(zones);
+        reflowZonesWhenNeeded(zones);
+    }
     zones.forEach(keepZoneInsideCanvas);
     renderCanvas();
     if (zones.length) selectZone(selectedZoneId && zones.some(z => z.id === selectedZoneId) ? selectedZoneId : zones[0].id);
@@ -1485,8 +1561,8 @@ function submitStudioForm() {
     zones.forEach(z => {
         addInput('zoneTen', z.name || 'Khu vực');
         addInput('zoneLoaiVeId', z.ticketId || TICKET_TYPES[0]?.id);
-        addInput('zoneSoHang', z.type === 'ga' ? 0 : Math.max(1, z.rows || 5));
-        addInput('zoneSoGheMoiHang', z.type === 'ga' ? 0 : Math.max(1, z.cols || 10));
+        addInput('zoneSoHang', z.type === 'ga' ? 0 : z.type === 'banquet' ? 1 : Math.max(1, z.rows || 5));
+        addInput('zoneSoGheMoiHang', z.type === 'ga' ? 0 : z.type === 'banquet' ? getZoneCapacity(z) : Math.max(1, z.cols || 10));
         addInput('zoneTongSoGhe', z.type === 'ga' ? 0 : getZoneCapacity(z));
         addInput('zoneMauSac', z.color || '#4f46e5');
         addInput('zoneViTriX', Math.round(z.x || 0));
@@ -1547,7 +1623,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hasKonva = document.getElementById('konva-container');
     if (hasKonva) {
         initKonva();
-        if (!restoreStudioDraft()) selectPreset('concert');
+        if (!restoreStudioDraft()) selectPreset('workshop');
     } else {
         // Trang sơ đồ đã lưu nghĩa là lần POST gần nhất thành công.
         try { sessionStorage.removeItem(STUDIO_DRAFT_KEY); } catch { }

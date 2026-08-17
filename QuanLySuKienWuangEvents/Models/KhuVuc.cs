@@ -19,7 +19,7 @@ public class KhuVuc
     public int Rong { get; set; }
     public int Cao { get; set; }
 
-    // seated = khách chọn ghế cụ thể; ga = khu đứng chọn số lượng, không sinh ghế ảo.
+    // seated = ghế theo hàng; banquet = bàn tiệc nhưng vẫn có ghế cụ thể; ga = khu đứng theo số lượng.
     public string LoaiKhuVuc { get; set; } = "seated";
     public int? SucChua { get; set; }
 

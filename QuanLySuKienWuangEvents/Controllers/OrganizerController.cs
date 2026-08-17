@@ -2156,7 +2156,7 @@ public class OrganizerController : Controller
         if (!await LaSuKienCuaToi(suKienId)) return Forbid();
 
         loaiSoDo = (loaiSoDo ?? "").Trim().ToLowerInvariant();
-        string[] cacLoaiSoDoHopLe = ["none", "auditorium", "theatre", "cinema", "arena", "custom", "concert"];
+        string[] cacLoaiSoDoHopLe = ["none", "workshop", "auditorium", "concert", "gala", "theatre", "cinema", "arena", "custom"];
         if (!cacLoaiSoDoHopLe.Contains(loaiSoDo)) loaiSoDo = "custom";
 
         if (await LaCauHinhVeHoacSoDoBiKhoa(suKienId))
@@ -2218,12 +2218,13 @@ public class OrganizerController : Controller
             {
                 int loaiVeId = zoneLoaiVeId![i];
                 string loaiKhu = zoneLoaiKhuVuc![i].Trim().ToLowerInvariant();
-                if (loaiKhu is not ("seated" or "ga"))
+                if (loaiKhu is not ("seated" or "ga" or "banquet"))
                 {
                     TempData["Error"] = "Loại khu vực không hợp lệ.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
                 bool isGA = loaiKhu == "ga";
+                bool isBanquet = loaiKhu == "banquet";
                 int soHang = isGA ? 0 : zoneSoHang![i];
                 int soGhe  = isGA ? 0 : zoneSoGheMoiHang![i];
                 int tongSoGhe = isGA ? 0 : zoneTongSoGhe![i];
@@ -2234,7 +2235,12 @@ public class OrganizerController : Controller
                     TempData["Error"] = "Mỗi khu phải dùng loại vé hợp lệ của sự kiện."; 
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
-                if (!isGA && (soHang is < 1 or > 20 || soGhe is < 1 or > 30 || tongSoGhe is < 1 or > 600 || tongSoGhe > soHang * soGhe))
+                if (isBanquet && (soHang != 1 || soGhe is < 2 or > 12 || tongSoGhe is < 2 or > 12 || tongSoGhe != soGhe))
+                {
+                    TempData["Error"] = "Mỗi bàn tiệc phải có từ 2 đến 12 ghế.";
+                    return RedirectToAction("SoDoChoNgoi", new { suKienId });
+                }
+                if (!isGA && !isBanquet && (soHang is < 1 or > 20 || soGhe is < 1 or > 30 || tongSoGhe is < 1 or > 600 || tongSoGhe > soHang * soGhe))
                 {
                     TempData["Error"] = "Khu ghế ngồi phải có 1–20 hàng, tối đa 30 ghế mỗi hàng và tối đa 600 ghế.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
@@ -2253,8 +2259,8 @@ public class OrganizerController : Controller
                 int cao = zoneCao![i];
                 // Kích thước phải đúng với công thức canvas ở SoDoChoNgoi.cshtml.
                 // Trước đây hai công thức lệch vài px, làm sơ đồ hợp lệ ở giao diện bị từ chối khi lưu.
-                int minRong = isGA ? 180 : Math.Max(180, 50 + soGhe * 32);
-                int minCao = isGA ? 120 : Math.Max(112, 56 + soHang * 30);
+                int minRong = isGA ? 180 : isBanquet ? 150 : Math.Max(180, 50 + soGhe * 32);
+                int minCao = isGA ? 120 : isBanquet ? 100 : Math.Max(112, 56 + soHang * 30);
                 bool kichThuocKhongHopLe = rong is < 120 or > 900 || cao is < 80 or > 900
                     || rong < minRong || cao < minCao;
                 bool namNgoaiCanvas = viTriX < 0 || viTriY < 0
@@ -2424,6 +2430,26 @@ public class OrganizerController : Controller
                     continue;
                 }
 
+                if (z.LoaiKhuVuc == "banquet")
+                {
+                    string banName = string.IsNullOrWhiteSpace(z.TienToHangGhe) ? z.Ten : z.TienToHangGhe.Trim();
+                    var rowId = await connection.QuerySingleAsync<int>(@"
+                        INSERT INTO HangGhe (KhuVucId, TenHang, SoGhe, ThuTu)
+                        OUTPUT INSERTED.Id
+                        VALUES (@zoneId, @rowName, @soGhe, 1)
+                    ", new { zoneId, rowName = banName, soGhe = z.TongSoGhe }, transaction);
+
+                    for (int col = 0; col < z.TongSoGhe; col++)
+                    {
+                        string seatLabel = $"{banName}-{col + 1}";
+                        await connection.ExecuteAsync(@"
+                            INSERT INTO ChoNgoi (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
+                            VALUES (@rowId, @seatLabel, @x, @y, 0)
+                        ", new { rowId, seatLabel, x = col + 1, y = 1 }, transaction);
+                    }
+                    continue;
+                }
+
                 // Khu vực ghế ngồi cố định (Seated)
                 string prefix = string.IsNullOrWhiteSpace(z.TienToHangGhe) ? "" : z.TienToHangGhe.Trim();
                 bool rtl = z.HuongDanhSo == "rtl";
@@ -2486,7 +2512,7 @@ public class OrganizerController : Controller
         public int ViTriY { get; set; }
         public int Rong { get; set; }
         public int Cao { get; set; }
-        public string LoaiKhuVuc { get; set; } = "seated"; // "seated" | "ga"
+        public string LoaiKhuVuc { get; set; } = "seated"; // "seated" | "ga" | "banquet"
         public int SucChua { get; set; }
         public string TienToHangGhe { get; set; } = "";
         public string HuongDanhSo { get; set; } = "ltr"; // "ltr" | "rtl" | "odd" | "even"
