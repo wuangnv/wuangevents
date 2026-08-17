@@ -1,231 +1,122 @@
-@* HomeController.Index trả List<SuKien>; ViewBag chứa danh mục và bộ lọc. *@
 @model List<SuKien>
 
 @{
     ViewData["Title"] = "Trang chủ";
     var danhMucs = ViewBag.DanhMucs as List<DanhMuc> ?? new List<DanhMuc>();
-    var noiBat = Model.Take(6).ToList();
-    var sapDienRa = Model.OrderBy(x => x.NgayBatDau).Take(8).ToList();
-    var daDienRa = ViewBag.SuKienDaQua as List<SuKien> ?? new List<SuKien>();
-    var loaiSuKien = ViewBag.LoaiSuKien as string ?? "tat-ca";
+    var featuredEvents = Model.Take(6).ToList();
+    var upcomingEvents = Model.OrderBy(x => x.NgayBatDau).Take(8).ToList();
+    var pastEvents = ViewBag.SuKienDaQua as List<SuKien> ?? new List<SuKien>();
+    var eventFormat = ViewBag.LoaiSuKien as string ?? "tat-ca";
 }
 
-@* Banner và form tìm kiếm GET tới Home/SuKien. *@
-<section class="hero d-flex align-items-center" style="min-height: 480px; padding: 4rem 0;">
-    <div class="container">
-        <div class="row align-items-center g-4">
-            <div class="col-lg-7 text-start">
-                <span class="hero-badge text-uppercase"><i class="fas fa-bolt me-1"></i> WUANGEVENTS</span>
-                <h1 class="font-heading display-5 mb-3 mt-3 text-white fw-bold" style="line-height: 1.2;">
-                    Khám phá &amp; Trải nghiệm<br />
-                    <span style="color: #f3e8ff;">Những Sự Kiện Đỉnh Cao</span>
-                </h1>
-                <p class="text-white-50 mb-4 lead" style="font-size: 1.05rem;">
-                    Nền tảng đặt vé và quản lý sự kiện trực tuyến nhanh chóng, an toàn và tiện lợi.
-                </p>
+@section Styles {
+<style>
+/* Home only: không thay đổi style, data hoặc hành vi của các trang khác. */
+body:has(.event-home),body:has(.event-home) .main-content{background:#fff}
+.event-home{--ink:#191919;--muted:#68707b;--line:#e7e7e7;--surface:#f8f8f7;--accent:#5c4ab9;color:var(--ink);padding-bottom:54px}.event-home .container{max-width:1200px}
+.home-intro{background:#fafafa;border-bottom:1px solid var(--line)}.home-intro .container{padding:54px 0 34px}.home-eyebrow{margin:0 0 10px;color:var(--accent);font-size:.76rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase}.home-intro h1{max-width:680px;margin:0;font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-.05em;line-height:1.08}.home-intro-copy{max-width:620px;margin:14px 0 25px;color:var(--muted);font-size:1rem;line-height:1.6}
+.home-search{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,180px) auto;max-width:850px;border:1px solid #cfcfcf;border-radius:8px;background:#fff}.home-search-field{position:relative;min-width:0}.home-search-field+.home-search-field{border-left:1px solid var(--line)}.home-search-field i{position:absolute;top:50%;left:15px;color:#697386;font-size:.86rem;transform:translateY(-50%)}.home-search input,.home-search select{width:100%;height:52px;border:0;outline:0;background:transparent;color:var(--ink);font-size:.91rem}.home-search input{padding:0 13px 0 40px}.home-search select{padding:0 12px;cursor:pointer}.home-search button{min-width:126px;margin:5px;border:0;border-radius:5px!important;background:#242424;color:#fff;font-size:.88rem;font-weight:750}.home-search button:hover,.home-search button:focus{background:#000;color:#fff;box-shadow:none;transform:none}
+.home-format-nav{display:flex;gap:24px;margin-top:25px;border-bottom:1px solid var(--line)}.home-format-link{display:inline-flex;align-items:center;gap:7px;padding:0 0 12px;border-bottom:2px solid transparent;color:var(--muted);font-size:.89rem;font-weight:700;text-decoration:none}.home-format-link i{color:#8a8a8a;font-size:.8rem}.home-format-link:hover,.home-format-link.active{color:var(--ink)}.home-format-link.active{border-bottom-color:var(--ink)}.home-format-link.active i{color:var(--accent)}
+.home-section{margin-top:52px}.home-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:19px}.home-section-title{margin:0;color:var(--ink);font-size:clamp(1.28rem,2vw,1.55rem);font-weight:800;letter-spacing:-.025em}.home-section-link{color:#4b5563;font-size:.85rem;font-weight:750;text-decoration:none;white-space:nowrap}.home-section-link:hover{color:var(--accent)}.home-section-link i,.home-event-link i{margin-left:4px;font-size:.65rem}
+.home-category-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}.home-category{display:flex;min-height:108px;flex-direction:column;align-items:flex-start;justify-content:center;gap:11px;padding:16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none}.home-category i{color:var(--accent);font-size:1.04rem}.home-category span{font-size:.83rem;font-weight:750;line-height:1.35}.home-category:hover{background:var(--surface);color:var(--ink)}
+.home-event-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 20px}.home-event-grid.compact{grid-template-columns:repeat(4,minmax(0,1fr))}.home-event-card{min-width:0;border:1px solid var(--line);background:#fff}.home-event-card:hover{border-color:#b8b8b8}.home-event-media{position:relative;display:block;height:202px;overflow:hidden;background:#efefef}.compact .home-event-media{height:154px}.home-event-media img{width:100%;height:100%;object-fit:cover}.home-event-format{position:absolute;bottom:10px;left:10px;display:inline-flex;align-items:center;gap:5px;padding:5px 7px;background:rgba(255,255,255,.94);color:#202020;font-size:.7rem;font-weight:750}.home-event-format i{color:var(--accent)}.home-event-content{display:flex;min-height:188px;flex-direction:column;padding:15px 16px 16px}.compact .home-event-content{min-height:178px;padding:14px}.home-event-date{margin:0 0 8px;color:var(--accent);font-size:.74rem;font-weight:800;letter-spacing:.02em}.home-event-title{margin:0 0 9px;color:var(--ink);font-size:1rem;font-weight:800;letter-spacing:-.015em;line-height:1.35}.home-event-title a{color:inherit;text-decoration:none}.home-event-title a:hover{color:var(--accent)}.home-event-location{display:flex;align-items:center;gap:7px;min-width:0;margin:0;color:var(--muted);font-size:.78rem}.home-event-location i{color:#8a8a8a;font-size:.75rem}.home-event-location span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.home-event-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:15px}.home-event-status{color:#267046;font-size:.73rem;font-weight:750}.home-event-link{color:var(--ink);font-size:.78rem;font-weight:800;text-decoration:none;white-space:nowrap}.home-event-link:hover{color:var(--accent)}.home-empty{padding:34px 16px;border:1px dashed #c9c9c9;color:var(--muted);text-align:center}
+.home-past{padding-top:38px;border-top:1px solid var(--line)}.home-past .home-section-title{color:#59606d}.home-event-card.past{border-color:#ececec;background:#fcfcfc}.home-event-card.past .home-event-media{height:174px}.home-event-card.past .home-event-media img{filter:grayscale(1);opacity:.76}.home-event-card.past .home-event-date,.home-event-card.past .home-event-link{color:#71717a}.home-event-card.past .home-event-title{color:#555b66}.home-event-card.past .home-event-content{min-height:168px}.home-event-card.past .home-event-status{color:#7a7f88}
+body:has(.event-home) .footer{padding:26px 0 18px;background:#fafafa;border-top-color:var(--line)}body:has(.event-home) .footer-grid{gap:20px}body:has(.event-home) .footer-col h4{margin-bottom:9px}body:has(.event-home) .footer-col li+li{margin-top:5px}body:has(.event-home) .footer-col a,body:has(.event-home) .footer-col p{font-size:.82rem}body:has(.event-home) .social-links{margin-top:13px!important}body:has(.event-home) .footer-bottom{margin-top:18px;padding-top:12px}
+@@media(max-width:991.98px){.home-category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.home-event-grid,.home-event-grid.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.compact .home-event-media{height:190px}}
+@@media(max-width:767.98px){.home-intro .container{padding:38px 0 28px}.home-search{grid-template-columns:1fr}.home-search-field+.home-search-field{border-top:1px solid var(--line);border-left:0}.home-search button{height:45px;margin:5px}.home-format-nav{gap:17px;overflow-x:auto}.home-format-link{flex:0 0 auto}.home-section{margin-top:40px}.compact .home-event-media{height:164px}}
+@@media(max-width:575.98px){.event-home{padding-bottom:34px}.home-intro h1{font-size:2rem}.home-intro-copy{font-size:.92rem}.home-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.home-category{min-height:92px}.home-event-grid,.home-event-grid.compact{grid-template-columns:1fr;gap:16px}.home-event-media,.compact .home-event-media{height:208px}.home-event-content,.compact .home-event-content{min-height:164px}.home-section-head{align-items:flex-end}.home-section-link{font-size:.78rem}body:has(.event-home) .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 16px}}
+</style>
+}
 
-                <form method="get" asp-controller="Home" asp-action="SuKien" class="d-flex p-2 align-items-center" style="max-width: 680px; background: rgba(255,255,255,0.95); border: 1px solid rgba(255,255,255,0.6); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
-                    <input type="hidden" name="loaiSuKien" value="@loaiSuKien" />
-                    <div class="input-group align-items-center px-3" style="flex: 1; border-right: 1px solid #e2e8f0;">
-                        <i class="fas fa-search text-muted me-2"></i>
-                        <input type="text" name="q" value="@ViewBag.TuKhoa" class="form-control border-0 bg-transparent py-2 shadow-none" placeholder="Tìm tên ca sĩ, đêm nhạc, hội thảo..." />
-                    </div>
-                    <div class="px-2" style="width: 170px;">
-                        <select name="thanhPho" class="form-select border-0 bg-transparent shadow-none" style="cursor: pointer; font-weight: 500;">
-                            <option value="">Tất cả tỉnh thành</option>
-                            @if (ViewBag.Cities != null)
-                            {
-                                foreach (var city in ViewBag.Cities)
-                                {
-                                    <option value="@city" selected="@(ViewBag.SelectedCity == city ? "selected" : null)">@city</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary px-4 py-2 rounded fw-bold" style="border-radius: 12px !important; white-space: nowrap;">
-                        <i class="fas fa-compass me-1"></i> Tìm vé
-                    </button>
-                </form>
-            </div>
-            <div class="col-lg-5 text-center d-none d-lg-block">
-                <div class="hero-image-wrapper position-relative">
-                    <img src="/images/hero-illustration.jpg" alt="Minh họa sự kiện WuangEvents" class="img-fluid rounded-4 shadow-lg" style="max-height: 360px; width: auto; object-fit: cover; border: 3px solid rgba(255,255,255,0.25);" />
-                </div>
-            </div>
+<div class="event-home">
+    <section class="home-intro">
+        <div class="container">
+            <p class="home-eyebrow">Khám phá sự kiện</p>
+            <h1>Tìm một trải nghiệm đáng để đi.</h1>
+            <p class="home-intro-copy">Từ buổi biểu diễn, workshop đến hội thảo — khám phá các sự kiện đang mở bán gần bạn.</p>
+            <form method="get" asp-controller="Home" asp-action="SuKien" class="home-search">
+                <input type="hidden" name="loaiSuKien" value="@eventFormat" />
+                <label class="home-search-field"><span class="visually-hidden">Từ khóa tìm kiếm</span><i class="fas fa-search"></i><input type="text" name="q" value="@ViewBag.TuKhoa" placeholder="Tìm sự kiện, nghệ sĩ, chủ đề..." /></label>
+                <label class="home-search-field"><span class="visually-hidden">Tỉnh thành</span><select name="thanhPho" aria-label="Chọn tỉnh thành"><option value="">Tất cả tỉnh thành</option>@if (ViewBag.Cities != null) { foreach (var city in ViewBag.Cities) { <option value="@city" selected="@(ViewBag.SelectedCity == city ? "selected" : null)">@city</option> } }</select></label>
+                <button type="submit"><i class="fas fa-search me-1"></i>Tìm sự kiện</button>
+            </form>
+            <nav class="home-format-nav" aria-label="Lọc theo hình thức tổ chức">
+                <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="tat-ca" class="home-format-link @(eventFormat == "tat-ca" ? "active" : "")"><i class="fas fa-border-all"></i>Tất cả</a>
+                <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="truc-tiep" class="home-format-link @(eventFormat == "truc-tiep" ? "active" : "")"><i class="fas fa-location-dot"></i>Trực tiếp</a>
+                <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="truc-tuyen" class="home-format-link @(eventFormat == "truc-tuyen" ? "active" : "")"><i class="fas fa-video"></i>Trực tuyến</a>
+            </nav>
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="container mt-4 mb-5" aria-label="Khám phá theo hình thức tổ chức">
-    <div class="home-format-filter">
-        <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="tat-ca"
-           class="home-format-option @(loaiSuKien == "tat-ca" ? "active" : "")">
-            <span class="format-icon"><i class="fas fa-border-all"></i></span>
-            <span>Tất cả sự kiện</span>
-        </a>
-        <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="truc-tiep"
-           class="home-format-option @(loaiSuKien == "truc-tiep" ? "active" : "")">
-            <span class="format-icon"><i class="fas fa-location-dot"></i></span>
-            <span>Sự kiện trực tiếp</span>
-        </a>
-        <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="truc-tuyen"
-           class="home-format-option @(loaiSuKien == "truc-tuyen" ? "active" : "")">
-            <span class="format-icon"><i class="fas fa-video"></i></span>
-            <span>Sự kiện trực tuyến</span>
-        </a>
-    </div>
-</section>
-
-@* Danh mục được Controller gửi qua ViewBag.DanhMucs. *@
-<section class="container my-5">
-    <div class="section-title d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 fw-bold font-heading mb-0">Danh mục nổi bật</h2>
-        <a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@loaiSuKien" class="text-primary fw-bold text-decoration-none small">Xem tất cả sự kiện <i class="fas fa-chevron-right ms-1"></i></a>
-    </div>
-    <div class="row g-3 row-cols-lg-6 row-cols-md-3 row-cols-2">
-        @foreach (var item in danhMucs)
-        {
-            <div class="col">
-                <a class="category-card p-3 rounded text-center h-100 d-flex flex-column align-items-center justify-content-center gap-2"
-                   asp-controller="Home" asp-action="SuKien" asp-route-danhMucId="@item.Id" asp-route-loaiSuKien="@loaiSuKien"
-                   style="min-height: 90px; text-decoration: none; border: 1px solid #ede9fe; background: #ffffff; transition: all 0.2s ease;">
-                    @if (!string.IsNullOrEmpty(item.Icon))
-                    {
-                        <i class="@item.Icon text-primary fs-4"></i>
-                    }
-                    <div class="category-name fw-bold" style="color: #1e1b4b; font-size: 0.9rem;">@item.TenDanhMuc</div>
-                </a>
-            </div>
-        }
-    </div>
-</section>
-
-@* Hiển thị tối đa sáu sự kiện nổi bật. *@
-<section class="container my-5" id="featured-events">
-    <div class="section-title d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 fw-bold font-heading mb-0">Sự kiện HOT nổi bật</h2>
-        <a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@loaiSuKien" class="text-primary fw-bold text-decoration-none small">Xem tất cả sự kiện <i class="fas fa-chevron-right ms-1"></i></a>
-    </div>
-
-    @{
-        var featuredList = noiBat.Count > 0 ? noiBat : Model.Take(6).ToList();
-    }
-
-    @if (featuredList.Count == 0)
-    {
-        <div class="card p-5 text-center">
-            <h3 class="h5 fw-bold">Chưa có sự kiện để hiển thị</h3>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4 row-cols-lg-3 row-cols-md-2 row-cols-1">
-            @foreach (var item in featuredList)
+    <section class="container home-section" aria-labelledby="home-categories-title">
+        <div class="home-section-head"><h2 class="home-section-title" id="home-categories-title">Khám phá theo danh mục</h2><a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@eventFormat" class="home-section-link">Tất cả sự kiện <i class="fas fa-arrow-right"></i></a></div>
+        <div class="home-category-grid">
+            @foreach (var item in danhMucs)
             {
-                <div class="col animate-hover-up">
-                    <div class="card h-100 rounded overflow-hidden">
-                        <div class="position-relative overflow-hidden" style="height: 200px;">
-                            <img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" class="w-100 h-100 bg-light" style="object-fit:contain" onerror="this.onerror=null;this.src='/images/default-event.svg';" />
-                            <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 bg-danger text-white rounded fw-bold text-uppercase">HOT</span>
-                            <span class="event-format-badge position-absolute top-0 end-0 m-3"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot") me-1"></i>@(item.LoaiSuKien == 1 ? "Trực tuyến" : "Trực tiếp")</span>
-                        </div>
-                        <div class="card-body p-4 d-flex flex-column justify-content-between">
-                            <div>
-                                <span class="text-primary small fw-bold text-uppercase d-block mb-1">
-                                    <i class="far fa-calendar-alt"></i> @item.NgayBatDau.ToString("dd/MM/yyyy - HH:mm")
-                                </span>
-                                <h3 class="h6 card-title fw-bold text-truncate-2 mb-3">@item.TenSuKien</h3>
-                                <div class="d-flex align-items-center gap-2 text-muted small mb-4">
-                                    <i class="fas @(item.LoaiSuKien == 1 ? "fa-video text-primary" : "fa-map-marker-alt text-danger")"></i>
-                                    <span class="text-truncate" style="max-width: 250px;" title="@(item.LoaiSuKien == 1 ? "Trực tuyến" : $"{item.TenDiaDiem}, {item.ThanhPhoDiaDiem}")">
-                                        @(item.LoaiSuKien == 1 ? "Trực tuyến" : (!string.IsNullOrEmpty(item.ThanhPhoDiaDiem) ? $"{item.TenDiaDiem} ({item.ThanhPhoDiaDiem})" : item.TenDiaDiem ?? "Trực tiếp"))
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="border-top pt-3 d-flex justify-content-between align-items-center">
-                                <span class="text-success small fw-bold"><i class="fas fa-circle-check me-1"></i>Đang mở bán</span>
-                                <a href="/Home/ChiTiet/@item.Slug" class="btn btn-primary px-4 py-2 rounded fw-bold small"><i class="fas fa-ticket me-1"></i>Mua vé ngay</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-</section>
-
-@* Sắp xếp và hiển thị tối đa tám sự kiện gần nhất. *@
-<section class="container my-5" id="sap-dien-ra">
-    <div class="section-title d-flex justify-content-between align-items-center mb-4">
-        <h2 class="h3 fw-bold font-heading mb-0">Sự kiện sắp diễn ra</h2>
-    </div>
-
-    <div class="row g-4 row-cols-lg-4 row-cols-md-2 row-cols-1">
-        @foreach (var item in sapDienRa)
-        {
-            <div class="col animate-hover-up">
-                <div class="card h-100 rounded overflow-hidden">
-                    <div class="position-relative overflow-hidden" style="height: 160px;">
-                        <img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" class="w-100 h-100 bg-light" style="object-fit:contain" onerror="this.onerror=null;this.src='/images/default-event.svg';" />
-                        <span class="event-format-badge position-absolute top-0 start-0 m-3"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot") me-1"></i>@(item.LoaiSuKien == 1 ? "Trực tuyến" : "Trực tiếp")</span>
-                    </div>
-                    <div class="card-body p-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <span class="text-primary small fw-bold text-uppercase d-block mb-1">
-                                <i class="far fa-calendar-alt"></i> @item.NgayBatDau.ToString("dd/MM/yyyy - HH:mm")
-                            </span>
-                            <h3 class="h6 card-title fw-bold text-truncate-2 mb-2">@item.TenSuKien</h3>
-                            <div class="d-flex align-items-center gap-2 text-muted small mb-3">
-                                <i class="fas @(item.LoaiSuKien == 1 ? "fa-video text-primary" : "fa-map-marker-alt text-danger")"></i>
-                                <span class="text-truncate" style="max-width: 200px;" title="@(item.LoaiSuKien == 1 ? "Trực tuyến" : $"{item.TenDiaDiem}, {item.ThanhPhoDiaDiem}")">
-                                    @(item.LoaiSuKien == 1 ? "Trực tuyến" : (!string.IsNullOrEmpty(item.ThanhPhoDiaDiem) ? $"{item.TenDiaDiem} ({item.ThanhPhoDiaDiem})" : item.TenDiaDiem ?? "Trực tiếp"))
-                                </span>
-                            </div>
-                        </div>
-                        <div class="border-top pt-3 d-flex justify-content-between align-items-center">
-                            <span class="text-success small fw-bold"><i class="fas fa-circle-check me-1"></i>Đang bán</span>
-                            <a href="/Home/ChiTiet/@item.Slug" class="btn btn-sm btn-primary px-3 py-2 rounded fw-bold small"><i class="fas fa-ticket me-1"></i>Mua vé</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-    </div>
-</section>
-
-@if (daDienRa.Count > 0)
-{
-    <section class="container my-5" id="da-dien-ra">
-        <div class="section-title d-flex justify-content-between align-items-center mb-4">
-            <h2 class="h3 fw-bold font-heading mb-0">Sự kiện đã diễn ra</h2>
-            <a asp-controller="Home" asp-action="SuKien" asp-route-thoiGian="da-dien-ra" asp-route-loaiSuKien="@loaiSuKien" class="text-primary fw-bold text-decoration-none small">Xem tất cả <i class="fas fa-chevron-right ms-1"></i></a>
-        </div>
-
-        <div class="row g-4 row-cols-lg-3 row-cols-md-2 row-cols-1">
-            @foreach (var item in daDienRa)
-            {
-                <div class="col animate-hover-up">
-                    <div class="card h-100 rounded overflow-hidden border-0" style="box-shadow: 0 4px 20px rgba(0,0,0,.06);">
-                        <div class="position-relative overflow-hidden" style="height: 180px;">
-                            <img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" class="w-100 h-100 bg-light" style="object-fit:contain" onerror="this.onerror=null;this.src='/images/default-event.svg';" />
-                            <span class="badge position-absolute top-0 start-0 m-3 px-3 py-2 bg-secondary">Đã diễn ra</span>
-                        </div>
-                        <div class="card-body p-4 d-flex flex-column justify-content-between">
-                            <div>
-                                <span class="text-secondary small fw-bold d-block mb-2">
-                                    <i class="far fa-calendar-alt me-1"></i>@item.NgayBatDau.ToString("dd/MM/yyyy - HH:mm")
-                                </span>
-                                <h3 class="h6 fw-bold text-truncate-2 mb-3">@item.TenSuKien</h3>
-                                <div class="text-muted small mb-4 text-truncate">
-                                    <i class="fas @(item.LoaiSuKien == 1 ? "fa-video text-primary" : "fa-map-marker-alt text-danger") me-1"></i>
-                                    @(item.LoaiSuKien == 1 ? "Trực tuyến" : item.TenDiaDiem ?? "Trực tiếp")
-                                </div>
-                            </div>
-                            <a href="/Home/ChiTiet/@item.Slug" class="btn btn-outline-primary fw-bold">Xem sự kiện</a>
-                        </div>
-                    </div>
-                </div>
+                <a class="home-category" asp-controller="Home" asp-action="SuKien" asp-route-danhMucId="@item.Id" asp-route-loaiSuKien="@eventFormat"><i class="@(string.IsNullOrEmpty(item.Icon) ? "fas fa-calendar" : item.Icon)"></i><span>@item.TenDanhMuc</span></a>
             }
         </div>
     </section>
-}
+
+    <section class="container home-section" aria-labelledby="home-featured-title">
+        <div class="home-section-head"><h2 class="home-section-title" id="home-featured-title">Đang được quan tâm</h2><a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@eventFormat" class="home-section-link">Xem tất cả <i class="fas fa-arrow-right"></i></a></div>
+        @if (featuredEvents.Count == 0)
+        {
+            <div class="home-empty">Chưa có sự kiện đang mở bán.</div>
+        }
+        else
+        {
+            <div class="home-event-grid">
+                @foreach (var item in featuredEvents)
+                {
+                    var type = item.LoaiSuKien == 1 ? "Trực tuyến" : "Trực tiếp";
+                    var location = item.LoaiSuKien == 1 ? "Trực tuyến" : (!string.IsNullOrEmpty(item.ThanhPhoDiaDiem) ? $"{item.TenDiaDiem} · {item.ThanhPhoDiaDiem}" : item.TenDiaDiem ?? "Trực tiếp");
+                    <article class="home-event-card">
+                        <a class="home-event-media" href="/Home/ChiTiet/@item.Slug" aria-label="Xem sự kiện @item.TenSuKien"><img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" onerror="this.onerror=null;this.src='/images/default-event.svg';" /><span class="home-event-format"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot")"></i>@type</span></a>
+                        <div class="home-event-content"><p class="home-event-date"><i class="far fa-calendar-alt me-1"></i>@item.NgayBatDau.ToString("dd/MM/yyyy · HH:mm")</p><h3 class="home-event-title text-truncate-2"><a href="/Home/ChiTiet/@item.Slug">@item.TenSuKien</a></h3><p class="home-event-location"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot")"></i><span title="@location">@location</span></p><div class="home-event-foot"><span class="home-event-status">Đang mở bán</span><a class="home-event-link" href="/Home/ChiTiet/@item.Slug">Xem chi tiết <i class="fas fa-arrow-right"></i></a></div></div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="container home-section" aria-labelledby="home-upcoming-title">
+        <div class="home-section-head"><h2 class="home-section-title" id="home-upcoming-title">Sắp diễn ra</h2><a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@eventFormat" class="home-section-link">Lịch sự kiện <i class="fas fa-arrow-right"></i></a></div>
+        @if (upcomingEvents.Count == 0)
+        {
+            <div class="home-empty">Chưa có sự kiện sắp diễn ra.</div>
+        }
+        else
+        {
+            <div class="home-event-grid compact">
+                @foreach (var item in upcomingEvents)
+                {
+                    var type = item.LoaiSuKien == 1 ? "Trực tuyến" : "Trực tiếp";
+                    var location = item.LoaiSuKien == 1 ? "Trực tuyến" : (!string.IsNullOrEmpty(item.ThanhPhoDiaDiem) ? $"{item.TenDiaDiem} · {item.ThanhPhoDiaDiem}" : item.TenDiaDiem ?? "Trực tiếp");
+                    <article class="home-event-card">
+                        <a class="home-event-media" href="/Home/ChiTiet/@item.Slug" aria-label="Xem sự kiện @item.TenSuKien"><img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" onerror="this.onerror=null;this.src='/images/default-event.svg';" /><span class="home-event-format"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot")"></i>@type</span></a>
+                        <div class="home-event-content"><p class="home-event-date"><i class="far fa-calendar-alt me-1"></i>@item.NgayBatDau.ToString("dd/MM/yyyy · HH:mm")</p><h3 class="home-event-title text-truncate-2"><a href="/Home/ChiTiet/@item.Slug">@item.TenSuKien</a></h3><p class="home-event-location"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot")"></i><span title="@location">@location</span></p><div class="home-event-foot"><span class="home-event-status">Đang mở bán</span><a class="home-event-link" href="/Home/ChiTiet/@item.Slug">Xem <i class="fas fa-arrow-right"></i></a></div></div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+
+    @if (pastEvents.Count > 0)
+    {
+        <section class="container home-section home-past" aria-labelledby="home-past-title">
+            <div class="home-section-head"><h2 class="home-section-title" id="home-past-title">Sự kiện đã diễn ra</h2><a asp-controller="Home" asp-action="SuKien" asp-route-thoiGian="da-dien-ra" asp-route-loaiSuKien="@eventFormat" class="home-section-link">Xem lại sự kiện <i class="fas fa-arrow-right"></i></a></div>
+            <div class="home-event-grid">
+                @foreach (var item in pastEvents)
+                {
+                    var type = item.LoaiSuKien == 1 ? "Trực tuyến" : "Trực tiếp";
+                    var location = item.LoaiSuKien == 1 ? "Trực tuyến" : item.TenDiaDiem ?? "Trực tiếp";
+                    <article class="home-event-card past">
+                        <a class="home-event-media" href="/Home/ChiTiet/@item.Slug" aria-label="Xem lại sự kiện @item.TenSuKien"><img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" onerror="this.onerror=null;this.src='/images/default-event.svg';" /><span class="home-event-format"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot")"></i>@type</span></a>
+                        <div class="home-event-content"><p class="home-event-date"><i class="far fa-calendar-alt me-1"></i>@item.NgayBatDau.ToString("dd/MM/yyyy · HH:mm")</p><h3 class="home-event-title text-truncate-2"><a href="/Home/ChiTiet/@item.Slug">@item.TenSuKien</a></h3><p class="home-event-location"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot")"></i><span title="@location">@location</span></p><div class="home-event-foot"><span class="home-event-status">Đã diễn ra</span><a class="home-event-link" href="/Home/ChiTiet/@item.Slug">Xem sự kiện <i class="fas fa-arrow-right"></i></a></div></div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+</div>
