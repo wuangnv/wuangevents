@@ -788,6 +788,7 @@ function fitPresetCapacities(items) {
         });
     });
     const fittedItems = items.filter(item => item.type === 'ga' ? item.capacity > 0 : item.seatCount > 0);
+    layoutPresetZones(currentPreset, fittedItems);
     reflowZonesWhenNeeded(fittedItems);
     return fittedItems;
 }
@@ -852,6 +853,71 @@ function reflowZonesWhenNeeded(items) {
     });
 }
 
+function placeZone(z, x, y) {
+    z.x = Math.round(x / GRID) * GRID;
+    z.y = Math.round(y / GRID) * GRID;
+}
+
+function centerZone(z, y) {
+    const size = calcZoneSize(z);
+    placeZone(z, (MAP_WIDTH - size.w) / 2, y);
+}
+
+// Bố cục mẫu ưu tiên đúng quy ước thực tế: khu VIP/khách mời ở phía trước,
+// các khối vé phổ thông xếp cân xứng và có lối đi rõ ràng. Số ghế thay đổi
+// chỉ làm khu rộng/cao hơn, không được đảo lộn "vai trò" của từng khu.
+function layoutPresetZones(preset, items) {
+    if (!items.length) return;
+    const top = stageConfig.y + stageConfig.height + 38;
+    const sideMargin = 30;
+    const sideGap = 30;
+
+    if (preset === 'arena') {
+        const vip = items[0];
+        centerZone(vip, 60);
+        const bottomY = stageConfig.y + stageConfig.height + 38;
+        const others = items.slice(1);
+        if (others.length === 1) {
+            centerZone(others[0], bottomY);
+        } else if (others.length === 2) {
+            const left = others[0], right = others[1];
+            placeZone(left, sideMargin, bottomY);
+            placeZone(right, MAP_WIDTH - sideMargin - calcZoneSize(right).w, bottomY);
+        } else if (others.length === 3) {
+            const [left, center, right] = others;
+            placeZone(left, sideMargin, bottomY);
+            centerZone(center, bottomY);
+            placeZone(right, MAP_WIDTH - sideMargin - calcZoneSize(right).w, bottomY);
+        }
+        return;
+    }
+
+    const primary = items[0];
+    centerZone(primary, top);
+    const afterPrimary = top + calcZoneSize(primary).h + sideGap;
+    const others = items.slice(1);
+
+    if (preset === 'theatre' && others.length >= 3) {
+        // Nhà hát: khu đẹp nhất ở trung tâm, tầng trệt sau đó và hai lô/ban công hai bên.
+        const [floor, leftBox, rightBox] = others;
+        centerZone(floor, afterPrimary);
+        placeZone(leftBox, sideMargin, afterPrimary);
+        placeZone(rightBox, MAP_WIDTH - sideMargin - calcZoneSize(rightBox).w, afterPrimary);
+        return;
+    }
+
+    if (others.length === 1) {
+        centerZone(others[0], afterPrimary);
+        return;
+    }
+    if (others.length === 2) {
+        const [left, right] = others;
+        placeZone(left, sideMargin, afterPrimary);
+        placeZone(right, MAP_WIDTH - sideMargin - calcZoneSize(right).w, afterPrimary);
+        return;
+    }
+}
+
 // Các mẫu là điểm xuất phát có bố cục thực tế; người tổ chức vẫn chọn loại vé trong bảng thuộc tính.
 function buildPresetZones(preset) {
     if (!TICKET_TYPES.length) return [];
@@ -863,34 +929,32 @@ function buildPresetZones(preset) {
     if (preset === 'concert') {
         stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };
         result = [
-            zone('Khu trung tâm', 0, 7, 12, 383, 150),
-            zone('Khán đài trái', 1, 5, 8, 60, 300),
-            zone('Khán đài phải', 1, 5, 8, 834, 300),
-            zone('Khán đài sau', 2, 5, 18, 287, 510)
+            zone('Khu VIP trung tâm', 0, 5, 10, 415, 125),
+            zone('Khu vé thường trái', 1, 10, 10, 150, 390),
+            zone('Khu vé thường phải', 1, 10, 10, 680, 390)
         ];
     } else if (preset === 'theatre') {
         stageConfig = { x: 420, y: 36, width: 360, height: 48, title: 'SÂN KHẤU' };
         result = [
-            zone('Tầng trệt', 0, 8, 14, 350, 145),
-            zone('Lô ghế trái', 1, 4, 6, 70, 230),
-            zone('Lô ghế phải', 1, 4, 6, 888, 230),
-            zone('Ban công', 2, 5, 18, 287, 490)
+            zone('Tầng trệt VIP', 0, 5, 10, 415, 125),
+            zone('Tầng trệt tiêu chuẩn', 1, 10, 10, 415, 360),
+            zone('Ban công trái', 1, 5, 10, 30, 360),
+            zone('Ban công phải', 1, 5, 10, 800, 360)
         ];
     } else if (preset === 'auditorium') {
         stageConfig = { x: 410, y: 36, width: 380, height: 48, title: 'SÂN KHẤU / MÀN HÌNH' };
         result = [
-            zone('Khối A', 0, 8, 8, 80, 145),
-            zone('Khối trung tâm', 1, 8, 12, 383, 145),
-            zone('Khối B', 0, 8, 8, 814, 145),
-            zone('Khối phía sau', 2, 4, 16, 319, 510)
+            zone('Khu khách mời', 0, 5, 10, 415, 125),
+            zone('Khối ghế A', 1, 10, 10, 150, 390),
+            zone('Khối ghế B', 1, 10, 10, 680, 390)
         ];
     } else if (preset === 'arena') {
         stageConfig = { x: 420, y: 345, width: 360, height: 88, title: 'SÀN ĐẤU / SÂN KHẤU' };
         result = [
-            zone('Khán đài Bắc', 0, 5, 14, 350, 90),
-            zone('Khán đài Nam', 1, 5, 14, 350, 550),
-            zone('Khán đài Tây', 2, 7, 6, 70, 275),
-            zone('Khán đài Đông', 2, 7, 6, 888, 275)
+            zone('Khán đài Bắc - VIP', 0, 5, 10, 415, 60),
+            zone('Khán đài Tây', 1, 7, 10, 30, 480),
+            zone('Khán đài Nam', 1, 7, 10, 415, 480),
+            zone('Khán đài Đông', 1, 7, 10, 800, 480)
         ];
     } else {
         stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };
