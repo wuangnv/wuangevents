@@ -664,12 +664,9 @@ main {
     overflow: hidden;
     isolation: isolate;
     color: #ffffff;
-    background:
-        radial-gradient(circle at 11% 22%, rgba(192, 132, 252, 0.34), transparent 30%),
-        radial-gradient(circle at 84% 18%, rgba(99, 102, 241, 0.36), transparent 32%),
-        radial-gradient(circle at 66% 92%, rgba(236, 72, 153, 0.18), transparent 28%),
-        linear-gradient(120deg, #21085d 0%, #4c1d95 34%, #6d28d9 67%, #7c3aed 100%);
+    background: linear-gradient(108deg, #0b1220 0%, #15243b 56%, #253b61 100%);
     border-bottom: none;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,.08);
 }
 
 .hero-section::before,
@@ -677,31 +674,14 @@ main {
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.075) 1px, transparent 1px);
-    background-size: 64px 64px;
-    opacity: .3;
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.75) 42%, #000 100%);
-    mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,.75) 42%, #000 100%);
+    background: radial-gradient(ellipse at 86% 52%, rgba(130, 163, 232, .24), transparent 54%);
+    opacity: 1;
     pointer-events: none;
 }
 
 .hero-section::after,
 .hero::after {
-    content: '';
-    position: absolute;
-    z-index: 0;
-    top: -310px;
-    right: -170px;
-    width: 620px;
-    height: 620px;
-    border: 1px solid rgba(255, 255, 255, 0.13);
-    border-radius: 50%;
-    box-shadow:
-        0 0 0 86px rgba(255, 255, 255, 0.035),
-        0 0 0 172px rgba(255, 255, 255, 0.022);
-    pointer-events: none;
+    display: none;
 }
 
 .hero-section .container,
@@ -712,12 +692,11 @@ main {
 
 .hero-image-wrapper {
     display: inline-block;
-    padding: 9px;
-    background: linear-gradient(145deg, rgba(255,255,255,.24), rgba(255,255,255,.07));
-    border: 1px solid rgba(255,255,255,.3);
-    border-radius: 22px;
-    box-shadow: 0 30px 70px rgba(20, 5, 65, .42), inset 0 1px 0 rgba(255,255,255,.25);
-    backdrop-filter: blur(10px);
+    padding: 7px;
+    background: rgba(255,255,255,.96);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 20px;
+    box-shadow: 0 26px 55px rgba(5, 13, 30, .35);
 }
 
 .hero-image-wrapper img {
@@ -1108,11 +1087,7 @@ main {
 .main-content .hero[style] {
     min-height: 480px !important;
     padding: 5rem 0 !important;
-    background:
-        radial-gradient(circle at 11% 22%, rgba(192, 132, 252, 0.34), transparent 30%),
-        radial-gradient(circle at 84% 18%, rgba(99, 102, 241, 0.36), transparent 32%),
-        radial-gradient(circle at 66% 92%, rgba(236, 72, 153, 0.18), transparent 28%),
-        linear-gradient(120deg, #21085d 0%, #4c1d95 34%, #6d28d9 67%, #7c3aed 100%) !important;
+    background: linear-gradient(108deg, #0b1220 0%, #15243b 56%, #253b61 100%) !important;
     border-bottom: none !important;
     box-shadow: inset 0 -1px 0 rgba(255,255,255,.08) !important;
 }

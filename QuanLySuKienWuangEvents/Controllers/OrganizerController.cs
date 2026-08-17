@@ -2133,6 +2133,7 @@ public class OrganizerController : Controller
         List<int>? zoneLoaiVeId,
         List<int>? zoneSoHang,
         List<int>? zoneSoGheMoiHang,
+        List<int>? zoneTongSoGhe,
         List<string>? zoneMauSac,
         List<int>? zoneViTriX,
         List<int>? zoneViTriY,
@@ -2190,6 +2191,7 @@ public class OrganizerController : Controller
                 || zoneLoaiVeId?.Count != count
                 || zoneSoHang?.Count != count
                 || zoneSoGheMoiHang?.Count != count
+                || zoneTongSoGhe?.Count != count
                 || zoneMauSac?.Count != count
                 || zoneViTriX?.Count != count
                 || zoneViTriY?.Count != count
@@ -2222,6 +2224,7 @@ public class OrganizerController : Controller
                 bool isGA = loaiKhu == "ga";
                 int soHang = isGA ? 0 : zoneSoHang![i];
                 int soGhe  = isGA ? 0 : zoneSoGheMoiHang![i];
+                int tongSoGhe = isGA ? 0 : zoneTongSoGhe![i];
                 int sucChua = isGA ? zoneSucChua![i] : 0;
 
                 if (!loaiVeHopLe.ContainsKey(loaiVeId) || string.IsNullOrWhiteSpace(zoneTen![i]))
@@ -2229,9 +2232,9 @@ public class OrganizerController : Controller
                     TempData["Error"] = "Mỗi khu phải dùng loại vé hợp lệ của sự kiện."; 
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
-                if (!isGA && (soHang is < 1 or > 20 || soGhe is < 1 or > 30))
+                if (!isGA && (soHang is < 1 or > 20 || soGhe is < 1 or > 30 || tongSoGhe is < 1 or > 600 || tongSoGhe > soHang * soGhe))
                 {
-                    TempData["Error"] = "Khu ghế ngồi phải có 1–20 hàng và 1–30 ghế mỗi hàng.";
+                    TempData["Error"] = "Khu ghế ngồi phải có 1–20 hàng, tối đa 30 ghế mỗi hàng và tối đa 600 ghế.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
                 if (isGA && sucChua is < 1 or > 10000)
@@ -2272,6 +2275,7 @@ public class OrganizerController : Controller
                 {
                     Ten = zoneTen![i].Trim(), LoaiVeId = loaiVeId,
                     SoHang = soHang, SoGheMoiHang = soGhe, MauSac = mau,
+                    TongSoGhe = tongSoGhe,
                     ViTriX = viTriX, ViTriY = viTriY,
                     LoaiKhuVuc = loaiKhu, SucChua = sucChua,
                     Rong = rong, Cao = cao,
@@ -2280,7 +2284,7 @@ public class OrganizerController : Controller
                 });
             }
 
-            int tongGhe = zones.Where(z => z.LoaiKhuVuc != "ga").Sum(x => x.SoHang * x.SoGheMoiHang);
+            int tongGhe = zones.Where(z => z.LoaiKhuVuc != "ga").Sum(x => x.TongSoGhe);
             int tongGA  = zones.Where(z => z.LoaiKhuVuc == "ga").Sum(x => x.SucChua);
             if (tongGhe + tongGA > 10000)
             {
@@ -2290,21 +2294,21 @@ public class OrganizerController : Controller
 
             foreach (var group in zones.GroupBy(x => x.LoaiVeId))
             {
-                int tongSoCuaLoai = group.Sum(x => x.LoaiKhuVuc == "ga" ? x.SucChua : x.SoHang * x.SoGheMoiHang);
+                int tongSoCuaLoai = group.Sum(x => x.LoaiKhuVuc == "ga" ? x.SucChua : x.TongSoGhe);
                 bool coKhuDung = group.Any(x => x.LoaiKhuVuc == "ga");
                 if (coKhuDung && (group.Count() != 1 || tongSoCuaLoai != loaiVeHopLe[group.Key].SoLuongTong))
                 {
                     TempData["Error"] = $"Vé khu đứng '{loaiVeHopLe[group.Key].TenLoaiVe}' phải gán cho đúng một khu và sức chứa phải bằng tổng số vé.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
-                if (tongSoCuaLoai > loaiVeHopLe[group.Key].SoLuongTong)
+                if (tongSoCuaLoai != loaiVeHopLe[group.Key].SoLuongTong)
                 {
-                    TempData["Error"] = $"Các khu dùng vé '{loaiVeHopLe[group.Key].TenLoaiVe}' phân bổ {tongSoCuaLoai} chỗ nhưng tổng số vé chỉ có {loaiVeHopLe[group.Key].SoLuongTong}.";
+                    TempData["Error"] = $"Các khu dùng vé '{loaiVeHopLe[group.Key].TenLoaiVe}' cần có đúng {loaiVeHopLe[group.Key].SoLuongTong} ghế; hiện có {tongSoCuaLoai} ghế.";
                     return RedirectToAction("SoDoChoNgoi", new { suKienId });
                 }
             }
 
-            foreach (var loaiVe in loaiVeHopLe.Values.Where(x => x.TrangThai))
+            foreach (var loaiVe in loaiVeHopLe.Values.Where(x => x.TrangThai && x.SoLuongTong > 0))
             {
                 if (!zones.Any(x => x.LoaiVeId == loaiVe.Id))
                 {
@@ -2426,8 +2430,11 @@ public class OrganizerController : Controller
                 if (z.HuongDanhSo == "odd" && soBatDau % 2 == 0) soBatDau++;
                 if (z.HuongDanhSo == "even" && soBatDau % 2 != 0) soBatDau++;
 
+                int gheConLai = z.TongSoGhe;
                 for (int r = 0; r < z.SoHang; r++)
                 {
+                    int soGheHangNay = Math.Min(z.SoGheMoiHang, gheConLai);
+                    if (soGheHangNay <= 0) break;
                     string rowLabel = TaoTenHang(r, z.BoQuaChuDeNham);
                     string rowName  = prefix + rowLabel;
 
@@ -2435,17 +2442,18 @@ public class OrganizerController : Controller
                         INSERT INTO HangGhe (KhuVucId, TenHang, SoGhe, ThuTu)
                         OUTPUT INSERTED.Id
                         VALUES (@zoneId, @rowName, @soGhe, @order)
-                    ", new { zoneId, rowName, soGhe = z.SoGheMoiHang, order = r + 1 }, transaction);
+                    ", new { zoneId, rowName, soGhe = soGheHangNay, order = r + 1 }, transaction);
 
-                    for (int col = 0; col < z.SoGheMoiHang; col++)
+                    for (int col = 0; col < soGheHangNay; col++)
                     {
-                        int seatNum = soBatDau + (rtl ? (z.SoGheMoiHang - 1 - col) : col) * buocDanhSo;
+                        int seatNum = soBatDau + (rtl ? (soGheHangNay - 1 - col) : col) * buocDanhSo;
                         string seatLabel = rowName + seatNum;
                         await connection.ExecuteAsync(@"
                             INSERT INTO ChoNgoi (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
                             VALUES (@rowId, @seatLabel, @x, @y, 0)
                         ", new { rowId, seatLabel, x = col + 1, y = r + 1 }, transaction);
                     }
+                    gheConLai -= soGheHangNay;
                 }
             }
 
@@ -2470,6 +2478,7 @@ public class OrganizerController : Controller
         public int LoaiVeId { get; set; }
         public int SoHang { get; set; }
         public int SoGheMoiHang { get; set; }
+        public int TongSoGhe { get; set; }
         public string MauSac { get; set; } = "#198754";
         public int ViTriX { get; set; }
         public int ViTriY { get; set; }

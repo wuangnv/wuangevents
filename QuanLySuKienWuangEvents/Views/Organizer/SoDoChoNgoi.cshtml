@@ -306,15 +306,15 @@
                 <div class="preset-list" id="presetList">
                     <button type="button" class="preset-btn active" data-preset="concert" onclick="selectPreset('concert')">
                         <span class="preset-icon"><i class="fas fa-music"></i></span>
-                        <span class="ptxt"><strong>Concert có ghế</strong><small>Sân khấu, khu trung tâm, khán đài</small></span>
+                        <span class="ptxt"><strong>Live show / sân khấu</strong><small>VIP trung tâm, khán đài và hàng sau</small></span>
                     </button>
                     <button type="button" class="preset-btn" data-preset="theatre" onclick="selectPreset('theatre')">
                         <span class="preset-icon"><i class="fas fa-masks-theater"></i></span>
-                        <span class="ptxt"><strong>Nhà hát &amp; hòa nhạc</strong><small>Tầng trệt, lô ghế, ban công</small></span>
+                        <span class="ptxt"><strong>Nhà hát biểu diễn</strong><small>Tầng trệt, lô cánh và ban công</small></span>
                     </button>
                     <button type="button" class="preset-btn" data-preset="auditorium" onclick="selectPreset('auditorium')">
                         <span class="preset-icon"><i class="fas fa-landmark"></i></span>
-                        <span class="ptxt"><strong>Hội trường hội nghị</strong><small>Sân khấu diễn giả, lối đi giữa</small></span>
+                        <span class="ptxt"><strong>Hội nghị / hội trường</strong><small>Ba khối ghế, lối đi và màn hình</small></span>
                     </button>
                     <button type="button" class="preset-btn" data-preset="arena" onclick="selectPreset('arena')">
                         <span class="preset-icon"><i class="fas fa-trophy"></i></span>
@@ -329,6 +329,7 @@
                 <p class="sb-section-title">Khu vực trong sơ đồ</p>
                 <button type="button" class="sb-btn-add" onclick="addSeatedZone()"><i class="fas fa-chair"></i> Thêm khu ghế ngồi</button>
                 <button type="button" class="sb-btn-add" onclick="addGAZone()" style="background:#fff8f0;border-color:#f59e0b;color:#d97706;margin-top:0"><i class="fas fa-person-walking"></i> Thêm khu đứng (GA)</button>
+                <button type="button" class="sb-btn-add" onclick="autoAllocateSeatsForTickets()" style="background:#f0fdf4;border-color:#86efac;color:#047857;margin-top:0"><i class="fas fa-wand-magic-sparkles"></i> Tự cân số ghế theo vé</button>
                 <div class="sb-zone-list" id="sbZoneList"></div>
             </div>
 
@@ -431,9 +432,10 @@
                     <!-- Tab Hàng & Ghế -->
                     <div class="props-body hidden" id="tabBodySeats">
                         <div class="pf-grid2">
+                            <div class="pf"><label>Tổng số ghế</label><input type="number" id="pSeatCount" min="1" max="600" oninput="updateSelectedZone('seatCount',this.value)" /></div>
                             <div class="pf"><label>Số hàng</label><input type="number" id="pRows" min="1" max="20" oninput="updateSelectedZone('rows',this.value)" /></div>
-                            <div class="pf"><label>Ghế / hàng</label><input type="number" id="pCols" min="1" max="30" oninput="updateSelectedZone('cols',this.value)" /></div>
                         </div>
+                        <div class="pf"><label>Ghế / hàng (tự tính)</label><input type="number" id="pCols" readonly tabindex="-1" /></div>
                         <div class="pf"><label>Tiền tố tên hàng</label><input type="text" id="pPrefix" maxlength="10" placeholder="Bỏ trống = A, B, C..." oninput="updateSelectedZone('prefix',this.value)" /></div>
                         <div class="pf">
                             <label>Kiểu đánh số ghế</label>
@@ -470,6 +472,7 @@
 const EVENT_ID = '@suKienId';
 const TICKET_TYPES = @Html.Raw(loaiVeJson);
 const EVENT_NAME = @Html.Raw(tenSuKienJson);
+const STUDIO_DRAFT_KEY = `wuangevents:seat-map-draft:${EVENT_ID}`;
 const SKIP_LETTERS = new Set(['I','O','Q','V','U']);
 const GRID = 20; // snap grid px
 const MAP_WIDTH = 1200, MAP_HEIGHT = 800;
@@ -484,6 +487,63 @@ let undoStack = [], redoStack = [];
 let konvaStage, konvaLayer, konvaBgLayer;
 let stageGroup = null;
 let stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };
+
+function saveStudioDraft() {
+    if (!document.getElementById('studioForm')) return;
+    try {
+        sessionStorage.setItem(STUDIO_DRAFT_KEY, JSON.stringify({
+            version: 1,
+            preset: currentPreset,
+            name: document.getElementById('tenSoDoField')?.value || '',
+            stage: stageConfig,
+            zones: zones.map(z => ({
+                id: z.id, name: z.name, ticketId: z.ticketId, type: z.type,
+                rows: z.rows, cols: z.cols, seatCount: z.seatCount, capacity: z.capacity,
+                color: z.color, x: z.x, y: z.y, prefix: z.prefix,
+                numScheme: z.numScheme, startNum: z.startNum, skipLetters: z.skipLetters
+            }))
+        }));
+    } catch { /* Private mode/storage full: saving still proceeds normally. */ }
+}
+
+function restoreStudioDraft() {
+    try {
+        const raw = sessionStorage.getItem(STUDIO_DRAFT_KEY);
+        if (!raw) return false;
+        const draft = JSON.parse(raw);
+        if (!Array.isArray(draft.zones) || !draft.zones.length) return false;
+        currentPreset = draft.preset || 'custom';
+        stageConfig = { ...stageConfig, ...(draft.stage || {}) };
+        zones = draft.zones.map(draftZone => {
+            const z = makeZone(
+                draftZone.name || 'Khu vực', draftZone.ticketId, draftZone.type || 'seated',
+                draftZone.rows || 5, draftZone.cols || 10, draftZone.x || 0, draftZone.y || 0,
+                draftZone.color, draftZone.capacity || 200
+            );
+            Object.assign(z, {
+                id: draftZone.id || nextZoneId(),
+                seatCount: draftZone.seatCount ?? (draftZone.rows * draftZone.cols),
+                prefix: draftZone.prefix || '', numScheme: draftZone.numScheme || 'ltr',
+                startNum: draftZone.startNum || 1, skipLetters: draftZone.skipLetters || 'yes'
+            });
+            normalizeSeatedZone(z);
+            keepZoneInsideCanvas(z);
+            return z;
+        });
+        document.querySelectorAll('.preset-btn').forEach(button =>
+            button.classList.toggle('active', button.dataset.preset === currentPreset));
+        document.getElementById('loaiSoDoInput').value = currentPreset;
+        document.getElementById('tenSoDoField').value = draft.name || ('Sơ đồ - ' + EVENT_NAME);
+        renderCanvas();
+        selectZone(zones[0].id);
+        requestAnimationFrame(konvaFitView);
+        if (typeof WuangUI !== 'undefined') WuangUI.toast('Đã khôi phục cấu hình sơ đồ trước đó.', 'info');
+        return true;
+    } catch {
+        sessionStorage.removeItem(STUDIO_DRAFT_KEY);
+        return false;
+    }
+}
 
 // ─── Init Konva Stage ──────────────────────────────────────────────────────
 function initKonva() {
@@ -604,7 +664,9 @@ function konvaFitView() {
 
 // ─── Preset Config ────────────────────────────────────────────────────────────
 function getTicketById(id) { return TICKET_TYPES.find(t => Number(t.id) === Number(id)) || TICKET_TYPES[0]; }
-function activeTicketTypes() { return TICKET_TYPES.filter(ticket => ticket.enabled !== false); }
+function activeTicketTypes() {
+    return TICKET_TYPES.filter(ticket => ticket.enabled !== false && Number(ticket.total || 0) > 0);
+}
 function nextZoneId() { return Date.now() + Math.random(); }
 
 function makeRowLabel(idx, skipLetters) {
@@ -619,10 +681,67 @@ function makeRowLabel(idx, skipLetters) {
     return result;
 }
 
-function ticketAt(index) { return TICKET_TYPES[index % TICKET_TYPES.length]; }
+function ticketAt(index) {
+    const tickets = activeTicketTypes();
+    return tickets[index % tickets.length] || TICKET_TYPES[index % TICKET_TYPES.length];
+}
 
-// Mỗi mẫu tự thu gọn số ghế để không phân bổ vượt tồn kho của loại vé đang được gán.
+const MAX_SEATED_SEATS_PER_ZONE = 600;
+
+function getZoneCapacity(z) {
+    return z.type === 'ga'
+        ? Math.max(0, Number(z.capacity || 0))
+        : Math.max(0, Number(z.seatCount ?? (z.rows * z.cols) ?? 0));
+}
+
+// Tổng số ghế là nguồn dữ liệu chính. Số hàng chỉ quyết định cách dàn ghế;
+// hàng cuối tự ngắn hơn khi cần để số ghế luôn đúng tuyệt đối.
+function normalizeSeatedZone(z) {
+    if (z.type === 'ga') return;
+    const total = Math.max(1, Math.min(MAX_SEATED_SEATS_PER_ZONE, Number(z.seatCount ?? (z.rows * z.cols) ?? 1)));
+    const minRows = Math.ceil(total / 30);
+    z.rows = Math.max(minRows, Math.min(20, Number(z.rows || minRows)));
+    z.cols = Math.ceil(total / z.rows);
+    z.seatCount = total;
+}
+
+function seatsInRow(z, rowIndex) {
+    return Math.max(0, Math.min(z.cols, getZoneCapacity(z) - rowIndex * z.cols));
+}
+
+// Mỗi mẫu tự phân bổ chính xác tổng vé của từng loại vào các khu đã có.
+// Nhờ vậy người tổ chức không phải tự cộng số hàng × số cột để tránh thiếu/thừa ghế.
 function fitPresetCapacities(items) {
+    const activeTickets = activeTicketTypes();
+    if (!activeTickets.length) return [];
+
+    // Mẫu tùy chỉnh có thể chỉ khởi đầu bằng một khu. Tạo thêm khu tối thiểu
+    // để không có loại vé đang bán nào bị bỏ sót khi bấm “Tự cân”.
+    while (items.length < activeTickets.length && items.length < 30) {
+        const ticket = activeTickets[items.length];
+        items.push(makeZone(
+            `Khu ${ticket.name}`,
+            ticket.id,
+            'seated',
+            5,
+            10,
+            60 + (items.length % 3) * 360,
+            180 + Math.floor(items.length / 3) * 260,
+            ticket.color
+        ));
+    }
+
+    // Bảo đảm mọi loại vé đang bán đều xuất hiện trên sơ đồ.
+    items.forEach((item, index) => {
+        const ticket = getTicketById(item.ticketId);
+        if (!ticket || ticket.enabled === false) item.ticketId = activeTickets[index % activeTickets.length].id;
+    });
+    activeTickets.forEach((ticket, index) => {
+        if (!items.some(item => Number(item.ticketId) === Number(ticket.id))) {
+            items[index % items.length].ticketId = ticket.id;
+        }
+    });
+
     const grouped = new Map();
     items.forEach(item => {
         const group = grouped.get(item.ticketId) || [];
@@ -630,22 +749,107 @@ function fitPresetCapacities(items) {
     });
     grouped.forEach((itemsForTicket, ticketId) => {
         const ticket = getTicketById(ticketId);
-        const perZone = Math.max(1, Math.floor(Number(ticket?.total || 1) / itemsForTicket.length));
-        itemsForTicket.forEach(item => {
-            if (item.type === 'ga') { item.capacity = Math.min(item.capacity, perZone); return; }
-            const wanted = item.rows * item.cols;
-            if (wanted <= perZone) return;
-            let best = { rows: 1, cols: 1, seats: 1 };
-            for (let rows = 1; rows <= item.rows; rows++) {
-                for (let cols = 1; cols <= item.cols; cols++) {
-                    const seats = rows * cols;
-                    if (seats <= perZone && seats > best.seats) best = { rows, cols, seats };
-                }
+        const total = Math.max(0, Number(ticket?.total || 0));
+        const requiredZones = Math.ceil(total / MAX_SEATED_SEATS_PER_ZONE);
+        while (itemsForTicket.length < requiredZones && items.length < 30) {
+            const source = itemsForTicket[itemsForTicket.length % Math.max(1, itemsForTicket.length)];
+            const extra = makeZone(
+                `${ticket.name} - khu ${itemsForTicket.length + 1}`,
+                ticketId,
+                'seated',
+                10,
+                10,
+                60 + (items.length % 3) * 380,
+                520 + Math.floor(items.length / 3) * 160,
+                source?.color || ticket.color
+            );
+            items.push(extra);
+            itemsForTicket.push(extra);
+        }
+        const allocatableTotal = Math.min(total, itemsForTicket.length * MAX_SEATED_SEATS_PER_ZONE);
+        const weights = itemsForTicket.map(item => Math.max(1, getZoneCapacity(item)));
+        const weightSum = weights.reduce((sum, value) => sum + value, 0);
+        const allocations = weights.map(value => Math.floor(allocatableTotal * value / weightSum));
+        let remaining = allocatableTotal - allocations.reduce((sum, value) => sum + value, 0);
+        let cursor = 0;
+        while (remaining > 0) {
+            if (allocations[cursor] < MAX_SEATED_SEATS_PER_ZONE) {
+                allocations[cursor]++;
+                remaining--;
             }
-            item.rows = best.rows; item.cols = best.cols;
+            cursor = (cursor + 1) % allocations.length;
+        }
+        itemsForTicket.forEach((item, index) => {
+            if (item.type === 'ga') item.capacity = allocations[index];
+            else {
+                item.seatCount = allocations[index];
+                normalizeSeatedZone(item);
+            }
         });
     });
-    return items;
+    const fittedItems = items.filter(item => item.type === 'ga' ? item.capacity > 0 : item.seatCount > 0);
+    reflowZonesWhenNeeded(fittedItems);
+    return fittedItems;
+}
+
+// Khi số vé thực tế làm một khu rộng hơn mẫu ban đầu, tự sắp lại theo hàng/cột
+// để không có khu nào chồng lên nhau, vượt canvas hoặc nằm quá xa nhau.
+function reflowZonesWhenNeeded(items) {
+    if (!items.length) return;
+
+    const isOutside = z => {
+        const { w, h } = calcZoneSize(z);
+        return z.x < 0 || z.y < 0 || z.x + w > MAP_WIDTH || z.y + h > MAP_HEIGHT;
+    };
+    const isOverlapping = (a, b) => {
+        const sa = calcZoneSize(a), sb = calcZoneSize(b);
+        return a.x < b.x + sb.w + 10 && a.x + sa.w + 10 > b.x &&
+               a.y < b.y + sb.h + 10 && a.y + sa.h + 10 > b.y;
+    };
+    const needsReflow = items.some(isOutside) || items.some((item, index) =>
+        items.slice(index + 1).some(other => isOverlapping(item, other)));
+    if (!needsReflow) return;
+
+    // Mỗi khu tối đa 15 ghế một hàng khi tự xếp lại. Kích thước này vừa cho hai
+    // khu đứng cạnh nhau trên canvas 1.200px, đồng thời không kéo sơ đồ quá cao.
+    const targetCols = items.length <= 2 ? 24 : 15;
+    items.forEach(z => {
+        if (z.type === 'ga') return;
+        z.rows = Math.max(1, Math.min(20, Math.ceil(getZoneCapacity(z) / targetCols)));
+        normalizeSeatedZone(z);
+    });
+
+    const gap = 32;
+    const padding = 36;
+    let x = padding;
+    let y = Math.max(padding, stageConfig.y + stageConfig.height + 42);
+    let rowHeight = 0;
+
+    items.forEach(z => {
+        let size = calcZoneSize(z);
+        if (x + size.w > MAP_WIDTH - padding && x > padding) {
+            x = padding;
+            y += rowHeight + gap;
+            rowHeight = 0;
+        }
+
+        // Nếu chiều cao chưa phù hợp, dàn nhiều hàng hơn để khu hẹp và thấp vừa canvas.
+        if (y + size.h > MAP_HEIGHT - padding && z.type !== 'ga') {
+            z.rows = 20;
+            normalizeSeatedZone(z);
+            size = calcZoneSize(z);
+            if (x + size.w > MAP_WIDTH - padding && x > padding) {
+                x = padding;
+                y += rowHeight + gap;
+                rowHeight = 0;
+            }
+        }
+        z.x = x;
+        z.y = y;
+        keepZoneInsideCanvas(z);
+        x += size.w + gap;
+        rowHeight = Math.max(rowHeight, size.h);
+    });
 }
 
 // Các mẫu là điểm xuất phát có bố cục thực tế; người tổ chức vẫn chọn loại vé trong bảng thuộc tính.
@@ -699,13 +903,14 @@ function buildPresetZones(preset) {
 
 function makeZone(name, ticketId, type, rows, cols, x, y, color, capacity = 200) {
     const t = getTicketById(ticketId);
-    return {
+    const zone = {
         id: nextZoneId(),
         name,
         ticketId: Number(ticketId),
         type, // 'seated' | 'ga'
         rows: type === 'ga' ? 0 : Math.max(1, rows),
         cols: type === 'ga' ? 0 : Math.max(1, cols),
+        seatCount: type === 'ga' ? 0 : Math.max(1, rows * cols),
         capacity: type === 'ga' ? capacity : 0,
         color: color || t.color || '#4f46e5',
         x: Math.max(20, x),
@@ -716,6 +921,8 @@ function makeZone(name, ticketId, type, rows, cols, x, y, color, capacity = 200)
         skipLetters: 'yes',
         group: null // Konva group ref
     };
+    normalizeSeatedZone(zone);
+    return zone;
 }
 
 // ─── Render Canvas ───────────────────────────────────────────────────────────
@@ -796,18 +1003,19 @@ function renderZone(z) {
         const gaIcon = new Konva.Text({ x: 0, y: 36, width: w, height: h - 36, text: `${z.capacity || 100} người`, fill: z.color, fontSize: 14, fontStyle: 'bold', fontFamily: 'Inter,system-ui,sans-serif', align: 'center', verticalAlign: 'middle' });
         grp.add(gaIcon);
     } else {
-        // Toàn bộ ghế được vẽ đúng số hàng/cột sẽ lưu, không dùng bản xem trước bị cắt.
+        // Hàng cuối có thể ngắn hơn để tổng ghế đúng bằng cấu hình của khu vực.
         for (let r = 0; r < z.rows; r++) {
             const rowLabel = makeRowLabel(r, z.skipLetters === 'yes');
             const rowLabelTxt = new Konva.Text({ x: ZONE_PAD, y: ZONE_PAD + ZONE_HEADER_H + r * (SEAT_H + ROW_GAP) + (SEAT_H - 10) / 2, text: rowLabel, fill: '#94a3b8', fontSize: 9, fontStyle: 'bold', fontFamily: 'Inter,system-ui', width: ROW_LABEL_W, align: 'center', listening: false });
             grp.add(rowLabelTxt);
-            for (let c = 0; c < z.cols; c++) {
+            const seatsThisRow = seatsInRow(z, r);
+            for (let c = 0; c < seatsThisRow; c++) {
                 const sx = ZONE_PAD + ROW_LABEL_W + c * (SEAT_W + SEAT_GAP);
                 const sy = ZONE_PAD + ZONE_HEADER_H + r * (SEAT_H + ROW_GAP);
                 const seatRect = new Konva.Rect({ x: sx, y: sy, width: SEAT_W, height: SEAT_H, fill: hexToRgba(z.color, 0.1), stroke: z.color, strokeWidth: 1, cornerRadius: 5, listening: false });
                 const numScheme = z.numScheme || 'ltr';
                 let seatNum;
-                if (numScheme === 'rtl') seatNum = z.startNum + (z.cols - 1 - c);
+                if (numScheme === 'rtl') seatNum = z.startNum + (seatsThisRow - 1 - c);
                 else if (numScheme === 'odd') seatNum = z.startNum + c * 2;
                 else if (numScheme === 'even') seatNum = (z.startNum || 2) + c * 2;
                 else seatNum = z.startNum + c;
@@ -863,7 +1071,8 @@ function selectZone(id) {
     document.getElementById('pTicket').value = z.ticketId;
     document.getElementById('pColor').value = z.color;
     document.getElementById('pRows').value = z.rows || 5;
-    document.getElementById('pCols').value = z.cols || 10;
+    document.getElementById('pSeatCount').value = getZoneCapacity(z) || 1;
+    document.getElementById('pCols').value = z.cols || 1;
     document.getElementById('pPrefix').value = z.prefix || '';
     document.getElementById('pNumScheme').value = z.numScheme || 'ltr';
     document.getElementById('pStartNum').value = z.startNum || 1;
@@ -894,12 +1103,18 @@ function updateSelectedZone(field, value) {
     else if (field === 'ticketId') z.ticketId = Number(value);
     else if (field === 'color') { z.color = value; document.getElementById('propsZoneColorDot').style.background = value; }
     else if (field === 'rows') z.rows = Math.max(1, Math.min(20, Number(value)));
-    else if (field === 'cols') z.cols = Math.max(1, Math.min(30, Number(value)));
+    else if (field === 'seatCount') z.seatCount = Math.max(1, Math.min(MAX_SEATED_SEATS_PER_ZONE, Number(value)));
     else if (field === 'prefix') z.prefix = value;
     else if (field === 'numScheme') z.numScheme = value;
     else if (field === 'startNum') z.startNum = Math.max(1, Number(value));
     else if (field === 'skipLetters') z.skipLetters = value;
     else if (field === 'capacity') z.capacity = Math.max(1, Number(value));
+    normalizeSeatedZone(z);
+    if (z.type !== 'ga') {
+        document.getElementById('pRows').value = z.rows;
+        document.getElementById('pCols').value = z.cols;
+        document.getElementById('pSeatCount').value = z.seatCount;
+    }
     keepZoneInsideCanvas(z);
     renderZone(z);
     konvaLayer.batchDraw();
@@ -915,7 +1130,11 @@ function setZoneType(type) {
     z.type = type;
     setZoneTypeUI(type);
     if (type === 'ga') { z.rows = 0; z.cols = 0; z.capacity = z.capacity || 200; }
-    else { z.rows = z.rows || 5; z.cols = z.cols || 10; }
+    else {
+        z.rows = z.rows || 5;
+        z.seatCount = z.seatCount || 50;
+        normalizeSeatedZone(z);
+    }
     keepZoneInsideCanvas(z);
     renderZone(z);
     konvaLayer.batchDraw();
@@ -971,7 +1190,7 @@ function removeZone(id) {
 function snapshotState() {
     return JSON.stringify({ stage: stageConfig, zones: zones.map(z => ({
         id: z.id, name: z.name, ticketId: z.ticketId, type: z.type,
-        rows: z.rows, cols: z.cols, capacity: z.capacity, color: z.color,
+        rows: z.rows, cols: z.cols, seatCount: z.seatCount, capacity: z.capacity, color: z.color,
         x: z.x, y: z.y, prefix: z.prefix, numScheme: z.numScheme,
         startNum: z.startNum, skipLetters: z.skipLetters
     })) });
@@ -986,7 +1205,11 @@ function restoreState(snap) {
     const data = Array.isArray(snapshot) ? snapshot : snapshot.zones;
     if (!Array.isArray(snapshot)) stageConfig = { ...stageConfig, ...snapshot.stage };
     zones.forEach(z => { if (z.group) z.group.destroy(); });
-    zones = data.map(d => ({ ...d, group: null }));
+    zones = data.map(d => {
+        const zone = { ...d, seatCount: d.seatCount ?? (d.rows * d.cols), group: null };
+        normalizeSeatedZone(zone);
+        return zone;
+    });
     renderCanvas();
     updateStats(); updateSbZoneList();
     if (selectedZoneId && !zones.find(z => z.id === selectedZoneId)) deselectZone();
@@ -1004,7 +1227,7 @@ function redoAction() {
 
 // ─── Stats & Sidebar ─────────────────────────────────────────────────────────
 function updateStats() {
-    const seatedTotal = zones.filter(z => z.type !== 'ga').reduce((s, z) => s + z.rows * z.cols, 0);
+    const seatedTotal = zones.filter(z => z.type !== 'ga').reduce((s, z) => s + getZoneCapacity(z), 0);
     const gaTotal = zones.filter(z => z.type === 'ga').reduce((s, z) => s + (z.capacity || 0), 0);
     document.getElementById('totalStatPill').textContent = `${seatedTotal + gaTotal} chỗ · ${zones.length} khu vực`;
 }
@@ -1027,9 +1250,9 @@ function updateCapTab(z) {
     const container = document.getElementById('capDetails');
     if (!z) { container.innerHTML = ''; return; }
     const t = getTicketById(z.ticketId);
-    let thisCap = z.type === 'ga' ? (z.capacity || 0) : (z.rows * z.cols);
+    let thisCap = getZoneCapacity(z);
     const allForTicket = zones.filter(zz => Number(zz.ticketId) === Number(z.ticketId));
-    const totalForTicket = allForTicket.reduce((s, zz) => s + (zz.type === 'ga' ? (zz.capacity || 0) : zz.rows * zz.cols), 0);
+    const totalForTicket = allForTicket.reduce((s, zz) => s + getZoneCapacity(zz), 0);
     const pct = t.total > 0 ? Math.round(totalForTicket / t.total * 100) : 0;
     const exact = totalForTicket === t.total;
     const over = totalForTicket > t.total;
@@ -1085,6 +1308,20 @@ function selectPreset(preset) {
     requestAnimationFrame(konvaFitView);
 }
 
+function autoAllocateSeatsForTickets() {
+    if (!zones.length) {
+        if (typeof WuangUI !== 'undefined') WuangUI.toast('Hãy chọn mẫu hoặc thêm một khu vực trước.', 'error');
+        return;
+    }
+    pushUndo();
+    zones = fitPresetCapacities(zones);
+    reflowZonesWhenNeeded(zones);
+    zones.forEach(keepZoneInsideCanvas);
+    renderCanvas();
+    if (zones.length) selectZone(selectedZoneId && zones.some(z => z.id === selectedZoneId) ? selectedZoneId : zones[0].id);
+    if (typeof WuangUI !== 'undefined') WuangUI.toast('Đã cân đúng số ghế theo tổng vé của từng loại.', 'success');
+}
+
 // ─── Form Submit ──────────────────────────────────────────────────────────────
 function submitNoSeatMap() {
     if (confirm('Bạn có chắc chắn muốn cấu hình sự kiện này thành BÁN VÉ TỰ DO (không chọn ghế)?')) {
@@ -1097,6 +1334,10 @@ function submitStudioForm() {
     if (!name) { if (typeof WuangUI !== 'undefined') WuangUI.toast('Vui lòng nhập tên sơ đồ', 'error'); return; }
     if (!zones.length) { if (typeof WuangUI !== 'undefined') WuangUI.toast('Vui lòng thêm ít nhất 1 khu vực', 'error'); return; }
 
+    // Lưu nháp trên trình duyệt trước khi POST. Nếu server từ chối vì một ràng buộc,
+    // trang quay lại vẫn phục hồi nguyên bố cục, tên khu, loại vé và số ghế.
+    saveStudioDraft();
+
     // Đảm bảo mọi zone đều có loại vé hợp lệ
     zones.forEach(z => {
         if (!z.ticketId || !getTicketById(z.ticketId)) {
@@ -1108,13 +1349,14 @@ function submitStudioForm() {
     // Validate capacity
     const ticketMap = new Map();
     zones.forEach(z => {
-        const cap = z.type === 'ga' ? (z.capacity || 0) : (z.rows * z.cols);
+        const cap = getZoneCapacity(z);
         ticketMap.set(z.ticketId, (ticketMap.get(z.ticketId) || 0) + cap);
     });
     for (const [tid, total] of ticketMap) {
         const t = getTicketById(tid);
-        if (t && total > t.total) {
-            if (typeof WuangUI !== 'undefined') WuangUI.toast(`Loại vé "${t.name}" phân bổ ${total} chỗ nhưng chỉ có ${t.total} vé!`, 'error');
+        if (t && total !== t.total) {
+            const detail = total > t.total ? `vượt ${total - t.total}` : `còn thiếu ${t.total - total}`;
+            if (typeof WuangUI !== 'undefined') WuangUI.toast(`Loại vé "${t.name}" ${detail} ghế. Hãy dùng “Tự cân số ghế theo vé”.`, 'error');
             return;
         }
     }
@@ -1150,6 +1392,7 @@ function submitStudioForm() {
         addInput('zoneLoaiVeId', z.ticketId || TICKET_TYPES[0]?.id);
         addInput('zoneSoHang', z.type === 'ga' ? 0 : Math.max(1, z.rows || 5));
         addInput('zoneSoGheMoiHang', z.type === 'ga' ? 0 : Math.max(1, z.cols || 10));
+        addInput('zoneTongSoGhe', z.type === 'ga' ? 0 : getZoneCapacity(z));
         addInput('zoneMauSac', z.color || '#4f46e5');
         addInput('zoneViTriX', Math.round(z.x || 0));
         addInput('zoneViTriY', Math.round(z.y || 0));
@@ -1207,7 +1450,13 @@ async function seatToggle(seatId) {
 // ─── Bootstrap ───────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     const hasKonva = document.getElementById('konva-container');
-    if (hasKonva) { initKonva(); selectPreset('concert'); }
+    if (hasKonva) {
+        initKonva();
+        if (!restoreStudioDraft()) selectPreset('concert');
+    } else {
+        // Trang sơ đồ đã lưu nghĩa là lần POST gần nhất thành công.
+        try { sessionStorage.removeItem(STUDIO_DRAFT_KEY); } catch { }
+    }
 });
 </script>
 }
