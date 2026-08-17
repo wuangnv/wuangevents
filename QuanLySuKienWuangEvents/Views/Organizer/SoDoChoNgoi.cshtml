@@ -916,10 +916,11 @@ function layoutPresetZones(preset, items) {
     if (preset === 'arena') {
         const [north, west, east, southLeft, southRight] = items;
         if (north) centerZone(north, 40);
-        if (west) placeZone(west, 70, 230);
-        if (east) placeZone(east, MAP_WIDTH - 70 - calcZoneSize(east).w, 230);
-        if (southLeft) placeZone(southLeft, 210, 560);
-        if (southRight) placeZone(southRight, MAP_WIDTH - 210 - calcZoneSize(southRight).w, 560);
+        // Chừa khoảng trống quanh sân 360°: các khán đài không được lấn vào sân hoặc nhau.
+        if (west) placeZone(west, 70, 190);
+        if (east) placeZone(east, MAP_WIDTH - 70 - calcZoneSize(east).w, 190);
+        if (southLeft) placeZone(southLeft, 190, 580);
+        if (southRight) placeZone(southRight, MAP_WIDTH - 190 - calcZoneSize(southRight).w, 580);
         return;
     }
     const top = stageConfig.y + stageConfig.height + 42;
@@ -994,10 +995,10 @@ function buildPresetZones(preset) {
         stageConfig = { x: 350, y: 300, width: 500, height: 180, title: 'SÀN THI ĐẤU / SÂN KHẤU 360°' };
         result = [
             zone('Khán đài Bắc - VIP', 0, 5, 10, 415, 40),
-            zone('Khán đài Tây', 1, 10, 5, 70, 230),
-            zone('Khán đài Đông', 1, 10, 5, 946, 230),
-            zone('Khán đài Nam trái', 1, 5, 10, 210, 560),
-            zone('Khán đài Nam phải', 1, 5, 10, 620, 560)
+            zone('Khán đài Tây', 1, 10, 5, 70, 190),
+            zone('Khán đài Đông', 1, 10, 5, 946, 190),
+            zone('Khán đài Nam trái', 1, 5, 10, 190, 580),
+            zone('Khán đài Nam phải', 1, 5, 10, 640, 580)
         ];
     } else {
         stageConfig = { x: 440, y: 36, width: 320, height: 48, title: 'SÂN KHẤU' };

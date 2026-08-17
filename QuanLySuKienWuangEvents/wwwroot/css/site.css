@@ -735,6 +735,16 @@ main {
     object-fit: cover;
 }
 
+/* Bootstrap phiên bản hiện tại không có utility object-fit. Các ảnh bìa dùng
+   class này phải giữ đúng tỷ lệ ở mọi danh sách/thẻ, không bị kéo méo. */
+.object-fit-contain {
+    object-fit: contain !important;
+}
+
+.object-fit-cover {
+    object-fit: cover !important;
+}
+
 .event-card-body {
     padding: 16px;
 }

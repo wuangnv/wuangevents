@@ -8,6 +8,7 @@ DECLARE @NowVietnam DATETIME2(7) = DATEADD(hour, 7, GETUTCDATE());
 DECLARE @OrganizerId UNIQUEIDENTIFIER = '5B5CE913-3124-448A-812B-85B5A4AB1A03';
 DECLARE @BuyerId UNIQUEIDENTIFIER = '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52';
 DECLARE @DraftEventId UNIQUEIDENTIFIER = 'E0000000-0000-0000-0000-000000000051';
+DECLARE @PausedEditorEventId UNIQUEIDENTIFIER = 'E0000000-0000-0000-0000-000000000054';
 
 IF (SELECT COUNT(*) FROM dbo.NguoiDung
     WHERE Email IN ('admin@wuangevents.com', 'organizer1@wuangevents.com', 'buyer1@wuangevents.com', 'staff1@wuangevents.com')) <> 4
@@ -73,6 +74,17 @@ IF EXISTS (
 IF EXISTS (SELECT 1 FROM dbo.DonHang WHERE SuKienId = @DraftEventId)
    OR EXISTS (SELECT 1 FROM dbo.SoDoChoNgoi WHERE SuKienId = @DraftEventId)
     THROW 51009, N'Sự kiện nháp cấu hình sơ đồ phải không có đơn hàng hoặc sơ đồ cũ.', 1;
+
+IF NOT EXISTS (
+        SELECT 1
+        FROM dbo.SuKien
+        WHERE Id = @PausedEditorEventId
+          AND NguoiToChucId = @OrganizerId
+          AND TrangThai = 2
+          AND CoSoDoChoNgoi = 0)
+   OR EXISTS (SELECT 1 FROM dbo.DonHang WHERE SuKienId = @PausedEditorEventId)
+   OR EXISTS (SELECT 1 FROM dbo.SoDoChoNgoi WHERE SuKienId = @PausedEditorEventId)
+    THROW 51013, N'Sự kiện tạm dừng dùng để chỉnh sơ đồ phải không có đơn hàng hoặc sơ đồ cũ.', 1;
 
 IF NOT EXISTS (
     SELECT 1 FROM dbo.NhanVienSuKien

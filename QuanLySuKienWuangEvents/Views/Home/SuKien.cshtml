@@ -158,7 +158,7 @@
                         <div class="col animate-hover-up">
                             <div class="card h-100 rounded overflow-hidden border-0" style="box-shadow: 0 4px 20px rgba(0,0,0,0.06); background: #fff;">
                                 <div class="position-relative overflow-hidden" style="height: 180px;">
-                                    <img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.src='/images/default-event.svg';" />
+                                    <img src="@item.LayAnhBiaHienThi" alt="@item.TenSuKien" class="w-100 h-100 bg-light" style="object-fit:contain" onerror="this.onerror=null;this.src='/images/default-event.svg';" />
                                     <span class="event-format-badge position-absolute top-0 end-0 m-3"><i class="fas @(item.LoaiSuKien == 1 ? "fa-video" : "fa-location-dot") me-1"></i>@(item.LoaiSuKien == 1 ? "Trực tuyến" : "Trực tiếp")</span>
                                 </div>
 

@@ -76,7 +76,8 @@ BEGIN
     IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_SoDoChoNgoi_LoaiSoDo')
         ALTER TABLE dbo.SoDoChoNgoi DROP CONSTRAINT CK_SoDoChoNgoi_LoaiSoDo;
     ALTER TABLE dbo.SoDoChoNgoi ADD CONSTRAINT CK_SoDoChoNgoi_LoaiSoDo
-        CHECK (LoaiSoDo IN (N'concert', N'auditorium', N'theatre', N'cinema', N'arena', N'custom'));
+        CHECK (LoaiSoDo IN (N'workshop', N'auditorium', N'concert', N'gala', N'arena', N'custom',
+                             N'theatre', N'cinema'));
 END;
 
 IF OBJECT_ID(N'dbo.KhuVuc', N'U') IS NOT NULL
@@ -98,9 +99,10 @@ BEGIN
     IF COL_LENGTH(N'dbo.KhuVuc', N'BoQuaChuDeNham') IS NULL
         ALTER TABLE dbo.KhuVuc ADD BoQuaChuDeNham BIT NOT NULL CONSTRAINT DF_KhuVuc_BoQuaChu DEFAULT (1);
 
-    -- Phải dùng dynamic SQL: SQL Server biên dịch cả batch trước khi ALTER ADD cột hoàn tất.
-    IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_KhuVuc_LoaiKhuVuc')
-        EXEC(N'ALTER TABLE dbo.KhuVuc ADD CONSTRAINT CK_KhuVuc_LoaiKhuVuc CHECK (LoaiKhuVuc IN (''seated'', ''ga''))');
+    -- CSDL cũ có ràng buộc chỉ gồm seated/ga; phải thay thế để hỗ trợ bàn tiệc (banquet).
+    IF EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CK_KhuVuc_LoaiKhuVuc')
+        ALTER TABLE dbo.KhuVuc DROP CONSTRAINT CK_KhuVuc_LoaiKhuVuc;
+    EXEC(N'ALTER TABLE dbo.KhuVuc ADD CONSTRAINT CK_KhuVuc_LoaiKhuVuc CHECK (LoaiKhuVuc IN (''seated'', ''ga'', ''banquet''))');
 END;";
 
         using var connection = new SqlConnection(_connectionString);

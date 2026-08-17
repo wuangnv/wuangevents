@@ -310,7 +310,7 @@ BEGIN TRY
 
         CONSTRAINT [PK_SoDoChoNgoi] PRIMARY KEY CLUSTERED ([Id]),
         CONSTRAINT [UQ_SoDoChoNgoi_SuKienId] UNIQUE ([SuKienId]),
-        CONSTRAINT [CK_SoDoChoNgoi_LoaiSoDo] CHECK ([LoaiSoDo] IN (N'concert', N'auditorium', N'theatre', N'cinema', N'arena', N'custom')),
+        CONSTRAINT [CK_SoDoChoNgoi_LoaiSoDo] CHECK ([LoaiSoDo] IN (N'workshop', N'auditorium', N'concert', N'gala', N'arena', N'custom', N'theatre', N'cinema')),
         CONSTRAINT [FK_SoDoChoNgoi_SuKien] FOREIGN KEY ([SuKienId]) REFERENCES [dbo].[SuKien]([Id]) ON DELETE CASCADE
     );
 
@@ -337,7 +337,7 @@ BEGIN TRY
         CONSTRAINT [UQ_KhuVuc_SoDo_Ten] UNIQUE ([SoDoChoNgoiId], [TenKhuVuc]),
         CONSTRAINT [FK_KhuVuc_SoDoChoNgoi] FOREIGN KEY ([SoDoChoNgoiId]) REFERENCES [dbo].[SoDoChoNgoi]([Id]) ON DELETE CASCADE,
         CONSTRAINT [FK_KhuVuc_LoaiVe] FOREIGN KEY ([LoaiVeId]) REFERENCES [dbo].[LoaiVe]([Id]),
-        CONSTRAINT [CK_KhuVuc_LoaiKhuVuc] CHECK ([LoaiKhuVuc] IN ('seated', 'ga'))
+        CONSTRAINT [CK_KhuVuc_LoaiKhuVuc] CHECK ([LoaiKhuVuc] IN ('seated', 'ga', 'banquet'))
     );
 
     -- 10. HangGhe
@@ -2192,7 +2192,7 @@ BEGIN TRY
     ('E0000000-0000-0000-0000-000000000051', N'Triển Lãm Cưới Việt Nam 2026', 'trien-lam-cuoi-viet-nam-2026', N'Không gian giới thiệu áo dài cưới, trang trí, chụp ảnh và dịch vụ tiệc cưới; dữ liệu mẫu đang ở trạng thái nháp.', '/uploads/banners/professional/real-trade-expo.jpg', 6, 9, 0, 0),
     ('E0000000-0000-0000-0000-000000000052', N'Ngày Hội Công Nghệ Việt 2026', 'ngay-hoi-cong-nghe-viet-2026', N'Hồ sơ ngày hội công nghệ đang chờ quản trị viên xem xét trước khi công khai và mở bán vé.', '/uploads/banners/professional/real-trade-expo.jpg', 10, 9, 1, 0),
     ('E0000000-0000-0000-0000-000000000053', N'Hội Chợ Sống Xanh Việt Nam', 'hoi-cho-song-xanh-viet-nam', N'Hội chợ giới thiệu sản phẩm bền vững, lớp tái chế và các doanh nghiệp xanh trong nước.', '/uploads/banners/professional/real-trade-expo.jpg', 15, 9, 3, 1),
-    ('E0000000-0000-0000-0000-000000000054', N'Tuần Lễ Thời Trang Việt Trẻ', 'tuan-le-thoi-trang-viet-tre', N'Sự kiện mua sắm và trình diễn thời trang đang tạm dừng bán vé để cập nhật kế hoạch vận hành.', '/uploads/banners/professional/real-art-gallery.jpg', 18, 10, 2, 0),
+    ('E0000000-0000-0000-0000-000000000054', N'Tuần Lễ Thời Trang Việt Trẻ', 'tuan-le-thoi-trang-viet-tre', N'Sự kiện mua sắm và trình diễn thời trang đang tạm dừng bán vé để Ban tổ chức cấu hình sơ đồ chỗ ngồi trước khi mở bán.', '/uploads/banners/professional/real-art-gallery.jpg', 18, 10, 2, 0),
     ('E0000000-0000-0000-0000-000000000055', N'Triển Lãm Xe Điện Và Di Chuyển Xanh', 'trien-lam-xe-dien-va-di-chuyen-xanh', N'Không gian giới thiệu xe điện, giải pháp sạc và xu hướng giao thông đô thị trong tương lai.', '/uploads/banners/professional/real-trade-expo.jpg', 23, 8, 3, 0),
     ('E0000000-0000-0000-0000-000000000056', N'Diễn Đàn Du Lịch Hàng Không Việt Nam', 'dien-dan-du-lich-hang-khong-viet-nam', N'Diễn đàn về vận hành, dịch vụ hành khách và kết nối các điểm đến trong nước; dữ liệu mẫu thuộc nhóm đã hủy.', '/uploads/banners/professional/real-tech-conference.jpg', 27, 9, 6, 0),
     ('E0000000-0000-0000-0000-000000000057', N'Tuần Lễ Áo Dài Việt Nam', 'tuan-le-ao-dai-viet-nam', N'Chương trình trình diễn áo dài và giao lưu nhà thiết kế; hồ sơ mẫu bị từ chối vì thiếu phương án an toàn.', '/uploads/banners/professional/real-vietnamese-performing-arts.jpg', 31, 18, 7, 0),
@@ -2684,6 +2684,25 @@ BEGIN TRY
     UPDATE dbo.SuKien
     SET CoSoDoChoNgoi = 0
     WHERE Id = 'E0000000-0000-0000-0000-000000000051';
+
+    -- Sự kiện tạm dừng là tình huống sát thực tế hơn để demo chỉnh sơ đồ:
+    -- đã có thông tin/loại vé nhưng chưa phát sinh đơn hoặc sơ đồ cũ.
+    DELETE ct
+    FROM dbo.ChiTietDonHang ct
+    JOIN dbo.DonHang dh ON dh.Id = ct.DonHangId
+    WHERE dh.SuKienId = 'E0000000-0000-0000-0000-000000000054';
+
+    DELETE FROM dbo.DonHang
+    WHERE SuKienId = 'E0000000-0000-0000-0000-000000000054';
+
+    DELETE FROM dbo.SoDoChoNgoi
+    WHERE SuKienId = 'E0000000-0000-0000-0000-000000000054';
+
+    UPDATE dbo.SuKien
+    SET CoSoDoChoNgoi = 0,
+        TrangThai = 2,
+        HienThiCongKhai = 1
+    WHERE Id = 'E0000000-0000-0000-0000-000000000054';
 
     -- Staff1 có cả ca sắp tới và ca đã lưu trữ.
     IF NOT EXISTS (
