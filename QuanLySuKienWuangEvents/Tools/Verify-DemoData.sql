@@ -7,6 +7,7 @@ SET NOCOUNT ON;
 DECLARE @NowVietnam DATETIME2(7) = DATEADD(hour, 7, GETUTCDATE());
 DECLARE @OrganizerId UNIQUEIDENTIFIER = '5B5CE913-3124-448A-812B-85B5A4AB1A03';
 DECLARE @BuyerId UNIQUEIDENTIFIER = '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52';
+DECLARE @MainEventId UNIQUEIDENTIFIER = 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E';
 DECLARE @DraftEventId UNIQUEIDENTIFIER = 'E0000000-0000-0000-0000-000000000051';
 DECLARE @PausedEditorEventId UNIQUEIDENTIFIER = 'E0000000-0000-0000-0000-000000000054';
 
@@ -26,6 +27,41 @@ IF NOT EXISTS (SELECT 1 FROM dbo.SuKien WHERE LoaiSuKien = 1 AND TrangThai = 3)
 
 IF NOT EXISTS (SELECT 1 FROM dbo.SuKien WHERE LoaiSuKien = 0 AND CoSoDoChoNgoi = 1)
     THROW 51004, N'Thiếu sự kiện trực tiếp có sơ đồ ghế.', 1;
+
+-- Sự kiện chính phải luôn có sơ đồ nhà thi đấu rõ phần VIP/Thường để demo mua vé.
+IF NOT EXISTS (
+    SELECT 1
+    FROM dbo.SoDoChoNgoi
+    WHERE SuKienId = @MainEventId
+      AND LoaiSoDo = N'arena'
+      AND CanvasRong = 1050
+      AND CanvasCao = 830)
+    THROW 51015, N'Sự kiện WuangEvents Live chưa có sơ đồ nhà thi đấu đúng cấu hình.', 1;
+
+IF (SELECT COUNT(*) FROM dbo.KhuVuc kv
+    JOIN dbo.SoDoChoNgoi sd ON sd.Id = kv.SoDoChoNgoiId
+    WHERE sd.SuKienId = @MainEventId) <> 4
+   OR (SELECT COUNT(*) FROM dbo.ChoNgoi cn
+       JOIN dbo.HangGhe hg ON hg.Id = cn.HangGheId
+       JOIN dbo.KhuVuc kv ON kv.Id = hg.KhuVucId
+       JOIN dbo.SoDoChoNgoi sd ON sd.Id = kv.SoDoChoNgoiId
+       WHERE sd.SuKienId = @MainEventId) <> 320
+    THROW 51016, N'Sơ đồ nhà thi đấu phải có 4 khán đài và 320 ghế.', 1;
+
+IF EXISTS (
+    SELECT 1
+    FROM dbo.LoaiVe lv
+    OUTER APPLY (
+        SELECT COUNT(*) AS SoGhe
+        FROM dbo.ChoNgoi cn
+        JOIN dbo.HangGhe hg ON hg.Id = cn.HangGheId
+        JOIN dbo.KhuVuc kv ON kv.Id = hg.KhuVucId
+        WHERE kv.LoaiVeId = lv.Id
+    ) sg
+    WHERE lv.SuKienId = @MainEventId
+      AND lv.TrangThai = 1
+      AND lv.SoLuongTong <> sg.SoGhe)
+    THROW 51017, N'Sức chứa loại vé chính không khớp số ghế thực tế trên sơ đồ.', 1;
 
 IF NOT EXISTS (SELECT 1 FROM dbo.LoaiVe WHERE GiaBan = 0)
    OR NOT EXISTS (SELECT 1 FROM dbo.LoaiVe WHERE GiaBan BETWEEN 50000 AND 100000)

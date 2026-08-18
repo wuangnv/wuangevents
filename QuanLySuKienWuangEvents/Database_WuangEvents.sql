@@ -1167,43 +1167,111 @@ BEGIN TRY
 
 
     -- =============================================
-    -- SEED DATA: SoDoChoNgoi / KhuVuc / HangGhe / ChoNgoi for Event 1
+    -- SƠ ĐỒ DEMO CHÍNH: Nhà thi đấu / khán đài 4 phía cho WuangEvents Live.
+    -- 80 ghế VIP ở khán đài Bắc và 240 ghế Thường ở ba khán đài còn lại.
+    -- Mỗi loại vé có sức chứa đúng bằng tổng số ghế thực tế trên sơ đồ.
     -- =============================================
-    INSERT INTO [dbo].[SoDoChoNgoi] ([SuKienId], [TenSoDo], [LoaiSoDo], [NgayTao])
-    VALUES ('D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', N'Sơ đồ khán đài Sân vận động Phú Thọ', N'arena', GETUTCDATE());
- 
-    INSERT INTO [dbo].[KhuVuc] ([SoDoChoNgoiId], [LoaiVeId], [TenKhuVuc], [MauSac], [ViTriX], [ViTriY], [ThuTu])
-    VALUES (1, 1, N'Khu VIP A', '#FFD700', 10, 10, 0);
- 
-    INSERT INTO [dbo].[KhuVuc] ([SoDoChoNgoiId], [LoaiVeId], [TenKhuVuc], [MauSac], [ViTriX], [ViTriY], [ThuTu])
-    VALUES (1, 2, N'Khu Thường B', '#1E90FF', 10, 60, 1);
- 
-    INSERT INTO [dbo].[HangGhe] ([KhuVucId], [TenHang], [SoGhe], [ThuTu])
-    VALUES (1, N'A', 5, 0);
-    INSERT INTO [dbo].[HangGhe] ([KhuVucId], [TenHang], [SoGhe], [ThuTu])
-    VALUES (1, N'B', 5, 1);
- 
-    INSERT INTO [dbo].[HangGhe] ([KhuVucId], [TenHang], [SoGhe], [ThuTu])
-    VALUES (2, N'C', 5, 0);
- 
-    -- ChoNgoi for Event 1 (A1, A2: TrangThai = 2 [DaBan], A3: TrangThai = 1 [GiuCho])
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (1, N'A1', 20, 20, 2);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (1, N'A2', 40, 20, 2);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (1, N'A3', 60, 20, 1);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (1, N'A4', 80, 20, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (1, N'A5', 100, 20, 0);
- 
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (2, N'B1', 20, 40, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (2, N'B2', 40, 40, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (2, N'B3', 60, 40, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (2, N'B4', 80, 40, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (2, N'B5', 100, 40, 0);
- 
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (3, N'C1', 20, 80, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (3, N'C2', 40, 80, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (3, N'C3', 60, 80, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (3, N'C4', 80, 80, 0);
-    INSERT INTO [dbo].[ChoNgoi] ([HangGheId], [SoGhe], [ViTriX], [ViTriY], [TrangThai]) VALUES (3, N'C5', 100, 80, 0);
+    DECLARE @MainEventId UNIQUEIDENTIFIER = 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E';
+    DECLARE @MainSeatMapId INT;
+    DECLARE @MainVipTicketId INT;
+    DECLARE @MainStandardTicketId INT;
+
+    SELECT @MainVipTicketId = Id
+    FROM dbo.LoaiVe
+    WHERE SuKienId = @MainEventId AND TenLoaiVe = N'Vé VIP';
+
+    SELECT @MainStandardTicketId = Id
+    FROM dbo.LoaiVe
+    WHERE SuKienId = @MainEventId AND TenLoaiVe = N'Vé Thường';
+
+    IF @MainVipTicketId IS NULL OR @MainStandardTicketId IS NULL
+        THROW 51020, N'Không tìm thấy loại vé VIP hoặc Vé Thường của sự kiện WuangEvents Live.', 1;
+
+    UPDATE dbo.LoaiVe
+    SET SoLuongTong = CASE WHEN Id = @MainVipTicketId THEN 80 ELSE 240 END
+    WHERE Id IN (@MainVipTicketId, @MainStandardTicketId);
+
+    INSERT INTO dbo.SoDoChoNgoi
+        (SuKienId, TenSoDo, LoaiSoDo, CanvasRong, CanvasCao,
+         SanKhauX, SanKhauY, SanKhauRong, SanKhauCao, NhanSanKhau, NgayTao)
+    VALUES
+        (@MainEventId, N'Sân vận động 4 khán đài - WuangEvents Live', N'arena', 1050, 830,
+         345, 330, 360, 150, N'SÂN KHẤU TRUNG TÂM', GETUTCDATE());
+    SET @MainSeatMapId = SCOPE_IDENTITY();
+
+    DECLARE @MainMapZones TABLE
+    (
+        ZoneKey TINYINT PRIMARY KEY,
+        KhuVucId INT NULL,
+        LoaiVeId INT NOT NULL,
+        TenKhuVuc NVARCHAR(100) NOT NULL,
+        MauSac VARCHAR(7) NOT NULL,
+        ViTriX INT NOT NULL,
+        ViTriY INT NOT NULL,
+        Rong INT NOT NULL,
+        Cao INT NOT NULL,
+        ThuTu INT NOT NULL
+    );
+
+    INSERT INTO @MainMapZones
+        (ZoneKey, LoaiVeId, TenKhuVuc, MauSac, ViTriX, ViTriY, Rong, Cao, ThuTu)
+    VALUES
+        (1, @MainVipTicketId,      N'Khán đài VIP Bắc', N'#F59E0B', 380,  52, 290, 245, 0),
+        (2, @MainStandardTicketId, N'Khán đài Tây',     N'#2563EB',  40, 285, 290, 245, 1),
+        (3, @MainStandardTicketId, N'Khán đài Đông',    N'#2563EB', 720, 285, 290, 245, 2),
+        (4, @MainStandardTicketId, N'Khán đài Nam',     N'#2563EB', 380, 545, 290, 245, 3);
+
+    INSERT INTO dbo.KhuVuc
+        (SoDoChoNgoiId, LoaiVeId, TenKhuVuc, MauSac, ViTriX, ViTriY,
+         Rong, Cao, LoaiKhuVuc, SucChua, TienToHangGhe, KieuDanhSo,
+         SoBatDau, BoQuaChuDeNham, ThuTu)
+    SELECT @MainSeatMapId, LoaiVeId, TenKhuVuc, MauSac, ViTriX, ViTriY,
+           Rong, Cao, 'seated', 80, N'', 'ltr', 1, 1, ThuTu
+    FROM @MainMapZones;
+
+    UPDATE z
+    SET KhuVucId = k.Id
+    FROM @MainMapZones z
+    JOIN dbo.KhuVuc k
+      ON k.SoDoChoNgoiId = @MainSeatMapId
+     AND k.TenKhuVuc = z.TenKhuVuc;
+
+    DECLARE @MainMapRows TABLE
+    (
+        ZoneKey TINYINT NOT NULL,
+        TenHang NVARCHAR(10) NOT NULL,
+        ThuTu INT NOT NULL,
+        PRIMARY KEY (ZoneKey, ThuTu)
+    );
+
+    INSERT INTO @MainMapRows (ZoneKey, TenHang, ThuTu)
+    VALUES
+        (1, N'A', 0), (1, N'B', 1), (1, N'C', 2), (1, N'D', 3),
+        (1, N'E', 4), (1, N'F', 5), (1, N'G', 6), (1, N'H', 7),
+        (2, N'J', 0), (2, N'K', 1), (2, N'L', 2), (2, N'M', 3),
+        (2, N'N', 4), (2, N'O', 5), (2, N'P', 6), (2, N'Q', 7),
+        (3, N'R', 0), (3, N'S', 1), (3, N'T', 2), (3, N'U', 3),
+        (3, N'V', 4), (3, N'W', 5), (3, N'X', 6), (3, N'Y', 7),
+        (4, N'AA', 0), (4, N'AB', 1), (4, N'AC', 2), (4, N'AD', 3),
+        (4, N'AE', 4), (4, N'AF', 5), (4, N'AG', 6), (4, N'AH', 7);
+
+    INSERT INTO dbo.HangGhe (KhuVucId, TenHang, SoGhe, ThuTu)
+    SELECT z.KhuVucId, r.TenHang, 10, r.ThuTu
+    FROM @MainMapRows r
+    JOIN @MainMapZones z ON z.ZoneKey = r.ZoneKey;
+
+    ;WITH SeatNumbers AS
+    (
+        SELECT 1 AS SoGhe
+        UNION ALL SELECT SoGhe + 1 FROM SeatNumbers WHERE SoGhe < 10
+    )
+    INSERT INTO dbo.ChoNgoi (HangGheId, SoGhe, ViTriX, ViTriY, TrangThai)
+    SELECT h.Id, CONVERT(NVARCHAR(10), n.SoGhe), n.SoGhe * 24, r.ThuTu * 27, 0
+    FROM @MainMapRows r
+    JOIN @MainMapZones z ON z.ZoneKey = r.ZoneKey
+    JOIN dbo.HangGhe h ON h.KhuVucId = z.KhuVucId AND h.TenHang = r.TenHang
+    CROSS JOIN SeatNumbers n
+    OPTION (MAXRECURSION 10);
 
 
     -- =============================================
@@ -2730,6 +2798,7 @@ BEGIN TRY
     JOIN dbo.KhuVuc kv ON kv.Id = hg.KhuVucId
     JOIN dbo.SoDoChoNgoi sd ON sd.Id = kv.SoDoChoNgoiId
     WHERE sd.SuKienId = @DemoEventId
+      AND kv.LoaiVeId = @DemoLoaiVeId
       AND cn.TrangThai = 0
       AND NOT EXISTS (SELECT 1 FROM dbo.ChiTietDonHang ct WHERE ct.ChoNgoiId = cn.Id)
     ORDER BY cn.Id;
