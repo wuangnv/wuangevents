@@ -8,9 +8,9 @@ namespace QuanLySuKienWuangEvents.Controllers;
 
 public class HomeController : Controller
 {
-    // GET / hoặc /Home/Index: lọc theo từ khóa, danh mục, thành phố và hình thức.
+    // GET / hoặc /Home/Index: lọc theo từ khóa, danh mục, thành phố, hình thức và giá vé.
     public async Task<IActionResult> Index(
-        string? q, int? danhMucId, string? thanhPho, string loaiSuKien = "tat-ca")
+        string? q, int? danhMucId, string? thanhPho, string loaiSuKien = "tat-ca", string giaVe = "tat-ca")
     {
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -18,7 +18,9 @@ public class HomeController : Controller
             if (User.IsInRole("Nhân viên soát vé")) return Redirect("/Staff/Index");
         }
 
+        q = q?.Trim();
         loaiSuKien = ChuanHoaLoaiSuKien(loaiSuKien);
+        giaVe = ChuanHoaGiaVe(giaVe);
         byte? loaiSuKienValue = LayGiaTriLoaiSuKien(loaiSuKien);
 
         // Lấy danh sách danh mục hiển thị trên thanh lọc
@@ -32,6 +34,7 @@ public class HomeController : Controller
         ViewBag.TuKhoa     = q;
         ViewBag.DanhMucId  = danhMucId;
         ViewBag.LoaiSuKien = loaiSuKien;
+        ViewBag.GiaVe      = giaVe;
 
         // Bộ lọc thành phố dùng cả sự kiện sắp tới và sự kiện đã diễn ra.
         string sqlCities = @"
@@ -54,10 +57,27 @@ public class HomeController : Controller
             WHERE HienThiCongKhai = 1
               AND TrangThai = 3
               AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE())
-              AND (@q = '' OR TenSuKien LIKE '%' + @q + '%')
+              AND (
+                    @q = ''
+                 OR TenSuKien COLLATE Latin1_General_100_CI_AI LIKE N'%' + @q + N'%'
+                 OR ISNULL(TenDiaDiem, N'') COLLATE Latin1_General_100_CI_AI LIKE N'%' + @q + N'%'
+                 OR ISNULL(ThanhPhoDiaDiem, N'') COLLATE Latin1_General_100_CI_AI LIKE N'%' + @q + N'%'
+              )
               AND (@danhMucId IS NULL OR DanhMucId = @danhMucId)
               AND (@thanhPho IS NULL OR @thanhPho = '' OR ThanhPhoDiaDiem = @thanhPho)
               AND (@loaiSuKienValue IS NULL OR LoaiSuKien = @loaiSuKienValue)
+              AND (
+                    @giaVe = 'tat-ca'
+                 OR (
+                        @giaVe = 'mien-phi'
+                    AND EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1)
+                    AND NOT EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1 AND lv.GiaBan > 0)
+                 )
+                 OR (
+                        @giaVe = 'co-phi'
+                    AND EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1 AND lv.GiaBan > 0)
+                 )
+              )
             ORDER BY NgayBatDau ASC
         ";
 
@@ -66,7 +86,8 @@ public class HomeController : Controller
             q         = q ?? "",
             danhMucId = danhMucId,
             thanhPho  = thanhPho ?? "",
-            loaiSuKienValue
+            loaiSuKienValue,
+            giaVe
         });
 
         // Trang chủ có thêm một dải sự kiện cũ để khách có thể xem lại.
@@ -77,20 +98,34 @@ public class HomeController : Controller
               AND TrangThai IN (3, 5)
               AND NgayKetThuc <= DATEADD(HOUR, 7, GETUTCDATE())
               AND (@loaiSuKienValue IS NULL OR LoaiSuKien = @loaiSuKienValue)
-            ORDER BY NgayBatDau DESC", new { loaiSuKienValue });
+              AND (
+                    @giaVe = 'tat-ca'
+                 OR (
+                        @giaVe = 'mien-phi'
+                    AND EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1)
+                    AND NOT EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1 AND lv.GiaBan > 0)
+                 )
+                 OR (
+                        @giaVe = 'co-phi'
+                    AND EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1 AND lv.GiaBan > 0)
+                 )
+              )
+            ORDER BY NgayBatDau DESC", new { loaiSuKienValue, giaVe });
 
         return View(danhSachSuKien);
     }
 
-    // DANH SÁCH SỰ KIỆN - Bộ lọc nâng cao theo từ khóa, danh mục, thành phố
+    // DANH SÁCH SỰ KIỆN - Bộ lọc nâng cao theo từ khóa, danh mục, thành phố và giá vé.
     // URL: GET /Home/SuKien
     public async Task<IActionResult> SuKien(
         string? q, int? danhMucId, string? thanhPho,
-        string thoiGian = "sap-dien-ra", string loaiSuKien = "tat-ca")
+        string thoiGian = "sap-dien-ra", string loaiSuKien = "tat-ca", string giaVe = "tat-ca")
     {
         string[] boLocHopLe = ["sap-dien-ra", "da-dien-ra", "tat-ca"];
         if (!boLocHopLe.Contains(thoiGian)) thoiGian = "sap-dien-ra";
+        q = q?.Trim();
         loaiSuKien = ChuanHoaLoaiSuKien(loaiSuKien);
+        giaVe = ChuanHoaGiaVe(giaVe);
         byte? loaiSuKienValue = LayGiaTriLoaiSuKien(loaiSuKien);
 
         // Lấy danh sách danh mục hiển thị trên thanh lọc
@@ -119,6 +154,7 @@ public class HomeController : Controller
         ViewBag.SelectedCity = thanhPho;
         ViewBag.ThoiGian = thoiGian;
         ViewBag.LoaiSuKien = loaiSuKien;
+        ViewBag.GiaVe = giaVe;
 
         // Lọc ba nhóm: sắp diễn ra, đã diễn ra hoặc toàn bộ.
         string sqlSuKien = @"
@@ -131,10 +167,27 @@ public class HomeController : Controller
                  OR (@thoiGian = 'da-dien-ra' AND (TrangThai = 5 OR NgayKetThuc <= DATEADD(HOUR, 7, GETUTCDATE())))
                  OR (@thoiGian = 'tat-ca')
               )
-              AND (@q = '' OR TenSuKien LIKE '%' + @q + '%')
+              AND (
+                    @q = ''
+                 OR TenSuKien COLLATE Latin1_General_100_CI_AI LIKE N'%' + @q + N'%'
+                 OR ISNULL(TenDiaDiem, N'') COLLATE Latin1_General_100_CI_AI LIKE N'%' + @q + N'%'
+                 OR ISNULL(ThanhPhoDiaDiem, N'') COLLATE Latin1_General_100_CI_AI LIKE N'%' + @q + N'%'
+              )
               AND (@danhMucId IS NULL OR DanhMucId = @danhMucId)
               AND (@thanhPho IS NULL OR @thanhPho = '' OR ThanhPhoDiaDiem = @thanhPho)
               AND (@loaiSuKienValue IS NULL OR LoaiSuKien = @loaiSuKienValue)
+              AND (
+                    @giaVe = 'tat-ca'
+                 OR (
+                        @giaVe = 'mien-phi'
+                    AND EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1)
+                    AND NOT EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1 AND lv.GiaBan > 0)
+                 )
+                 OR (
+                        @giaVe = 'co-phi'
+                    AND EXISTS (SELECT 1 FROM LoaiVe lv WHERE lv.SuKienId = SuKien.Id AND lv.TrangThai = 1 AND lv.GiaBan > 0)
+                 )
+              )
             ORDER BY
                 CASE WHEN TrangThai = 3 AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE()) THEN 0 ELSE 1 END,
                 CASE WHEN TrangThai = 3 AND NgayKetThuc > DATEADD(HOUR, 7, GETUTCDATE()) THEN NgayBatDau END ASC,
@@ -147,7 +200,8 @@ public class HomeController : Controller
             danhMucId = danhMucId,
             thanhPho  = thanhPho ?? "",
             thoiGian,
-            loaiSuKienValue
+            loaiSuKienValue,
+            giaVe
         });
 
         return View(danhSachSuKien);
@@ -165,6 +219,13 @@ public class HomeController : Controller
         "truc-tiep" => 0,
         "truc-tuyen" => 1,
         _ => null
+    };
+
+    private static string ChuanHoaGiaVe(string? value) => value switch
+    {
+        "mien-phi" => "mien-phi",
+        "co-phi" => "co-phi",
+        _ => "tat-ca"
     };
 
     // CHI TIẾT SỰ KIỆN - Xem thông tin 1 sự kiện + loại vé

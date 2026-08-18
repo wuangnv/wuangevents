@@ -8,6 +8,7 @@
     var keywords = ViewBag.TuKhoa as string;
     var thoiGian = ViewBag.ThoiGian as string ?? "sap-dien-ra";
     var loaiSuKien = ViewBag.LoaiSuKien as string ?? "tat-ca";
+    var giaVe = ViewBag.GiaVe as string ?? "tat-ca";
 }
 
 @* GET nhận q/danhMucId/thanhPho; Controller trả List<SuKien>.
@@ -31,15 +32,15 @@
         <a class="event-time-tab @(thoiGian == "sap-dien-ra" ? "active" : "")"
            asp-action="SuKien" asp-route-q="@keywords" asp-route-danhMucId="@selectedDanhMucId"
            asp-route-thanhPho="@selectedCity" asp-route-thoiGian="sap-dien-ra"
-           asp-route-loaiSuKien="@loaiSuKien">Sắp diễn ra</a>
+           asp-route-loaiSuKien="@loaiSuKien" asp-route-giaVe="@giaVe">Sắp diễn ra</a>
         <a class="event-time-tab @(thoiGian == "da-dien-ra" ? "active" : "")"
            asp-action="SuKien" asp-route-q="@keywords" asp-route-danhMucId="@selectedDanhMucId"
            asp-route-thanhPho="@selectedCity" asp-route-thoiGian="da-dien-ra"
-           asp-route-loaiSuKien="@loaiSuKien">Đã diễn ra</a>
+           asp-route-loaiSuKien="@loaiSuKien" asp-route-giaVe="@giaVe">Đã diễn ra</a>
         <a class="event-time-tab @(thoiGian == "tat-ca" ? "active" : "")"
            asp-action="SuKien" asp-route-q="@keywords" asp-route-danhMucId="@selectedDanhMucId"
            asp-route-thanhPho="@selectedCity" asp-route-thoiGian="tat-ca"
-           asp-route-loaiSuKien="@loaiSuKien">Tất cả</a>
+           asp-route-loaiSuKien="@loaiSuKien" asp-route-giaVe="@giaVe">Tất cả</a>
     </div>
 
     <div class="row">
@@ -53,6 +54,7 @@
                 <form method="get" action="/Home/SuKien" id="filterForm">
                     <input type="hidden" name="thoiGian" value="@thoiGian" />
                     <input type="hidden" name="loaiSuKien" id="selectedLoaiSuKien" value="@loaiSuKien" />
+                    <input type="hidden" name="giaVe" id="selectedGiaVe" value="@giaVe" />
                     <!-- Tìm theo từ khóa -->
                     <div class="mb-4">
                         <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Từ khóa</label>
@@ -74,6 +76,22 @@
                             </button>
                             <button type="button" onclick="setEventType('truc-tuyen')" class="event-format-choice @(loaiSuKien == "truc-tuyen" ? "active" : "")">
                                 <i class="fas fa-video"></i><span>Trực tuyến</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lọc theo giá vé -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px; display:block; margin-bottom:10px;">Giá vé</label>
+                        <div class="event-format-choices">
+                            <button type="button" onclick="setPriceType('tat-ca')" class="event-format-choice @(giaVe == "tat-ca" ? "active" : "")">
+                                <i class="fas fa-ticket-alt"></i><span>Tất cả mức giá</span>
+                            </button>
+                            <button type="button" onclick="setPriceType('mien-phi')" class="event-format-choice @(giaVe == "mien-phi" ? "active" : "")">
+                                <i class="fas fa-gift"></i><span>Miễn phí</span>
+                            </button>
+                            <button type="button" onclick="setPriceType('co-phi')" class="event-format-choice @(giaVe == "co-phi" ? "active" : "")">
+                                <i class="fas fa-money-bill-wave"></i><span>Có phí</span>
                             </button>
                         </div>
                     </div>
@@ -274,6 +292,10 @@ function setCategory(id) {
 }
 function setEventType(value) {
     document.getElementById('selectedLoaiSuKien').value = value;
+    document.getElementById('filterForm').submit();
+}
+function setPriceType(value) {
+    document.getElementById('selectedGiaVe').value = value;
     document.getElementById('filterForm').submit();
 }
 </script>

@@ -8,6 +8,9 @@
     var sapDienRa = Model.OrderBy(x => x.NgayBatDau).Take(8).ToList();
     var daDienRa = ViewBag.SuKienDaQua as List<SuKien> ?? new List<SuKien>();
     var loaiSuKien = ViewBag.LoaiSuKien as string ?? "tat-ca";
+    var giaVe = ViewBag.GiaVe as string ?? "tat-ca";
+    var tuKhoa = ViewBag.TuKhoa as string;
+    var selectedCity = ViewBag.SelectedCity as string;
 }
 
 @* Banner và form tìm kiếm GET tới Home/SuKien. *@
@@ -26,6 +29,7 @@
 
                 <form method="get" asp-controller="Home" asp-action="SuKien" class="d-flex p-2 align-items-center" style="max-width: 680px; background: rgba(255,255,255,0.95); border: 1px solid rgba(255,255,255,0.6); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
                     <input type="hidden" name="loaiSuKien" value="@loaiSuKien" />
+                    <input type="hidden" name="giaVe" value="@giaVe" />
                     <div class="input-group align-items-center px-3" style="flex: 1; border-right: 1px solid #e2e8f0;">
                         <i class="fas fa-search text-muted me-2"></i>
                         <input type="text" name="q" value="@ViewBag.TuKhoa" class="form-control border-0 bg-transparent py-2 shadow-none" placeholder="Tìm tên ca sĩ, đêm nhạc, hội thảo..." />
@@ -59,16 +63,19 @@
 <section class="container mt-4 mb-5" aria-label="Khám phá theo hình thức tổ chức">
     <div class="home-format-filter">
         <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="tat-ca"
+           asp-route-giaVe="@giaVe" asp-route-q="@tuKhoa" asp-route-thanhPho="@selectedCity"
            class="home-format-option @(loaiSuKien == "tat-ca" ? "active" : "")">
             <span class="format-icon"><i class="fas fa-border-all"></i></span>
             <span>Tất cả sự kiện</span>
         </a>
         <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="truc-tiep"
+           asp-route-giaVe="@giaVe" asp-route-q="@tuKhoa" asp-route-thanhPho="@selectedCity"
            class="home-format-option @(loaiSuKien == "truc-tiep" ? "active" : "")">
             <span class="format-icon"><i class="fas fa-location-dot"></i></span>
             <span>Sự kiện trực tiếp</span>
         </a>
         <a asp-controller="Home" asp-action="Index" asp-route-loaiSuKien="truc-tuyen"
+           asp-route-giaVe="@giaVe" asp-route-q="@tuKhoa" asp-route-thanhPho="@selectedCity"
            class="home-format-option @(loaiSuKien == "truc-tuyen" ? "active" : "")">
             <span class="format-icon"><i class="fas fa-video"></i></span>
             <span>Sự kiện trực tuyến</span>
@@ -76,18 +83,30 @@
     </div>
 </section>
 
+<section class="container mb-4" aria-label="Lọc theo giá vé">
+    <div class="d-flex flex-wrap align-items-center gap-2 px-3 py-2 bg-white border rounded-3">
+        <span class="small fw-bold text-muted me-1"><i class="fas fa-ticket-alt me-1"></i>Giá vé:</span>
+        <a asp-controller="Home" asp-action="Index" asp-route-giaVe="tat-ca" asp-route-loaiSuKien="@loaiSuKien" asp-route-q="@tuKhoa" asp-route-thanhPho="@selectedCity"
+           class="btn btn-sm @(giaVe == "tat-ca" ? "btn-primary" : "btn-outline-secondary")">Tất cả</a>
+        <a asp-controller="Home" asp-action="Index" asp-route-giaVe="mien-phi" asp-route-loaiSuKien="@loaiSuKien" asp-route-q="@tuKhoa" asp-route-thanhPho="@selectedCity"
+           class="btn btn-sm @(giaVe == "mien-phi" ? "btn-primary" : "btn-outline-secondary")">Miễn phí</a>
+        <a asp-controller="Home" asp-action="Index" asp-route-giaVe="co-phi" asp-route-loaiSuKien="@loaiSuKien" asp-route-q="@tuKhoa" asp-route-thanhPho="@selectedCity"
+           class="btn btn-sm @(giaVe == "co-phi" ? "btn-primary" : "btn-outline-secondary")">Có phí</a>
+    </div>
+</section>
+
 @* Danh mục được Controller gửi qua ViewBag.DanhMucs. *@
 <section class="container my-5">
     <div class="section-title d-flex justify-content-between align-items-center mb-4">
         <h2 class="h3 fw-bold font-heading mb-0">Danh mục nổi bật</h2>
-        <a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@loaiSuKien" class="text-primary fw-bold text-decoration-none small">Xem tất cả sự kiện <i class="fas fa-chevron-right ms-1"></i></a>
+        <a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@loaiSuKien" asp-route-giaVe="@giaVe" class="text-primary fw-bold text-decoration-none small">Xem tất cả sự kiện <i class="fas fa-chevron-right ms-1"></i></a>
     </div>
     <div class="row g-3 row-cols-lg-6 row-cols-md-3 row-cols-2">
         @foreach (var item in danhMucs)
         {
             <div class="col">
                 <a class="category-card p-3 rounded text-center h-100 d-flex flex-column align-items-center justify-content-center gap-2"
-                   asp-controller="Home" asp-action="SuKien" asp-route-danhMucId="@item.Id" asp-route-loaiSuKien="@loaiSuKien"
+                   asp-controller="Home" asp-action="SuKien" asp-route-danhMucId="@item.Id" asp-route-loaiSuKien="@loaiSuKien" asp-route-giaVe="@giaVe"
                    style="min-height: 90px; text-decoration: none; border: 1px solid #ede9fe; background: #ffffff; transition: all 0.2s ease;">
                     @if (!string.IsNullOrEmpty(item.Icon))
                     {
@@ -104,7 +123,7 @@
 <section class="container my-5" id="featured-events">
     <div class="section-title d-flex justify-content-between align-items-center mb-4">
         <h2 class="h3 fw-bold font-heading mb-0">Sự kiện HOT nổi bật</h2>
-        <a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@loaiSuKien" class="text-primary fw-bold text-decoration-none small">Xem tất cả sự kiện <i class="fas fa-chevron-right ms-1"></i></a>
+        <a asp-controller="Home" asp-action="SuKien" asp-route-loaiSuKien="@loaiSuKien" asp-route-giaVe="@giaVe" class="text-primary fw-bold text-decoration-none small">Xem tất cả sự kiện <i class="fas fa-chevron-right ms-1"></i></a>
     </div>
 
     @{
@@ -198,7 +217,7 @@
     <section class="container my-5" id="da-dien-ra">
         <div class="section-title d-flex justify-content-between align-items-center mb-4">
             <h2 class="h3 fw-bold font-heading mb-0">Sự kiện đã diễn ra</h2>
-            <a asp-controller="Home" asp-action="SuKien" asp-route-thoiGian="da-dien-ra" asp-route-loaiSuKien="@loaiSuKien" class="text-primary fw-bold text-decoration-none small">Xem tất cả <i class="fas fa-chevron-right ms-1"></i></a>
+            <a asp-controller="Home" asp-action="SuKien" asp-route-thoiGian="da-dien-ra" asp-route-loaiSuKien="@loaiSuKien" asp-route-giaVe="@giaVe" class="text-primary fw-bold text-decoration-none small">Xem tất cả <i class="fas fa-chevron-right ms-1"></i></a>
         </div>
 
         <div class="row g-4 row-cols-lg-3 row-cols-md-2 row-cols-1">
