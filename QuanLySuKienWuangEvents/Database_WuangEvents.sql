@@ -2888,6 +2888,51 @@ BEGIN TRY
     WHERE sk.LoaiSuKien = 0
       AND sk.NgayBatDau > DATEADD(hour, 7, GETUTCDATE());
 
+    -- Sự kiện miễn phí chỉ dùng một hạng "Vé miễn phí" để khách không thấy VIP/Vé thường cùng giá 0đ.
+    -- Các chi tiết đơn và khu vực (nếu có) được chuyển sang hạng vé giữ lại trước khi xóa hạng dư.
+    DECLARE @VeMienPhi TABLE (
+        SuKienId UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+        LoaiVeId INT NOT NULL,
+        TongSoVe INT NOT NULL
+    );
+
+    INSERT INTO @VeMienPhi (SuKienId, LoaiVeId, TongSoVe)
+    SELECT lv.SuKienId, MIN(lv.Id), SUM(lv.SoLuongTong)
+    FROM dbo.LoaiVe lv
+    GROUP BY lv.SuKienId
+    HAVING COUNT(CASE WHEN lv.TrangThai = 1 THEN 1 END) > 0
+       AND MAX(CASE WHEN lv.TrangThai = 1 THEN lv.GiaBan END) = 0;
+
+    UPDATE ct
+    SET LoaiVeId = vm.LoaiVeId
+    FROM dbo.ChiTietDonHang ct
+    JOIN dbo.LoaiVe lv ON lv.Id = ct.LoaiVeId
+    JOIN @VeMienPhi vm ON vm.SuKienId = lv.SuKienId
+    WHERE ct.LoaiVeId <> vm.LoaiVeId;
+
+    UPDATE kv
+    SET LoaiVeId = vm.LoaiVeId
+    FROM dbo.KhuVuc kv
+    JOIN dbo.LoaiVe lv ON lv.Id = kv.LoaiVeId
+    JOIN @VeMienPhi vm ON vm.SuKienId = lv.SuKienId
+    WHERE kv.LoaiVeId <> vm.LoaiVeId;
+
+    UPDATE lv
+    SET TenLoaiVe = N'Vé miễn phí',
+        MoTa = N'Vé tham dự sự kiện miễn phí.',
+        GiaBan = 0,
+        SoLuongTong = vm.TongSoVe,
+        ThuTuHienThi = 0,
+        MauSac = '#16A34A',
+        TrangThai = 1
+    FROM dbo.LoaiVe lv
+    JOIN @VeMienPhi vm ON vm.LoaiVeId = lv.Id;
+
+    DELETE lv
+    FROM dbo.LoaiVe lv
+    JOIN @VeMienPhi vm ON vm.SuKienId = lv.SuKienId
+    WHERE lv.Id <> vm.LoaiVeId;
+
     -- Đồng bộ lại tồn vé sau khi thêm các đơn trạng thái mẫu.
     ;WITH DemoTicketCounts AS (
         SELECT lv.Id,

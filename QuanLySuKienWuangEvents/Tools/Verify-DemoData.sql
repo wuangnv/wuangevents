@@ -32,6 +32,16 @@ IF NOT EXISTS (SELECT 1 FROM dbo.LoaiVe WHERE GiaBan = 0)
    OR NOT EXISTS (SELECT 1 FROM dbo.LoaiVe WHERE GiaBan > 100000)
     THROW 51005, N'Chưa có đủ nhóm vé miễn phí, phổ thông và vé demo giá cao.', 1;
 
+-- Sự kiện miễn phí chỉ có duy nhất một loại vé để giao diện mua vé rõ ràng, không có VIP/Vé thường cùng giá 0đ.
+IF EXISTS (
+    SELECT 1
+    FROM dbo.SuKien sk
+    JOIN dbo.LoaiVe lv ON lv.SuKienId = sk.Id AND lv.TrangThai = 1
+    GROUP BY sk.Id
+    HAVING MAX(lv.GiaBan) = 0
+       AND (COUNT(*) <> 1 OR MAX(lv.TenLoaiVe) <> N'Vé miễn phí'))
+    THROW 51014, N'Sự kiện miễn phí phải chỉ có một loại Vé miễn phí.', 1;
+
 IF EXISTS (
     SELECT 1
     FROM dbo.SuKien sk
