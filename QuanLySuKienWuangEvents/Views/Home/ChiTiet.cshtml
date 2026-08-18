@@ -363,6 +363,8 @@
             qtyInp.value = 1;
             updateCardStyle(id, 1);
         }
+        // Bấm vào thẻ vé chọn lượt đầu tiên cũng phải cập nhật tạm tính ngay.
+        updateTicketTotal();
     }
  
     function updateCardStyle(id, qty) {
