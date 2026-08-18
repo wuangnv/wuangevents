@@ -125,7 +125,7 @@ def main() -> None:
 
     prepared: list[tuple[WebSession, str, str]] = []
     for index in range(1, args.users + 1):
-        email = f"buyer{index}@wuangevents.com"
+        email = f"buyer{index}@gmail.com"
         prepared.append(
             prepare_worker(
                 args.base_url,

@@ -11,7 +11,7 @@ DECLARE @DraftEventId UNIQUEIDENTIFIER = 'E0000000-0000-0000-0000-000000000051';
 DECLARE @PausedEditorEventId UNIQUEIDENTIFIER = 'E0000000-0000-0000-0000-000000000054';
 
 IF (SELECT COUNT(*) FROM dbo.NguoiDung
-    WHERE Email IN ('admin@wuangevents.com', 'organizer1@wuangevents.com', 'buyer1@wuangevents.com', 'staff1@wuangevents.com')) <> 4
+    WHERE Email IN ('admin@gmail.com', 'organizer1@gmail.com', 'battlegrounds2004@gmail.com', 'staff1@gmail.com')) <> 4
     THROW 51001, N'Thiếu tài khoản demo chính.', 1;
 
 IF EXISTS (

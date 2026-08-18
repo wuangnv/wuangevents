@@ -31,10 +31,10 @@ Mật khẩu chung của dữ liệu seed: `123456`.
 
 | Vai trò | Email | Phạm vi dữ liệu demo |
 |---|---|---|
-| Quản trị viên | `admin@wuangevents.com` | Duyệt BTC, sự kiện, người dùng, danh mục và đơn hàng |
-| Ban tổ chức | `organizer1@wuangevents.com` | Đủ trạng thái sự kiện, online/offline, ghế, vé, voucher, staff, đơn và check-in |
-| Người mua | `buyer1@wuangevents.com` | Đủ đơn chờ thanh toán, hoàn tất, đã hủy và hết hạn |
-| Nhân viên soát vé | `staff1@wuangevents.com` | Sự kiện đã được phân công để kiểm tra vé |
+| Quản trị viên | `admin@gmail.com` | Duyệt BTC, sự kiện, người dùng, danh mục và đơn hàng |
+| Ban tổ chức | `organizer1@gmail.com` | Đủ trạng thái sự kiện, online/offline, ghế, vé, voucher, staff, đơn và check-in |
+| Người mua | `battlegrounds2004@gmail.com` | Đủ đơn chờ thanh toán, hoàn tất, đã hủy và hết hạn |
+| Nhân viên soát vé | `staff1@gmail.com` | Sự kiện đã được phân công để kiểm tra vé |
 
 ## Cấu hình bí mật trên máy phát triển
 

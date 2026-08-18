@@ -413,267 +413,267 @@ BEGIN TRY
 
     -- Admin (1)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('F1784A22-D111-4E6D-ABFF-EE1C04F0906D', 'admin@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Quản Trị Viên Hệ Thống', '0912345678', NULL, 3, 1, 1, GETUTCDATE());
+    VALUES ('F1784A22-D111-4E6D-ABFF-EE1C04F0906D', 'admin@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Quản Trị Viên Hệ Thống', '0912345678', NULL, 3, 1, 1, GETUTCDATE());
 
     -- Organizer 1
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('5B5CE913-3124-448A-812B-85B5A4AB1A03', 'organizer1@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 1', '0987654301', NULL, 1, 1, 1, 'Vietcombank', '0071001234001', 'NGUYEN VAN BTC 1', 2, '0987654301', GETUTCDATE(), GETUTCDATE());
+    VALUES ('5B5CE913-3124-448A-812B-85B5A4AB1A03', 'organizer1@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 1', '0987654301', NULL, 1, 1, 1, 'Vietcombank', '0071001234001', 'NGUYEN VAN BTC 1', 2, '0987654301', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 2
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('C6D443D8-3015-4677-8BE2-D3C92C777062', 'organizer2@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 2', '0987654302', NULL, 1, 1, 1, 'Vietcombank', '0071001234002', 'NGUYEN VAN BTC 2', 2, '0987654302', GETUTCDATE(), GETUTCDATE());
+    VALUES ('C6D443D8-3015-4677-8BE2-D3C92C777062', 'organizer2@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 2', '0987654302', NULL, 1, 1, 1, 'Vietcombank', '0071001234002', 'NGUYEN VAN BTC 2', 2, '0987654302', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 3
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('3A1B89A7-7E53-4A33-ACAE-FE4A71DC7BE4', 'organizer3@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 3', '0987654303', NULL, 1, 1, 1, 'Vietcombank', '0071001234003', 'NGUYEN VAN BTC 3', 2, '0987654303', GETUTCDATE(), GETUTCDATE());
+    VALUES ('3A1B89A7-7E53-4A33-ACAE-FE4A71DC7BE4', 'organizer3@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 3', '0987654303', NULL, 1, 1, 1, 'Vietcombank', '0071001234003', 'NGUYEN VAN BTC 3', 2, '0987654303', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 4
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('DF63CB1F-67FF-4CB5-8BA2-6C30FBF1F240', 'organizer4@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 4', '0987654304', NULL, 1, 1, 1, 'Vietcombank', '0071001234004', 'NGUYEN VAN BTC 4', 2, '0987654304', GETUTCDATE(), GETUTCDATE());
+    VALUES ('DF63CB1F-67FF-4CB5-8BA2-6C30FBF1F240', 'organizer4@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 4', '0987654304', NULL, 1, 1, 1, 'Vietcombank', '0071001234004', 'NGUYEN VAN BTC 4', 2, '0987654304', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 5
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('C7C46C00-D517-46AF-8121-7FADE6992FFA', 'organizer5@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 5', '0987654305', NULL, 1, 1, 1, 'Vietcombank', '0071001234005', 'NGUYEN VAN BTC 5', 2, '0987654305', GETUTCDATE(), GETUTCDATE());
+    VALUES ('C7C46C00-D517-46AF-8121-7FADE6992FFA', 'organizer5@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 5', '0987654305', NULL, 1, 1, 1, 'Vietcombank', '0071001234005', 'NGUYEN VAN BTC 5', 2, '0987654305', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 6
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('5146EDFE-FC06-44CD-AAB4-C4B6BC9AD765', 'organizer6@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 6', '0987654306', NULL, 1, 1, 1, 'Vietcombank', '0071001234006', 'NGUYEN VAN BTC 6', 2, '0987654306', GETUTCDATE(), GETUTCDATE());
+    VALUES ('5146EDFE-FC06-44CD-AAB4-C4B6BC9AD765', 'organizer6@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 6', '0987654306', NULL, 1, 1, 1, 'Vietcombank', '0071001234006', 'NGUYEN VAN BTC 6', 2, '0987654306', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 7
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('95F1339E-2245-4449-A2B9-85C046A2D1DD', 'organizer7@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 7', '0987654307', NULL, 1, 1, 1, 'Vietcombank', '0071001234007', 'NGUYEN VAN BTC 7', 2, '0987654307', GETUTCDATE(), GETUTCDATE());
+    VALUES ('95F1339E-2245-4449-A2B9-85C046A2D1DD', 'organizer7@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 7', '0987654307', NULL, 1, 1, 1, 'Vietcombank', '0071001234007', 'NGUYEN VAN BTC 7', 2, '0987654307', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 8
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('1EFB3BD4-1BFD-4F1F-BD98-B17BA7B72074', 'organizer8@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 8', '0987654308', NULL, 1, 1, 1, 'Vietcombank', '0071001234008', 'NGUYEN VAN BTC 8', 2, '0987654308', GETUTCDATE(), GETUTCDATE());
+    VALUES ('1EFB3BD4-1BFD-4F1F-BD98-B17BA7B72074', 'organizer8@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 8', '0987654308', NULL, 1, 1, 1, 'Vietcombank', '0071001234008', 'NGUYEN VAN BTC 8', 2, '0987654308', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 9
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('725DCDFC-12B8-48F7-A427-805527F0112C', 'organizer9@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 9', '0987654309', NULL, 1, 1, 1, 'Vietcombank', '0071001234009', 'NGUYEN VAN BTC 9', 2, '0987654309', GETUTCDATE(), GETUTCDATE());
+    VALUES ('725DCDFC-12B8-48F7-A427-805527F0112C', 'organizer9@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 9', '0987654309', NULL, 1, 1, 1, 'Vietcombank', '0071001234009', 'NGUYEN VAN BTC 9', 2, '0987654309', GETUTCDATE(), GETUTCDATE());
 
     -- Organizer 10
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [TenNganHang], [SoTaiKhoan], [ChuTaiKhoan], [YeuCauBanToChuc], [SdtBanToChuc], [NgayYeuCauBTC], [NgayTao])
-    VALUES ('50075312-F374-48A9-8B2C-48F109BF34E9', 'organizer10@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 10', '0987654310', NULL, 1, 1, 1, 'Vietcombank', '0071001234010', 'NGUYEN VAN BTC 10', 2, '0987654310', GETUTCDATE(), GETUTCDATE());
+    VALUES ('50075312-F374-48A9-8B2C-48F109BF34E9', 'organizer10@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhà Tổ Chức 10', '0987654310', NULL, 1, 1, 1, 'Vietcombank', '0071001234010', 'NGUYEN VAN BTC 10', 2, '0987654310', GETUTCDATE(), GETUTCDATE());
 
     -- Buyer 1
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'buyer1@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 1', '0901234501', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'battlegrounds2004@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 1', '0901234501', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 2
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('DB847C61-CC0B-41F5-9BEB-F6132B0E5BF2', 'buyer2@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 2', '0901234502', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('DB847C61-CC0B-41F5-9BEB-F6132B0E5BF2', 'buyer2@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 2', '0901234502', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 3
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('B46BD4B0-EAC9-4C87-A500-785131A97B4A', 'buyer3@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 3', '0901234503', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('B46BD4B0-EAC9-4C87-A500-785131A97B4A', 'buyer3@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 3', '0901234503', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 4
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('FE3E3726-2435-43B9-9688-308CA7D1F34A', 'buyer4@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 4', '0901234504', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('FE3E3726-2435-43B9-9688-308CA7D1F34A', 'buyer4@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 4', '0901234504', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 5
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('06BF864B-30A7-4413-B9C4-321686732721', 'buyer5@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 5', '0901234505', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('06BF864B-30A7-4413-B9C4-321686732721', 'buyer5@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 5', '0901234505', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 6
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('42F528B2-7107-4672-B7FC-3D49A10F63F6', 'buyer6@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 6', '0901234506', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('42F528B2-7107-4672-B7FC-3D49A10F63F6', 'buyer6@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 6', '0901234506', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 7
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', 'buyer7@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 7', '0901234507', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', 'buyer7@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 7', '0901234507', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 8
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('F5E77535-E905-43E7-907C-108141C0485F', 'buyer8@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 8', '0901234508', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('F5E77535-E905-43E7-907C-108141C0485F', 'buyer8@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 8', '0901234508', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 9
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('00858E32-C188-44CC-8A26-21A599A2F73C', 'buyer9@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 9', '0901234509', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('00858E32-C188-44CC-8A26-21A599A2F73C', 'buyer9@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 9', '0901234509', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 10
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('CB31862C-E0C2-4590-A9F6-A0AB45513214', 'buyer10@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 10', '0901234510', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('CB31862C-E0C2-4590-A9F6-A0AB45513214', 'buyer10@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 10', '0901234510', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 11
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000011', 'buyer11@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 11', '0901234511', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000011', 'buyer11@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 11', '0901234511', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 12
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000012', 'buyer12@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 12', '0901234512', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000012', 'buyer12@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 12', '0901234512', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 13
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000013', 'buyer13@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 13', '0901234513', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000013', 'buyer13@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 13', '0901234513', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 14
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000014', 'buyer14@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 14', '0901234514', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000014', 'buyer14@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 14', '0901234514', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 15
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000015', 'buyer15@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 15', '0901234515', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000015', 'buyer15@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 15', '0901234515', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 16
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000016', 'buyer16@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 16', '0901234516', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000016', 'buyer16@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 16', '0901234516', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 17
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000017', 'buyer17@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 17', '0901234517', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000017', 'buyer17@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 17', '0901234517', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 18
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000018', 'buyer18@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 18', '0901234518', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000018', 'buyer18@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 18', '0901234518', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 19
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000019', 'buyer19@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 19', '0901234519', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000019', 'buyer19@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 19', '0901234519', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 20
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000020', 'buyer20@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 20', '0901234520', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000020', 'buyer20@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 20', '0901234520', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 21
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000021', 'buyer21@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 21', '0901234521', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000021', 'buyer21@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 21', '0901234521', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 22
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000022', 'buyer22@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 22', '0901234522', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000022', 'buyer22@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 22', '0901234522', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 23
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000023', 'buyer23@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 23', '0901234523', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000023', 'buyer23@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 23', '0901234523', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 24
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000024', 'buyer24@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 24', '0901234524', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000024', 'buyer24@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 24', '0901234524', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 25
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000025', 'buyer25@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 25', '0901234525', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000025', 'buyer25@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 25', '0901234525', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 26
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000026', 'buyer26@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 26', '0901234526', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000026', 'buyer26@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 26', '0901234526', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 27
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000027', 'buyer27@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 27', '0901234527', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000027', 'buyer27@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 27', '0901234527', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 28
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000028', 'buyer28@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 28', '0901234528', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000028', 'buyer28@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 28', '0901234528', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 29
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000029', 'buyer29@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 29', '0901234529', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000029', 'buyer29@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 29', '0901234529', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 30
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000030', 'buyer30@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 30', '0901234530', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000030', 'buyer30@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 30', '0901234530', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 31
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000031', 'buyer31@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 31', '0901234531', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000031', 'buyer31@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 31', '0901234531', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 32
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000032', 'buyer32@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 32', '0901234532', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000032', 'buyer32@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 32', '0901234532', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 33
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000033', 'buyer33@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 33', '0901234533', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000033', 'buyer33@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 33', '0901234533', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 34
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000034', 'buyer34@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 34', '0901234534', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000034', 'buyer34@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 34', '0901234534', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 35
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000035', 'buyer35@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 35', '0901234535', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000035', 'buyer35@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 35', '0901234535', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 36
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000036', 'buyer36@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 36', '0901234536', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000036', 'buyer36@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 36', '0901234536', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 37
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000037', 'buyer37@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 37', '0901234537', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000037', 'buyer37@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 37', '0901234537', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 38
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000038', 'buyer38@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 38', '0901234538', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000038', 'buyer38@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 38', '0901234538', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 39
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000039', 'buyer39@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 39', '0901234539', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000039', 'buyer39@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 39', '0901234539', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Buyer 40
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NgayTao])
-    VALUES ('A0000000-0000-0000-0000-000000000040', 'buyer40@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 40', '0901234540', NULL, 0, 1, 1, GETUTCDATE());
+    VALUES ('A0000000-0000-0000-0000-000000000040', 'buyer40@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Khách Hàng Mua Vé 40', '0901234540', NULL, 0, 1, 1, GETUTCDATE());
 
     -- Staff 1 (Quản lý bởi Organizer 1)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('55F02A90-5841-4563-A735-C12B9717BB96', 'staff1@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 1', '0971234501', NULL, 2, 1, 1, '5B5CE913-3124-448A-812B-85B5A4AB1A03', GETUTCDATE());
+    VALUES ('55F02A90-5841-4563-A735-C12B9717BB96', 'staff1@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 1', '0971234501', NULL, 2, 1, 1, '5B5CE913-3124-448A-812B-85B5A4AB1A03', GETUTCDATE());
 
     -- Staff 2 (Quản lý bởi Organizer 2)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('308F7B86-4503-4DB4-87F1-A66A56C7A3BF', 'staff2@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 2', '0971234502', NULL, 2, 1, 1, 'C6D443D8-3015-4677-8BE2-D3C92C777062', GETUTCDATE());
+    VALUES ('308F7B86-4503-4DB4-87F1-A66A56C7A3BF', 'staff2@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 2', '0971234502', NULL, 2, 1, 1, 'C6D443D8-3015-4677-8BE2-D3C92C777062', GETUTCDATE());
 
     -- Staff 3 (Quản lý bởi Organizer 3)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('73E06548-F2B9-4768-837D-1A942636A27F', 'staff3@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 3', '0971234503', NULL, 2, 1, 1, '3A1B89A7-7E53-4A33-ACAE-FE4A71DC7BE4', GETUTCDATE());
+    VALUES ('73E06548-F2B9-4768-837D-1A942636A27F', 'staff3@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 3', '0971234503', NULL, 2, 1, 1, '3A1B89A7-7E53-4A33-ACAE-FE4A71DC7BE4', GETUTCDATE());
 
     -- Staff 4 (Quản lý bởi Organizer 4)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('706BEA74-E775-460F-8E3B-74BBFA81A5CF', 'staff4@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 4', '0971234504', NULL, 2, 1, 1, 'DF63CB1F-67FF-4CB5-8BA2-6C30FBF1F240', GETUTCDATE());
+    VALUES ('706BEA74-E775-460F-8E3B-74BBFA81A5CF', 'staff4@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 4', '0971234504', NULL, 2, 1, 1, 'DF63CB1F-67FF-4CB5-8BA2-6C30FBF1F240', GETUTCDATE());
 
     -- Staff 5 (Quản lý bởi Organizer 5)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('5EA93981-1208-4862-AE9C-7E14FEFB596B', 'staff5@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 5', '0971234505', NULL, 2, 1, 1, 'C7C46C00-D517-46AF-8121-7FADE6992FFA', GETUTCDATE());
+    VALUES ('5EA93981-1208-4862-AE9C-7E14FEFB596B', 'staff5@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 5', '0971234505', NULL, 2, 1, 1, 'C7C46C00-D517-46AF-8121-7FADE6992FFA', GETUTCDATE());
 
     -- Staff 6 (Quản lý bởi Organizer 6)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('FC115C36-482E-4648-A580-A4AF9E50D33D', 'staff6@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 6', '0971234506', NULL, 2, 1, 1, '5146EDFE-FC06-44CD-AAB4-C4B6BC9AD765', GETUTCDATE());
+    VALUES ('FC115C36-482E-4648-A580-A4AF9E50D33D', 'staff6@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 6', '0971234506', NULL, 2, 1, 1, '5146EDFE-FC06-44CD-AAB4-C4B6BC9AD765', GETUTCDATE());
 
     -- Staff 7 (Quản lý bởi Organizer 7)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('817AC6A9-9F7E-40F3-A119-D4D31FD01C74', 'staff7@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 7', '0971234507', NULL, 2, 1, 1, '95F1339E-2245-4449-A2B9-85C046A2D1DD', GETUTCDATE());
+    VALUES ('817AC6A9-9F7E-40F3-A119-D4D31FD01C74', 'staff7@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 7', '0971234507', NULL, 2, 1, 1, '95F1339E-2245-4449-A2B9-85C046A2D1DD', GETUTCDATE());
 
     -- Staff 8 (Quản lý bởi Organizer 8)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('71D84E61-3BC1-4270-8E01-5738E4D673FF', 'staff8@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 8', '0971234508', NULL, 2, 1, 1, '1EFB3BD4-1BFD-4F1F-BD98-B17BA7B72074', GETUTCDATE());
+    VALUES ('71D84E61-3BC1-4270-8E01-5738E4D673FF', 'staff8@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 8', '0971234508', NULL, 2, 1, 1, '1EFB3BD4-1BFD-4F1F-BD98-B17BA7B72074', GETUTCDATE());
 
     -- Staff 9 (Quản lý bởi Organizer 9)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('16DE5824-396A-49AB-9D33-6850ADA72500', 'staff9@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 9', '0971234509', NULL, 2, 1, 1, '725DCDFC-12B8-48F7-A427-805527F0112C', GETUTCDATE());
+    VALUES ('16DE5824-396A-49AB-9D33-6850ADA72500', 'staff9@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 9', '0971234509', NULL, 2, 1, 1, '725DCDFC-12B8-48F7-A427-805527F0112C', GETUTCDATE());
 
     -- Staff 10 (Quản lý bởi Organizer 10)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('59443B1B-7793-40DE-B0E2-11ACD1C16FDF', 'staff10@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 10', '0971234510', NULL, 2, 1, 1, '50075312-F374-48A9-8B2C-48F109BF34E9', GETUTCDATE());
+    VALUES ('59443B1B-7793-40DE-B0E2-11ACD1C16FDF', 'staff10@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 10', '0971234510', NULL, 2, 1, 1, '50075312-F374-48A9-8B2C-48F109BF34E9', GETUTCDATE());
 
     -- Staff 11 (Quản lý bởi Organizer 1)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('B0000000-0000-0000-0000-000000000011', 'staff11@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 11', '0971234511', NULL, 2, 1, 1, '5B5CE913-3124-448A-812B-85B5A4AB1A03', GETUTCDATE());
+    VALUES ('B0000000-0000-0000-0000-000000000011', 'staff11@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 11', '0971234511', NULL, 2, 1, 1, '5B5CE913-3124-448A-812B-85B5A4AB1A03', GETUTCDATE());
 
     -- Staff 12 (Quản lý bởi Organizer 2)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('B0000000-0000-0000-0000-000000000012', 'staff12@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 12', '0971234512', NULL, 2, 1, 1, 'C6D443D8-3015-4677-8BE2-D3C92C777062', GETUTCDATE());
+    VALUES ('B0000000-0000-0000-0000-000000000012', 'staff12@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 12', '0971234512', NULL, 2, 1, 1, 'C6D443D8-3015-4677-8BE2-D3C92C777062', GETUTCDATE());
 
     -- Staff 13 (Quản lý bởi Organizer 3)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('B0000000-0000-0000-0000-000000000013', 'staff13@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 13', '0971234513', NULL, 2, 1, 1, '3A1B89A7-7E53-4A33-ACAE-FE4A71DC7BE4', GETUTCDATE());
+    VALUES ('B0000000-0000-0000-0000-000000000013', 'staff13@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 13', '0971234513', NULL, 2, 1, 1, '3A1B89A7-7E53-4A33-ACAE-FE4A71DC7BE4', GETUTCDATE());
 
     -- Staff 14 (Quản lý bởi Organizer 4)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('B0000000-0000-0000-0000-000000000014', 'staff14@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 14', '0971234514', NULL, 2, 1, 1, 'DF63CB1F-67FF-4CB5-8BA2-6C30FBF1F240', GETUTCDATE());
+    VALUES ('B0000000-0000-0000-0000-000000000014', 'staff14@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 14', '0971234514', NULL, 2, 1, 1, 'DF63CB1F-67FF-4CB5-8BA2-6C30FBF1F240', GETUTCDATE());
 
     -- Staff 15 (Quản lý bởi Organizer 5)
     INSERT INTO [dbo].[NguoiDung] ([Id], [Email], [MatKhauHash], [HoTen], [SoDienThoai], [AnhDaiDien], [VaiTro], [TrangThai], [EmailXacNhan], [NguoiTaoId], [NgayTao])
-    VALUES ('B0000000-0000-0000-0000-000000000015', 'staff15@wuangevents.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 15', '0971234515', NULL, 2, 1, 1, 'C7C46C00-D517-46AF-8121-7FADE6992FFA', GETUTCDATE());
+    VALUES ('B0000000-0000-0000-0000-000000000015', 'staff15@gmail.com', '$2a$11$xxJGoSZ55gn3xGh6Rn1NDuPFCandgtNv4uToYm/QcBn82UnJrYlQ.', N'Nhân Viên Soát Vé 15', '0971234515', NULL, 2, 1, 1, 'C7C46C00-D517-46AF-8121-7FADE6992FFA', GETUTCDATE());
 
 
     -- =============================================
@@ -1336,785 +1336,785 @@ BEGIN TRY
 
     -- Order 1 (Event 1): Đã thanh toán, 2 vé VIP A1, A2
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000001', 'DH-WUANG-PAID-01', '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', '0901234501', 1000000, 0, 1000000, 1, DATEADD(hour, -5, GETUTCDATE()), 'TXN-VNP-001', 2, DATEADD(hour, -5, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000001', 'DH-WUANG-PAID-01', '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', '0901234501', 1000000, 0, 1000000, 1, DATEADD(hour, -5, GETUTCDATE()), 'TXN-VNP-001', 2, DATEADD(hour, -5, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000001', 1, 1, 500000, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', 'VE-WUANG-VIP-1', 'QR-WUANG-VIP-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000001', 1, 1, 500000, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', 'VE-WUANG-VIP-1', 'QR-WUANG-VIP-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000001', 1, 2, 500000, N'Nguyễn Văn Khách 2', 'buyer1-guest@wuangevents.com', 'VE-WUANG-VIP-2', 'QR-WUANG-VIP-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000001', 1, 2, 500000, N'Nguyễn Văn Khách 2', 'buyer1-guest@gmail.com', 'VE-WUANG-VIP-2', 'QR-WUANG-VIP-2', 0, NULL, NULL);
 
     -- Đơn hàng 2 (Event 1): Chưa thanh toán, giữ chỗ VIP A3
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000002', 'DH-WUANG-PEND-02', 'DB847C61-CC0B-41F5-9BEB-F6132B0E5BF2', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 2', 'buyer2@wuangevents.com', '0901234502', 500000, 0, 500000, 0, DATEADD(minute, -5, GETUTCDATE()), NULL, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000002', 'DH-WUANG-PEND-02', 'DB847C61-CC0B-41F5-9BEB-F6132B0E5BF2', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 2', 'buyer2@gmail.com', '0901234502', 500000, 0, 500000, 0, DATEADD(minute, -5, GETUTCDATE()), NULL, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000002', 1, 3, 500000, N'Khách Hàng Mua Vé 2', 'buyer2@wuangevents.com', 'VE-WUANG-PEND-3', 'QR-WUANG-PEND-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000002', 1, 3, 500000, N'Khách Hàng Mua Vé 2', 'buyer2@gmail.com', 'VE-WUANG-PEND-3', 'QR-WUANG-PEND-3', 0, NULL, NULL);
 
     -- Đơn hàng 3 (Event 1): Đã hủy
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000003', 'DH-WUANG-FAIL-03', 'B46BD4B0-EAC9-4C87-A500-785131A97B4A', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 3', 'buyer3@wuangevents.com', '0901234503', 500000, 0, 500000, 2, DATEADD(day, -1, GETUTCDATE()), NULL, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000003', 'DH-WUANG-FAIL-03', 'B46BD4B0-EAC9-4C87-A500-785131A97B4A', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 3', 'buyer3@gmail.com', '0901234503', 500000, 0, 500000, 2, DATEADD(day, -1, GETUTCDATE()), NULL, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000003', 1, 4, 500000, N'Khách Hàng Mua Vé 3', 'buyer3@wuangevents.com', 'VE-WUANG-FAIL-4', 'QR-WUANG-FAIL-4', 2, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000003', 1, 4, 500000, N'Khách Hàng Mua Vé 3', 'buyer3@gmail.com', 'VE-WUANG-FAIL-4', 'QR-WUANG-FAIL-4', 2, NULL, NULL);
 
     -- Đơn hàng 4 (Event 2): Đã thanh toán, 1 vé VIP đã check-in, 1 vé Thường chưa check-in
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000004', 'DH-JAZZ-PAID-04', 'FE3E3726-2435-43B9-9688-308CA7D1F34A', 'E20875EC-36DB-45EB-85D1-A706DC9B62D2', NULL, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', '0901234504', 800000, 0, 800000, 1, DATEADD(hour, -2, GETUTCDATE()), 'TXN-VNP-004', 2, DATEADD(hour, -2, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000004', 'DH-JAZZ-PAID-04', 'FE3E3726-2435-43B9-9688-308CA7D1F34A', 'E20875EC-36DB-45EB-85D1-A706DC9B62D2', NULL, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', '0901234504', 800000, 0, 800000, 1, DATEADD(hour, -2, GETUTCDATE()), 'TXN-VNP-004', 2, DATEADD(hour, -2, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000004', 3, NULL, 600000, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', 'VE-JAZZ-VIP-4', 'QR-JAZZ-VIP-4', 1, DATEADD(minute, -10, GETUTCDATE()), '55F02A90-5841-4563-A735-C12B9717BB96');
+    VALUES ('D1000000-0000-0000-0000-000000000004', 3, NULL, 600000, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', 'VE-JAZZ-VIP-4', 'QR-JAZZ-VIP-4', 1, DATEADD(minute, -10, GETUTCDATE()), '55F02A90-5841-4563-A735-C12B9717BB96');
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000004', 4, NULL, 200000, N'Nguyễn Văn Jazz', 'buyer4-guest@wuangevents.com', 'VE-JAZZ-THUONG-4', 'QR-JAZZ-THUONG-4', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000004', 4, NULL, 200000, N'Nguyễn Văn Jazz', 'buyer4-guest@gmail.com', 'VE-JAZZ-THUONG-4', 'QR-JAZZ-THUONG-4', 0, NULL, NULL);
 
     -- Đơn hàng 5 (Event 2): Đã thanh toán, 1 vé Thường chưa check-in
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000005', 'DH-JAZZ-PAID-05', '06BF864B-30A7-4413-B9C4-321686732721', 'E20875EC-36DB-45EB-85D1-A706DC9B62D2', NULL, N'Khách Hàng Mua Vé 5', 'buyer5@wuangevents.com', '0901234505', 200000, 0, 200000, 1, DATEADD(hour, -1, GETUTCDATE()), 'TXN-VNP-005', 2, DATEADD(hour, -1, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000005', 'DH-JAZZ-PAID-05', '06BF864B-30A7-4413-B9C4-321686732721', 'E20875EC-36DB-45EB-85D1-A706DC9B62D2', NULL, N'Khách Hàng Mua Vé 5', 'buyer5@gmail.com', '0901234505', 200000, 0, 200000, 1, DATEADD(hour, -1, GETUTCDATE()), 'TXN-VNP-005', 2, DATEADD(hour, -1, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000005', 4, NULL, 200000, N'Khách Hàng Mua Vé 5', 'buyer5@wuangevents.com', 'VE-JAZZ-THUONG-5', 'QR-JAZZ-THUONG-5', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000005', 4, NULL, 200000, N'Khách Hàng Mua Vé 5', 'buyer5@gmail.com', 'VE-JAZZ-THUONG-5', 'QR-JAZZ-THUONG-5', 0, NULL, NULL);
 
     -- Đơn hàng 6 (Event 3): Đã thanh toán, 1 vé Thường chưa check-in
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000006', 'DH-ROCK-PAID-06', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'D2C252F2-7FD4-4A02-86CB-3D9DE7415795', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', '0901234506', 250000, 0, 250000, 1, DATEADD(hour, -4, GETUTCDATE()), 'TXN-VNP-006', 2, DATEADD(hour, -4, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000006', 'DH-ROCK-PAID-06', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'D2C252F2-7FD4-4A02-86CB-3D9DE7415795', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', '0901234506', 250000, 0, 250000, 1, DATEADD(hour, -4, GETUTCDATE()), 'TXN-VNP-006', 2, DATEADD(hour, -4, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000006', 6, NULL, 250000, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', 'VE-ROCK-THUONG-6', 'QR-ROCK-THUONG-6', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000006', 6, NULL, 250000, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', 'VE-ROCK-THUONG-6', 'QR-ROCK-THUONG-6', 0, NULL, NULL);
 
     -- Đơn hàng 7 (Event 4): Đã thanh toán, 1 vé Thường chưa check-in
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000007', 'DH-ACOUSTIC-07', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', '0901234507', 300000, 0, 300000, 1, DATEADD(day, -2, GETUTCDATE()), 'TXN-VNP-007', 2, DATEADD(day, -2, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000007', 'DH-ACOUSTIC-07', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', '0901234507', 300000, 0, 300000, 1, DATEADD(day, -2, GETUTCDATE()), 'TXN-VNP-007', 2, DATEADD(day, -2, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000007', 8, NULL, 300000, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', 'VE-ACOUSTIC-THUONG-7', 'QR-ACOUSTIC-THUONG-7', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000007', 8, NULL, 300000, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', 'VE-ACOUSTIC-THUONG-7', 'QR-ACOUSTIC-THUONG-7', 0, NULL, NULL);
 
     -- Order 8
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000008', 'DH-DEMO-008', 'A0000000-0000-0000-0000-000000000013', 'E0000000-0000-0000-0000-000000000051', NULL, N'Khách Hàng Mua Vé 13', 'buyer13@wuangevents.com', '0901234513', 500000, 0, 500000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-008', 2, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000008', 'DH-DEMO-008', 'A0000000-0000-0000-0000-000000000013', 'E0000000-0000-0000-0000-000000000051', NULL, N'Khách Hàng Mua Vé 13', 'buyer13@gmail.com', '0901234513', 500000, 0, 500000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-008', 2, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000008', 102, NULL, 250000, N'Khách Hàng Mua Vé 13', 'buyer13@wuangevents.com', 'VE-STD-008-1', 'QR-STD-008-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000008', 102, NULL, 250000, N'Khách Hàng Mua Vé 13', 'buyer13@gmail.com', 'VE-STD-008-1', 'QR-STD-008-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000008', 102, NULL, 250000, N'Khách Hàng Mua Vé 13', 'buyer13@wuangevents.com', 'VE-STD-008-2', 'QR-STD-008-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000008', 102, NULL, 250000, N'Khách Hàng Mua Vé 13', 'buyer13@gmail.com', 'VE-STD-008-2', 'QR-STD-008-2', 0, NULL, NULL);
 
     -- Order 9
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000009', 'DH-DEMO-009', 'A0000000-0000-0000-0000-000000000034', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', '0901234534', 800000, 0, 800000, 1, DATEADD(day, -19, GETUTCDATE()), 'TXN-VNP-009', 2, DATEADD(day, -19, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000009', 'DH-DEMO-009', 'A0000000-0000-0000-0000-000000000034', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', '0901234534', 800000, 0, 800000, 1, DATEADD(day, -19, GETUTCDATE()), 'TXN-VNP-009', 2, DATEADD(day, -19, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000009', 35, NULL, 800000, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', 'VE-VIP-009-1', 'QR-VIP-009-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000009', 35, NULL, 800000, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', 'VE-VIP-009-1', 'QR-VIP-009-1', 0, NULL, NULL);
 
     -- Order 10
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000010', 'DH-DEMO-010', 'A0000000-0000-0000-0000-000000000014', 'E0000000-0000-0000-0000-000000000051', NULL, N'Khách Hàng Mua Vé 14', 'buyer14@wuangevents.com', '0901234514', 750000, 0, 750000, 1, DATEADD(day, -19, GETUTCDATE()), 'TXN-VNP-010', 2, DATEADD(day, -19, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000010', 'DH-DEMO-010', 'A0000000-0000-0000-0000-000000000014', 'E0000000-0000-0000-0000-000000000051', NULL, N'Khách Hàng Mua Vé 14', 'buyer14@gmail.com', '0901234514', 750000, 0, 750000, 1, DATEADD(day, -19, GETUTCDATE()), 'TXN-VNP-010', 2, DATEADD(day, -19, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000010', 102, NULL, 250000, N'Khách Hàng Mua Vé 14', 'buyer14@wuangevents.com', 'VE-STD-010-1', 'QR-STD-010-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000010', 102, NULL, 250000, N'Khách Hàng Mua Vé 14', 'buyer14@gmail.com', 'VE-STD-010-1', 'QR-STD-010-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000010', 102, NULL, 250000, N'Khách Hàng Mua Vé 14', 'buyer14@wuangevents.com', 'VE-STD-010-2', 'QR-STD-010-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000010', 102, NULL, 250000, N'Khách Hàng Mua Vé 14', 'buyer14@gmail.com', 'VE-STD-010-2', 'QR-STD-010-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000010', 102, NULL, 250000, N'Khách Hàng Mua Vé 14', 'buyer14@wuangevents.com', 'VE-STD-010-3', 'QR-STD-010-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000010', 102, NULL, 250000, N'Khách Hàng Mua Vé 14', 'buyer14@gmail.com', 'VE-STD-010-3', 'QR-STD-010-3', 0, NULL, NULL);
 
     -- Order 11
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000011', 'DH-DEMO-011', 'A0000000-0000-0000-0000-000000000032', 'E0000000-0000-0000-0000-000000000019', NULL, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', '0901234532', 1600000, 0, 1600000, 1, DATEADD(day, -11, GETUTCDATE()), 'TXN-VNP-011', 1, DATEADD(day, -11, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000011', 'DH-DEMO-011', 'A0000000-0000-0000-0000-000000000032', 'E0000000-0000-0000-0000-000000000019', NULL, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', '0901234532', 1600000, 0, 1600000, 1, DATEADD(day, -11, GETUTCDATE()), 'TXN-VNP-011', 1, DATEADD(day, -11, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000011', 37, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', 'VE-VIP-011-1', 'QR-VIP-011-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000011', 37, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', 'VE-VIP-011-1', 'QR-VIP-011-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000011', 37, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', 'VE-VIP-011-2', 'QR-VIP-011-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000011', 37, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', 'VE-VIP-011-2', 'QR-VIP-011-2', 0, NULL, NULL);
 
     -- Order 12
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000012', 'DH-DEMO-012', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', '0901234530', 1050000, 0, 1050000, 1, DATEADD(day, -16, GETUTCDATE()), 'TXN-VNP-012', 1, DATEADD(day, -16, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000012', 'DH-DEMO-012', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', '0901234530', 1050000, 0, 1050000, 1, DATEADD(day, -16, GETUTCDATE()), 'TXN-VNP-012', 1, DATEADD(day, -16, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000012', 103, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-VIP-012-1', 'QR-VIP-012-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000012', 103, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-VIP-012-1', 'QR-VIP-012-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000012', 104, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-STD-012-2', 'QR-STD-012-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000012', 104, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-STD-012-2', 'QR-STD-012-2', 0, NULL, NULL);
 
     -- Order 13
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000013', 'DH-DEMO-013', 'A0000000-0000-0000-0000-000000000015', 'E0000000-0000-0000-0000-000000000055', NULL, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', '0901234515', 1850000, 0, 1850000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-013', 1, DATEADD(day, -17, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000013', 'DH-DEMO-013', 'A0000000-0000-0000-0000-000000000015', 'E0000000-0000-0000-0000-000000000055', NULL, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', '0901234515', 1850000, 0, 1850000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-013', 1, DATEADD(day, -17, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000013', 109, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', 'VE-VIP-013-1', 'QR-VIP-013-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000013', 109, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', 'VE-VIP-013-1', 'QR-VIP-013-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000013', 109, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', 'VE-VIP-013-2', 'QR-VIP-013-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000013', 109, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', 'VE-VIP-013-2', 'QR-VIP-013-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000013', 110, NULL, 250000, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', 'VE-STD-013-3', 'QR-STD-013-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000013', 110, NULL, 250000, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', 'VE-STD-013-3', 'QR-STD-013-3', 0, NULL, NULL);
 
     -- Order 14
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000014', 'DH-DEMO-014', 'A0000000-0000-0000-0000-000000000019', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', '0901234519', 250000, 0, 250000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-014', 1, DATEADD(day, -17, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000014', 'DH-DEMO-014', 'A0000000-0000-0000-0000-000000000019', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', '0901234519', 250000, 0, 250000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-014', 1, DATEADD(day, -17, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000014', 36, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', 'VE-STD-014-1', 'QR-STD-014-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000014', 36, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', 'VE-STD-014-1', 'QR-STD-014-1', 0, NULL, NULL);
 
     -- Order 15
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000015', 'DH-DEMO-015', 'A0000000-0000-0000-0000-000000000029', 'E0000000-0000-0000-0000-000000000024', NULL, N'Khách Hàng Mua Vé 29', 'buyer29@wuangevents.com', '0901234529', 1850000, 0, 1850000, 1, DATEADD(day, -12, GETUTCDATE()), 'TXN-VNP-015', 2, DATEADD(day, -12, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000015', 'DH-DEMO-015', 'A0000000-0000-0000-0000-000000000029', 'E0000000-0000-0000-0000-000000000024', NULL, N'Khách Hàng Mua Vé 29', 'buyer29@gmail.com', '0901234529', 1850000, 0, 1850000, 1, DATEADD(day, -12, GETUTCDATE()), 'TXN-VNP-015', 2, DATEADD(day, -12, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000015', 47, NULL, 800000, N'Khách Hàng Mua Vé 29', 'buyer29@wuangevents.com', 'VE-VIP-015-1', 'QR-VIP-015-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000015', 47, NULL, 800000, N'Khách Hàng Mua Vé 29', 'buyer29@gmail.com', 'VE-VIP-015-1', 'QR-VIP-015-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000015', 47, NULL, 800000, N'Khách Hàng Mua Vé 29', 'buyer29@wuangevents.com', 'VE-VIP-015-2', 'QR-VIP-015-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000015', 47, NULL, 800000, N'Khách Hàng Mua Vé 29', 'buyer29@gmail.com', 'VE-VIP-015-2', 'QR-VIP-015-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000015', 48, NULL, 250000, N'Khách Hàng Mua Vé 29', 'buyer29@wuangevents.com', 'VE-STD-015-3', 'QR-STD-015-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000015', 48, NULL, 250000, N'Khách Hàng Mua Vé 29', 'buyer29@gmail.com', 'VE-STD-015-3', 'QR-STD-015-3', 0, NULL, NULL);
 
     -- Order 16
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000016', 'DH-DEMO-016', 'A0000000-0000-0000-0000-000000000027', 'E0000000-0000-0000-0000-000000000013', NULL, N'Khách Hàng Mua Vé 27', 'buyer27@wuangevents.com', '0901234527', 1850000, 0, 1850000, 2, DATEADD(day, -10, GETUTCDATE()), 'NULL', 1, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000016', 'DH-DEMO-016', 'A0000000-0000-0000-0000-000000000027', 'E0000000-0000-0000-0000-000000000013', NULL, N'Khách Hàng Mua Vé 27', 'buyer27@gmail.com', '0901234527', 1850000, 0, 1850000, 2, DATEADD(day, -10, GETUTCDATE()), 'NULL', 1, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000016', 25, NULL, 800000, N'Khách Hàng Mua Vé 27', 'buyer27@wuangevents.com', 'VE-VIP-016-1', 'QR-VIP-016-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000016', 25, NULL, 800000, N'Khách Hàng Mua Vé 27', 'buyer27@gmail.com', 'VE-VIP-016-1', 'QR-VIP-016-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000016', 25, NULL, 800000, N'Khách Hàng Mua Vé 27', 'buyer27@wuangevents.com', 'VE-VIP-016-2', 'QR-VIP-016-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000016', 25, NULL, 800000, N'Khách Hàng Mua Vé 27', 'buyer27@gmail.com', 'VE-VIP-016-2', 'QR-VIP-016-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000016', 26, NULL, 250000, N'Khách Hàng Mua Vé 27', 'buyer27@wuangevents.com', 'VE-STD-016-3', 'QR-STD-016-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000016', 26, NULL, 250000, N'Khách Hàng Mua Vé 27', 'buyer27@gmail.com', 'VE-STD-016-3', 'QR-STD-016-3', 0, NULL, NULL);
 
     -- Order 17
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000017', 'DH-DEMO-017', '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', '0901234501', 1050000, 0, 1050000, 0, DATEADD(day, -13, GETUTCDATE()), 'NULL', 1, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000017', 'DH-DEMO-017', '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', '0901234501', 1050000, 0, 1050000, 0, DATEADD(day, -13, GETUTCDATE()), 'NULL', 1, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000017', 103, NULL, 800000, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', 'VE-VIP-017-1', 'QR-VIP-017-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000017', 103, NULL, 800000, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', 'VE-VIP-017-1', 'QR-VIP-017-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000017', 104, NULL, 250000, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', 'VE-STD-017-2', 'QR-STD-017-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000017', 104, NULL, 250000, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', 'VE-STD-017-2', 'QR-STD-017-2', 0, NULL, NULL);
 
     -- Order 18
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000018', 'DH-DEMO-018', 'A0000000-0000-0000-0000-000000000017', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', '0901234517', 1050000, 0, 1050000, 1, DATEADD(day, -14, GETUTCDATE()), 'TXN-VNP-018', 1, DATEADD(day, -14, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000018', 'DH-DEMO-018', 'A0000000-0000-0000-0000-000000000017', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', '0901234517', 1050000, 0, 1050000, 1, DATEADD(day, -14, GETUTCDATE()), 'TXN-VNP-018', 1, DATEADD(day, -14, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000018', 99, NULL, 800000, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', 'VE-VIP-018-1', 'QR-VIP-018-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000018', 99, NULL, 800000, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', 'VE-VIP-018-1', 'QR-VIP-018-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000018', 100, NULL, 250000, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', 'VE-STD-018-2', 'QR-STD-018-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000018', 100, NULL, 250000, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', 'VE-STD-018-2', 'QR-STD-018-2', 0, NULL, NULL);
 
     -- Order 19
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000019', 'DH-DEMO-019', 'A0000000-0000-0000-0000-000000000035', 'E0000000-0000-0000-0000-000000000028', NULL, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', '0901234535', 1600000, 0, 1600000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-019', 1, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000019', 'DH-DEMO-019', 'A0000000-0000-0000-0000-000000000035', 'E0000000-0000-0000-0000-000000000028', NULL, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', '0901234535', 1600000, 0, 1600000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-019', 1, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000019', 55, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', 'VE-VIP-019-1', 'QR-VIP-019-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000019', 55, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', 'VE-VIP-019-1', 'QR-VIP-019-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000019', 55, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', 'VE-VIP-019-2', 'QR-VIP-019-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000019', 55, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', 'VE-VIP-019-2', 'QR-VIP-019-2', 0, NULL, NULL);
 
     -- Order 20
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000020', 'DH-DEMO-020', 'A0000000-0000-0000-0000-000000000019', 'E20875EC-36DB-45EB-85D1-A706DC9B62D2', NULL, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', '0901234519', 500000, 0, 500000, 0, DATEADD(day, -9, GETUTCDATE()), 'NULL', 1, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000020', 'DH-DEMO-020', 'A0000000-0000-0000-0000-000000000019', 'E20875EC-36DB-45EB-85D1-A706DC9B62D2', NULL, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', '0901234519', 500000, 0, 500000, 0, DATEADD(day, -9, GETUTCDATE()), 'NULL', 1, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000020', 4, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', 'VE-STD-020-1', 'QR-STD-020-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000020', 4, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', 'VE-STD-020-1', 'QR-STD-020-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000020', 4, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', 'VE-STD-020-2', 'QR-STD-020-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000020', 4, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', 'VE-STD-020-2', 'QR-STD-020-2', 0, NULL, NULL);
 
     -- Order 21
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000021', 'DH-DEMO-021', 'FE3E3726-2435-43B9-9688-308CA7D1F34A', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', '0901234504', 1850000, 0, 1850000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-021', 2, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000021', 'DH-DEMO-021', 'FE3E3726-2435-43B9-9688-308CA7D1F34A', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', '0901234504', 1850000, 0, 1850000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-021', 2, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000021', 23, NULL, 800000, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', 'VE-VIP-021-1', 'QR-VIP-021-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000021', 23, NULL, 800000, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', 'VE-VIP-021-1', 'QR-VIP-021-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000021', 23, NULL, 800000, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', 'VE-VIP-021-2', 'QR-VIP-021-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000021', 23, NULL, 800000, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', 'VE-VIP-021-2', 'QR-VIP-021-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000021', 24, NULL, 250000, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', 'VE-STD-021-3', 'QR-STD-021-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000021', 24, NULL, 250000, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', 'VE-STD-021-3', 'QR-STD-021-3', 0, NULL, NULL);
 
     -- Order 22
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000022', 'DH-DEMO-022', 'A0000000-0000-0000-0000-000000000037', 'E0000000-0000-0000-0000-000000000058', NULL, N'Khách Hàng Mua Vé 37', 'buyer37@wuangevents.com', '0901234537', 750000, 0, 750000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-022', 1, DATEADD(day, -4, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000022', 'DH-DEMO-022', 'A0000000-0000-0000-0000-000000000037', 'E0000000-0000-0000-0000-000000000058', NULL, N'Khách Hàng Mua Vé 37', 'buyer37@gmail.com', '0901234537', 750000, 0, 750000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-022', 1, DATEADD(day, -4, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000022', 116, NULL, 250000, N'Khách Hàng Mua Vé 37', 'buyer37@wuangevents.com', 'VE-STD-022-1', 'QR-STD-022-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000022', 116, NULL, 250000, N'Khách Hàng Mua Vé 37', 'buyer37@gmail.com', 'VE-STD-022-1', 'QR-STD-022-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000022', 116, NULL, 250000, N'Khách Hàng Mua Vé 37', 'buyer37@wuangevents.com', 'VE-STD-022-2', 'QR-STD-022-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000022', 116, NULL, 250000, N'Khách Hàng Mua Vé 37', 'buyer37@gmail.com', 'VE-STD-022-2', 'QR-STD-022-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000022', 116, NULL, 250000, N'Khách Hàng Mua Vé 37', 'buyer37@wuangevents.com', 'VE-STD-022-3', 'QR-STD-022-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000022', 116, NULL, 250000, N'Khách Hàng Mua Vé 37', 'buyer37@gmail.com', 'VE-STD-022-3', 'QR-STD-022-3', 0, NULL, NULL);
 
     -- Order 23
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000023', 'DH-DEMO-023', 'A0000000-0000-0000-0000-000000000040', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 40', 'buyer40@wuangevents.com', '0901234540', 1600000, 0, 1600000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-023', 1, DATEADD(day, -8, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000023', 'DH-DEMO-023', 'A0000000-0000-0000-0000-000000000040', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 40', 'buyer40@gmail.com', '0901234540', 1600000, 0, 1600000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-023', 1, DATEADD(day, -8, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000023', 29, NULL, 800000, N'Khách Hàng Mua Vé 40', 'buyer40@wuangevents.com', 'VE-VIP-023-1', 'QR-VIP-023-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000023', 29, NULL, 800000, N'Khách Hàng Mua Vé 40', 'buyer40@gmail.com', 'VE-VIP-023-1', 'QR-VIP-023-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000023', 29, NULL, 800000, N'Khách Hàng Mua Vé 40', 'buyer40@wuangevents.com', 'VE-VIP-023-2', 'QR-VIP-023-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000023', 29, NULL, 800000, N'Khách Hàng Mua Vé 40', 'buyer40@gmail.com', 'VE-VIP-023-2', 'QR-VIP-023-2', 0, NULL, NULL);
 
     -- Order 24
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000024', 'DH-DEMO-024', 'B46BD4B0-EAC9-4C87-A500-785131A97B4A', 'E0000000-0000-0000-0000-000000000020', NULL, N'Khách Hàng Mua Vé 3', 'buyer3@wuangevents.com', '0901234503', 1600000, 0, 1600000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-024', 2, DATEADD(day, -10, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000024', 'DH-DEMO-024', 'B46BD4B0-EAC9-4C87-A500-785131A97B4A', 'E0000000-0000-0000-0000-000000000020', NULL, N'Khách Hàng Mua Vé 3', 'buyer3@gmail.com', '0901234503', 1600000, 0, 1600000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-024', 2, DATEADD(day, -10, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000024', 39, NULL, 800000, N'Khách Hàng Mua Vé 3', 'buyer3@wuangevents.com', 'VE-VIP-024-1', 'QR-VIP-024-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000024', 39, NULL, 800000, N'Khách Hàng Mua Vé 3', 'buyer3@gmail.com', 'VE-VIP-024-1', 'QR-VIP-024-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000024', 39, NULL, 800000, N'Khách Hàng Mua Vé 3', 'buyer3@wuangevents.com', 'VE-VIP-024-2', 'QR-VIP-024-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000024', 39, NULL, 800000, N'Khách Hàng Mua Vé 3', 'buyer3@gmail.com', 'VE-VIP-024-2', 'QR-VIP-024-2', 0, NULL, NULL);
 
     -- Order 25
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000025', 'DH-DEMO-025', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', '0901234507', 800000, 0, 800000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-025', 1, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000025', 'DH-DEMO-025', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', '0901234507', 800000, 0, 800000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-025', 1, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000025', 7, NULL, 800000, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', 'VE-VIP-025-1', 'QR-VIP-025-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000025', 7, NULL, 800000, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', 'VE-VIP-025-1', 'QR-VIP-025-1', 0, NULL, NULL);
 
     -- Order 26
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000026', 'DH-DEMO-026', 'A0000000-0000-0000-0000-000000000036', 'E0000000-0000-0000-0000-000000000009', NULL, N'Khách Hàng Mua Vé 36', 'buyer36@wuangevents.com', '0901234536', 500000, 0, 500000, 1, DATEADD(day, -3, GETUTCDATE()), 'TXN-VNP-026', 1, DATEADD(day, -3, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000026', 'DH-DEMO-026', 'A0000000-0000-0000-0000-000000000036', 'E0000000-0000-0000-0000-000000000009', NULL, N'Khách Hàng Mua Vé 36', 'buyer36@gmail.com', '0901234536', 500000, 0, 500000, 1, DATEADD(day, -3, GETUTCDATE()), 'TXN-VNP-026', 1, DATEADD(day, -3, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000026', 18, NULL, 250000, N'Khách Hàng Mua Vé 36', 'buyer36@wuangevents.com', 'VE-STD-026-1', 'QR-STD-026-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000026', 18, NULL, 250000, N'Khách Hàng Mua Vé 36', 'buyer36@gmail.com', 'VE-STD-026-1', 'QR-STD-026-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000026', 18, NULL, 250000, N'Khách Hàng Mua Vé 36', 'buyer36@wuangevents.com', 'VE-STD-026-2', 'QR-STD-026-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000026', 18, NULL, 250000, N'Khách Hàng Mua Vé 36', 'buyer36@gmail.com', 'VE-STD-026-2', 'QR-STD-026-2', 0, NULL, NULL);
 
     -- Order 27
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000027', 'DH-DEMO-027', 'A0000000-0000-0000-0000-000000000022', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 22', 'buyer22@wuangevents.com', '0901234522', 1050000, 0, 1050000, 1, DATEADD(day, -3, GETUTCDATE()), 'TXN-VNP-027', 1, DATEADD(day, -3, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000027', 'DH-DEMO-027', 'A0000000-0000-0000-0000-000000000022', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 22', 'buyer22@gmail.com', '0901234522', 1050000, 0, 1050000, 1, DATEADD(day, -3, GETUTCDATE()), 'TXN-VNP-027', 1, DATEADD(day, -3, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000027', 99, NULL, 800000, N'Khách Hàng Mua Vé 22', 'buyer22@wuangevents.com', 'VE-VIP-027-1', 'QR-VIP-027-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000027', 99, NULL, 800000, N'Khách Hàng Mua Vé 22', 'buyer22@gmail.com', 'VE-VIP-027-1', 'QR-VIP-027-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000027', 100, NULL, 250000, N'Khách Hàng Mua Vé 22', 'buyer22@wuangevents.com', 'VE-STD-027-2', 'QR-STD-027-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000027', 100, NULL, 250000, N'Khách Hàng Mua Vé 22', 'buyer22@gmail.com', 'VE-STD-027-2', 'QR-STD-027-2', 0, NULL, NULL);
 
     -- Order 28
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000028', 'DH-DEMO-028', 'A0000000-0000-0000-0000-000000000013', 'E0000000-0000-0000-0000-000000000029', NULL, N'Khách Hàng Mua Vé 13', 'buyer13@wuangevents.com', '0901234513', 800000, 0, 800000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-028', 2, DATEADD(day, -5, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000028', 'DH-DEMO-028', 'A0000000-0000-0000-0000-000000000013', 'E0000000-0000-0000-0000-000000000029', NULL, N'Khách Hàng Mua Vé 13', 'buyer13@gmail.com', '0901234513', 800000, 0, 800000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-028', 2, DATEADD(day, -5, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000028', 57, NULL, 800000, N'Khách Hàng Mua Vé 13', 'buyer13@wuangevents.com', 'VE-VIP-028-1', 'QR-VIP-028-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000028', 57, NULL, 800000, N'Khách Hàng Mua Vé 13', 'buyer13@gmail.com', 'VE-VIP-028-1', 'QR-VIP-028-1', 0, NULL, NULL);
 
     -- Order 29
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000029', 'DH-DEMO-029', 'A0000000-0000-0000-0000-000000000039', 'E0000000-0000-0000-0000-000000000025', NULL, N'Khách Hàng Mua Vé 39', 'buyer39@wuangevents.com', '0901234539', 750000, 0, 750000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-029', 1, DATEADD(day, -8, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000029', 'DH-DEMO-029', 'A0000000-0000-0000-0000-000000000039', 'E0000000-0000-0000-0000-000000000025', NULL, N'Khách Hàng Mua Vé 39', 'buyer39@gmail.com', '0901234539', 750000, 0, 750000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-029', 1, DATEADD(day, -8, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000029', 50, NULL, 250000, N'Khách Hàng Mua Vé 39', 'buyer39@wuangevents.com', 'VE-STD-029-1', 'QR-STD-029-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000029', 50, NULL, 250000, N'Khách Hàng Mua Vé 39', 'buyer39@gmail.com', 'VE-STD-029-1', 'QR-STD-029-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000029', 50, NULL, 250000, N'Khách Hàng Mua Vé 39', 'buyer39@wuangevents.com', 'VE-STD-029-2', 'QR-STD-029-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000029', 50, NULL, 250000, N'Khách Hàng Mua Vé 39', 'buyer39@gmail.com', 'VE-STD-029-2', 'QR-STD-029-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000029', 50, NULL, 250000, N'Khách Hàng Mua Vé 39', 'buyer39@wuangevents.com', 'VE-STD-029-3', 'QR-STD-029-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000029', 50, NULL, 250000, N'Khách Hàng Mua Vé 39', 'buyer39@gmail.com', 'VE-STD-029-3', 'QR-STD-029-3', 0, NULL, NULL);
 
     -- Order 30
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000030', 'DH-DEMO-030', 'A0000000-0000-0000-0000-000000000035', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', '0901234535', 1600000, 0, 1600000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-030', 1, DATEADD(day, -20, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000030', 'DH-DEMO-030', 'A0000000-0000-0000-0000-000000000035', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', '0901234535', 1600000, 0, 1600000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-030', 1, DATEADD(day, -20, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000030', 33, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', 'VE-VIP-030-1', 'QR-VIP-030-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000030', 33, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', 'VE-VIP-030-1', 'QR-VIP-030-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000030', 33, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', 'VE-VIP-030-2', 'QR-VIP-030-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000030', 33, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', 'VE-VIP-030-2', 'QR-VIP-030-2', 0, NULL, NULL);
 
     -- Order 31
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000031', 'DH-DEMO-031', 'A0000000-0000-0000-0000-000000000012', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 12', 'buyer12@wuangevents.com', '0901234512', 250000, 0, 250000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-031', 2, DATEADD(day, -6, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000031', 'DH-DEMO-031', 'A0000000-0000-0000-0000-000000000012', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 12', 'buyer12@gmail.com', '0901234512', 250000, 0, 250000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-031', 2, DATEADD(day, -6, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000031', 8, NULL, 250000, N'Khách Hàng Mua Vé 12', 'buyer12@wuangevents.com', 'VE-STD-031-1', 'QR-STD-031-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000031', 8, NULL, 250000, N'Khách Hàng Mua Vé 12', 'buyer12@gmail.com', 'VE-STD-031-1', 'QR-STD-031-1', 0, NULL, NULL);
 
     -- Order 32
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000032', 'DH-DEMO-032', 'A0000000-0000-0000-0000-000000000034', 'E0000000-0000-0000-0000-000000000044', NULL, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', '0901234534', 1050000, 0, 1050000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-032', 2, DATEADD(day, -6, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000032', 'DH-DEMO-032', 'A0000000-0000-0000-0000-000000000034', 'E0000000-0000-0000-0000-000000000044', NULL, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', '0901234534', 1050000, 0, 1050000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-032', 2, DATEADD(day, -6, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000032', 87, NULL, 800000, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', 'VE-VIP-032-1', 'QR-VIP-032-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000032', 87, NULL, 800000, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', 'VE-VIP-032-1', 'QR-VIP-032-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000032', 88, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', 'VE-STD-032-2', 'QR-STD-032-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000032', 88, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', 'VE-STD-032-2', 'QR-STD-032-2', 0, NULL, NULL);
 
     -- Order 33
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000033', 'DH-DEMO-033', 'A0000000-0000-0000-0000-000000000025', 'E0000000-0000-0000-0000-000000000008', NULL, N'Khách Hàng Mua Vé 25', 'buyer25@wuangevents.com', '0901234525', 500000, 0, 500000, 1, DATEADD(day, -9, GETUTCDATE()), 'TXN-VNP-033', 2, DATEADD(day, -9, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000033', 'DH-DEMO-033', 'A0000000-0000-0000-0000-000000000025', 'E0000000-0000-0000-0000-000000000008', NULL, N'Khách Hàng Mua Vé 25', 'buyer25@gmail.com', '0901234525', 500000, 0, 500000, 1, DATEADD(day, -9, GETUTCDATE()), 'TXN-VNP-033', 2, DATEADD(day, -9, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000033', 16, NULL, 250000, N'Khách Hàng Mua Vé 25', 'buyer25@wuangevents.com', 'VE-STD-033-1', 'QR-STD-033-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000033', 16, NULL, 250000, N'Khách Hàng Mua Vé 25', 'buyer25@gmail.com', 'VE-STD-033-1', 'QR-STD-033-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000033', 16, NULL, 250000, N'Khách Hàng Mua Vé 25', 'buyer25@wuangevents.com', 'VE-STD-033-2', 'QR-STD-033-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000033', 16, NULL, 250000, N'Khách Hàng Mua Vé 25', 'buyer25@gmail.com', 'VE-STD-033-2', 'QR-STD-033-2', 0, NULL, NULL);
 
     -- Order 34
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000034', 'DH-DEMO-034', 'A0000000-0000-0000-0000-000000000028', 'E0000000-0000-0000-0000-000000000046', NULL, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', '0901234528', 1600000, 0, 1600000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-034', 2, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000034', 'DH-DEMO-034', 'A0000000-0000-0000-0000-000000000028', 'E0000000-0000-0000-0000-000000000046', NULL, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', '0901234528', 1600000, 0, 1600000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-034', 2, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000034', 91, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-VIP-034-1', 'QR-VIP-034-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000034', 91, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-VIP-034-1', 'QR-VIP-034-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000034', 91, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-VIP-034-2', 'QR-VIP-034-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000034', 91, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-VIP-034-2', 'QR-VIP-034-2', 0, NULL, NULL);
 
     -- Order 35
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000035', 'DH-DEMO-035', 'A0000000-0000-0000-0000-000000000034', 'E0000000-0000-0000-0000-000000000024', NULL, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', '0901234534', 750000, 0, 750000, 1, DATEADD(day, -2, GETUTCDATE()), 'TXN-VNP-035', 2, DATEADD(day, -2, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000035', 'DH-DEMO-035', 'A0000000-0000-0000-0000-000000000034', 'E0000000-0000-0000-0000-000000000024', NULL, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', '0901234534', 750000, 0, 750000, 1, DATEADD(day, -2, GETUTCDATE()), 'TXN-VNP-035', 2, DATEADD(day, -2, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000035', 48, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', 'VE-STD-035-1', 'QR-STD-035-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000035', 48, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', 'VE-STD-035-1', 'QR-STD-035-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000035', 48, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', 'VE-STD-035-2', 'QR-STD-035-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000035', 48, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', 'VE-STD-035-2', 'QR-STD-035-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000035', 48, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@wuangevents.com', 'VE-STD-035-3', 'QR-STD-035-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000035', 48, NULL, 250000, N'Khách Hàng Mua Vé 34', 'buyer34@gmail.com', 'VE-STD-035-3', 'QR-STD-035-3', 0, NULL, NULL);
 
     -- Order 36
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000036', 'DH-DEMO-036', 'A0000000-0000-0000-0000-000000000026', 'E0000000-0000-0000-0000-000000000024', NULL, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', '0901234526', 1850000, 0, 1850000, 1, DATEADD(day, -12, GETUTCDATE()), 'TXN-VNP-036', 1, DATEADD(day, -12, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000036', 'DH-DEMO-036', 'A0000000-0000-0000-0000-000000000026', 'E0000000-0000-0000-0000-000000000024', NULL, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', '0901234526', 1850000, 0, 1850000, 1, DATEADD(day, -12, GETUTCDATE()), 'TXN-VNP-036', 1, DATEADD(day, -12, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000036', 47, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', 'VE-VIP-036-1', 'QR-VIP-036-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000036', 47, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', 'VE-VIP-036-1', 'QR-VIP-036-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000036', 47, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', 'VE-VIP-036-2', 'QR-VIP-036-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000036', 47, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', 'VE-VIP-036-2', 'QR-VIP-036-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000036', 48, NULL, 250000, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', 'VE-STD-036-3', 'QR-STD-036-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000036', 48, NULL, 250000, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', 'VE-STD-036-3', 'QR-STD-036-3', 0, NULL, NULL);
 
     -- Order 37
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000037', 'DH-DEMO-037', 'A0000000-0000-0000-0000-000000000022', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 22', 'buyer22@wuangevents.com', '0901234522', 1050000, 0, 1050000, 1, DATEADD(day, -16, GETUTCDATE()), 'TXN-VNP-037', 1, DATEADD(day, -16, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000037', 'DH-DEMO-037', 'A0000000-0000-0000-0000-000000000022', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 22', 'buyer22@gmail.com', '0901234522', 1050000, 0, 1050000, 1, DATEADD(day, -16, GETUTCDATE()), 'TXN-VNP-037', 1, DATEADD(day, -16, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000037', 35, NULL, 800000, N'Khách Hàng Mua Vé 22', 'buyer22@wuangevents.com', 'VE-VIP-037-1', 'QR-VIP-037-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000037', 35, NULL, 800000, N'Khách Hàng Mua Vé 22', 'buyer22@gmail.com', 'VE-VIP-037-1', 'QR-VIP-037-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000037', 36, NULL, 250000, N'Khách Hàng Mua Vé 22', 'buyer22@wuangevents.com', 'VE-STD-037-2', 'QR-STD-037-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000037', 36, NULL, 250000, N'Khách Hàng Mua Vé 22', 'buyer22@gmail.com', 'VE-STD-037-2', 'QR-STD-037-2', 0, NULL, NULL);
 
     -- Order 38
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000038', 'DH-DEMO-038', 'A0000000-0000-0000-0000-000000000019', 'D2C252F2-7FD4-4A02-86CB-3D9DE7415795', NULL, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', '0901234519', 1050000, 0, 1050000, 0, DATEADD(day, -13, GETUTCDATE()), 'NULL', 1, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000038', 'DH-DEMO-038', 'A0000000-0000-0000-0000-000000000019', 'D2C252F2-7FD4-4A02-86CB-3D9DE7415795', NULL, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', '0901234519', 1050000, 0, 1050000, 0, DATEADD(day, -13, GETUTCDATE()), 'NULL', 1, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000038', 5, NULL, 800000, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', 'VE-VIP-038-1', 'QR-VIP-038-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000038', 5, NULL, 800000, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', 'VE-VIP-038-1', 'QR-VIP-038-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000038', 6, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@wuangevents.com', 'VE-STD-038-2', 'QR-STD-038-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000038', 6, NULL, 250000, N'Khách Hàng Mua Vé 19', 'buyer19@gmail.com', 'VE-STD-038-2', 'QR-STD-038-2', 0, NULL, NULL);
 
     -- Order 39
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000039', 'DH-DEMO-039', 'A0000000-0000-0000-0000-000000000038', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 38', 'buyer38@wuangevents.com', '0901234538', 1050000, 0, 1050000, 1, DATEADD(day, -11, GETUTCDATE()), 'TXN-VNP-039', 2, DATEADD(day, -11, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000039', 'DH-DEMO-039', 'A0000000-0000-0000-0000-000000000038', 'E0000000-0000-0000-0000-000000000018', NULL, N'Khách Hàng Mua Vé 38', 'buyer38@gmail.com', '0901234538', 1050000, 0, 1050000, 1, DATEADD(day, -11, GETUTCDATE()), 'TXN-VNP-039', 2, DATEADD(day, -11, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000039', 35, NULL, 800000, N'Khách Hàng Mua Vé 38', 'buyer38@wuangevents.com', 'VE-VIP-039-1', 'QR-VIP-039-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000039', 35, NULL, 800000, N'Khách Hàng Mua Vé 38', 'buyer38@gmail.com', 'VE-VIP-039-1', 'QR-VIP-039-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000039', 36, NULL, 250000, N'Khách Hàng Mua Vé 38', 'buyer38@wuangevents.com', 'VE-STD-039-2', 'QR-STD-039-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000039', 36, NULL, 250000, N'Khách Hàng Mua Vé 38', 'buyer38@gmail.com', 'VE-STD-039-2', 'QR-STD-039-2', 0, NULL, NULL);
 
     -- Order 40
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000040', 'DH-DEMO-040', 'A0000000-0000-0000-0000-000000000038', 'E0000000-0000-0000-0000-000000000040', NULL, N'Khách Hàng Mua Vé 38', 'buyer38@wuangevents.com', '0901234538', 1050000, 0, 1050000, 1, DATEADD(day, -13, GETUTCDATE()), 'TXN-VNP-040', 1, DATEADD(day, -13, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000040', 'DH-DEMO-040', 'A0000000-0000-0000-0000-000000000038', 'E0000000-0000-0000-0000-000000000040', NULL, N'Khách Hàng Mua Vé 38', 'buyer38@gmail.com', '0901234538', 1050000, 0, 1050000, 1, DATEADD(day, -13, GETUTCDATE()), 'TXN-VNP-040', 1, DATEADD(day, -13, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000040', 79, NULL, 800000, N'Khách Hàng Mua Vé 38', 'buyer38@wuangevents.com', 'VE-VIP-040-1', 'QR-VIP-040-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000040', 79, NULL, 800000, N'Khách Hàng Mua Vé 38', 'buyer38@gmail.com', 'VE-VIP-040-1', 'QR-VIP-040-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000040', 80, NULL, 250000, N'Khách Hàng Mua Vé 38', 'buyer38@wuangevents.com', 'VE-STD-040-2', 'QR-STD-040-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000040', 80, NULL, 250000, N'Khách Hàng Mua Vé 38', 'buyer38@gmail.com', 'VE-STD-040-2', 'QR-STD-040-2', 0, NULL, NULL);
 
     -- Order 41
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000041', 'DH-DEMO-041', 'A0000000-0000-0000-0000-000000000030', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', '0901234530', 1850000, 0, 1850000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-041', 2, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000041', 'DH-DEMO-041', 'A0000000-0000-0000-0000-000000000030', 'D3C3FBCE-4FFF-4F33-A4AF-0A2750C9E94E', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', '0901234530', 1850000, 0, 1850000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-041', 2, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000041', 1, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-VIP-041-1', 'QR-VIP-041-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000041', 1, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-VIP-041-1', 'QR-VIP-041-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000041', 1, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-VIP-041-2', 'QR-VIP-041-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000041', 1, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-VIP-041-2', 'QR-VIP-041-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000041', 2, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-STD-041-3', 'QR-STD-041-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000041', 2, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-STD-041-3', 'QR-STD-041-3', 0, NULL, NULL);
 
     -- Order 42
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000042', 'DH-DEMO-042', 'A0000000-0000-0000-0000-000000000023', 'E0000000-0000-0000-0000-000000000049', NULL, N'Khách Hàng Mua Vé 23', 'buyer23@wuangevents.com', '0901234523', 250000, 0, 250000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-042', 2, DATEADD(day, -20, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000042', 'DH-DEMO-042', 'A0000000-0000-0000-0000-000000000023', 'E0000000-0000-0000-0000-000000000049', NULL, N'Khách Hàng Mua Vé 23', 'buyer23@gmail.com', '0901234523', 250000, 0, 250000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-042', 2, DATEADD(day, -20, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000042', 98, NULL, 250000, N'Khách Hàng Mua Vé 23', 'buyer23@wuangevents.com', 'VE-STD-042-1', 'QR-STD-042-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000042', 98, NULL, 250000, N'Khách Hàng Mua Vé 23', 'buyer23@gmail.com', 'VE-STD-042-1', 'QR-STD-042-1', 0, NULL, NULL);
 
     -- Order 43
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000043', 'DH-DEMO-043', '00858E32-C188-44CC-8A26-21A599A2F73C', 'E0000000-0000-0000-0000-000000000045', NULL, N'Khách Hàng Mua Vé 9', 'buyer9@wuangevents.com', '0901234509', 250000, 0, 250000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-043', 1, DATEADD(day, -17, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000043', 'DH-DEMO-043', '00858E32-C188-44CC-8A26-21A599A2F73C', 'E0000000-0000-0000-0000-000000000045', NULL, N'Khách Hàng Mua Vé 9', 'buyer9@gmail.com', '0901234509', 250000, 0, 250000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-043', 1, DATEADD(day, -17, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000043', 90, NULL, 250000, N'Khách Hàng Mua Vé 9', 'buyer9@wuangevents.com', 'VE-STD-043-1', 'QR-STD-043-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000043', 90, NULL, 250000, N'Khách Hàng Mua Vé 9', 'buyer9@gmail.com', 'VE-STD-043-1', 'QR-STD-043-1', 0, NULL, NULL);
 
     -- Order 44
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000044', 'DH-DEMO-044', 'A0000000-0000-0000-0000-000000000011', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 11', 'buyer11@wuangevents.com', '0901234511', 800000, 0, 800000, 1, DATEADD(day, -1, GETUTCDATE()), 'TXN-VNP-044', 1, DATEADD(day, -1, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000044', 'DH-DEMO-044', 'A0000000-0000-0000-0000-000000000011', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 11', 'buyer11@gmail.com', '0901234511', 800000, 0, 800000, 1, DATEADD(day, -1, GETUTCDATE()), 'TXN-VNP-044', 1, DATEADD(day, -1, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000044', 33, NULL, 800000, N'Khách Hàng Mua Vé 11', 'buyer11@wuangevents.com', 'VE-VIP-044-1', 'QR-VIP-044-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000044', 33, NULL, 800000, N'Khách Hàng Mua Vé 11', 'buyer11@gmail.com', 'VE-VIP-044-1', 'QR-VIP-044-1', 0, NULL, NULL);
 
     -- Order 45
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000045', 'DH-DEMO-045', '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'E0000000-0000-0000-0000-000000000026', NULL, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', '0901234501', 1600000, 0, 1600000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-045', 2, DATEADD(day, -20, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000045', 'DH-DEMO-045', '77EDA4D0-64A0-4CD8-9BC0-C4B56C3DBA52', 'E0000000-0000-0000-0000-000000000026', NULL, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', '0901234501', 1600000, 0, 1600000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-045', 2, DATEADD(day, -20, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000045', 51, NULL, 800000, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', 'VE-VIP-045-1', 'QR-VIP-045-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000045', 51, NULL, 800000, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', 'VE-VIP-045-1', 'QR-VIP-045-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000045', 51, NULL, 800000, N'Khách Hàng Mua Vé 1', 'buyer1@wuangevents.com', 'VE-VIP-045-2', 'QR-VIP-045-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000045', 51, NULL, 800000, N'Khách Hàng Mua Vé 1', 'battlegrounds2004@gmail.com', 'VE-VIP-045-2', 'QR-VIP-045-2', 0, NULL, NULL);
 
     -- Order 46
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000046', 'DH-DEMO-046', 'A0000000-0000-0000-0000-000000000018', 'E0000000-0000-0000-0000-000000000053', NULL, N'Khách Hàng Mua Vé 18', 'buyer18@wuangevents.com', '0901234518', 1050000, 0, 1050000, 1, DATEADD(day, -16, GETUTCDATE()), 'TXN-VNP-046', 2, DATEADD(day, -16, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000046', 'DH-DEMO-046', 'A0000000-0000-0000-0000-000000000018', 'E0000000-0000-0000-0000-000000000053', NULL, N'Khách Hàng Mua Vé 18', 'buyer18@gmail.com', '0901234518', 1050000, 0, 1050000, 1, DATEADD(day, -16, GETUTCDATE()), 'TXN-VNP-046', 2, DATEADD(day, -16, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000046', 105, NULL, 800000, N'Khách Hàng Mua Vé 18', 'buyer18@wuangevents.com', 'VE-VIP-046-1', 'QR-VIP-046-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000046', 105, NULL, 800000, N'Khách Hàng Mua Vé 18', 'buyer18@gmail.com', 'VE-VIP-046-1', 'QR-VIP-046-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000046', 106, NULL, 250000, N'Khách Hàng Mua Vé 18', 'buyer18@wuangevents.com', 'VE-STD-046-2', 'QR-STD-046-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000046', 106, NULL, 250000, N'Khách Hàng Mua Vé 18', 'buyer18@gmail.com', 'VE-STD-046-2', 'QR-STD-046-2', 0, NULL, NULL);
 
     -- Order 47
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000047', 'DH-DEMO-047', 'A0000000-0000-0000-0000-000000000025', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 25', 'buyer25@wuangevents.com', '0901234525', 1850000, 0, 1850000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-047', 1, DATEADD(day, -17, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000047', 'DH-DEMO-047', 'A0000000-0000-0000-0000-000000000025', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 25', 'buyer25@gmail.com', '0901234525', 1850000, 0, 1850000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-047', 1, DATEADD(day, -17, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000047', 33, NULL, 800000, N'Khách Hàng Mua Vé 25', 'buyer25@wuangevents.com', 'VE-VIP-047-1', 'QR-VIP-047-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000047', 33, NULL, 800000, N'Khách Hàng Mua Vé 25', 'buyer25@gmail.com', 'VE-VIP-047-1', 'QR-VIP-047-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000047', 33, NULL, 800000, N'Khách Hàng Mua Vé 25', 'buyer25@wuangevents.com', 'VE-VIP-047-2', 'QR-VIP-047-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000047', 33, NULL, 800000, N'Khách Hàng Mua Vé 25', 'buyer25@gmail.com', 'VE-VIP-047-2', 'QR-VIP-047-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000047', 34, NULL, 250000, N'Khách Hàng Mua Vé 25', 'buyer25@wuangevents.com', 'VE-STD-047-3', 'QR-STD-047-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000047', 34, NULL, 250000, N'Khách Hàng Mua Vé 25', 'buyer25@gmail.com', 'VE-STD-047-3', 'QR-STD-047-3', 0, NULL, NULL);
 
     -- Order 48
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000048', 'DH-DEMO-048', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', '0901234506', 1600000, 0, 1600000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-048', 2, DATEADD(day, -5, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000048', 'DH-DEMO-048', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', '0901234506', 1600000, 0, 1600000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-048', 2, DATEADD(day, -5, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000048', 23, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', 'VE-VIP-048-1', 'QR-VIP-048-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000048', 23, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', 'VE-VIP-048-1', 'QR-VIP-048-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000048', 23, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', 'VE-VIP-048-2', 'QR-VIP-048-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000048', 23, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', 'VE-VIP-048-2', 'QR-VIP-048-2', 0, NULL, NULL);
 
     -- Order 49
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000049', 'DH-DEMO-049', '00858E32-C188-44CC-8A26-21A599A2F73C', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 9', 'buyer9@wuangevents.com', '0901234509', 1600000, 0, 1600000, 1, DATEADD(day, -1, GETUTCDATE()), 'TXN-VNP-049', 2, DATEADD(day, -1, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000049', 'DH-DEMO-049', '00858E32-C188-44CC-8A26-21A599A2F73C', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 9', 'buyer9@gmail.com', '0901234509', 1600000, 0, 1600000, 1, DATEADD(day, -1, GETUTCDATE()), 'TXN-VNP-049', 2, DATEADD(day, -1, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000049', 23, NULL, 800000, N'Khách Hàng Mua Vé 9', 'buyer9@wuangevents.com', 'VE-VIP-049-1', 'QR-VIP-049-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000049', 23, NULL, 800000, N'Khách Hàng Mua Vé 9', 'buyer9@gmail.com', 'VE-VIP-049-1', 'QR-VIP-049-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000049', 23, NULL, 800000, N'Khách Hàng Mua Vé 9', 'buyer9@wuangevents.com', 'VE-VIP-049-2', 'QR-VIP-049-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000049', 23, NULL, 800000, N'Khách Hàng Mua Vé 9', 'buyer9@gmail.com', 'VE-VIP-049-2', 'QR-VIP-049-2', 0, NULL, NULL);
 
     -- Order 50
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000050', 'DH-DEMO-050', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', '0901234507', 500000, 0, 500000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-050', 2, DATEADD(day, -8, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000050', 'DH-DEMO-050', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', 'E0000000-0000-0000-0000-000000000017', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', '0901234507', 500000, 0, 500000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-050', 2, DATEADD(day, -8, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000050', 34, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', 'VE-STD-050-1', 'QR-STD-050-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000050', 34, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', 'VE-STD-050-1', 'QR-STD-050-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000050', 34, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', 'VE-STD-050-2', 'QR-STD-050-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000050', 34, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', 'VE-STD-050-2', 'QR-STD-050-2', 0, NULL, NULL);
 
     -- Order 51
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000051', 'DH-DEMO-051', 'A0000000-0000-0000-0000-000000000020', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 20', 'buyer20@wuangevents.com', '0901234520', 1050000, 0, 1050000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-051', 2, DATEADD(day, -8, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000051', 'DH-DEMO-051', 'A0000000-0000-0000-0000-000000000020', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 20', 'buyer20@gmail.com', '0901234520', 1050000, 0, 1050000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-051', 2, DATEADD(day, -8, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000051', 29, NULL, 800000, N'Khách Hàng Mua Vé 20', 'buyer20@wuangevents.com', 'VE-VIP-051-1', 'QR-VIP-051-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000051', 29, NULL, 800000, N'Khách Hàng Mua Vé 20', 'buyer20@gmail.com', 'VE-VIP-051-1', 'QR-VIP-051-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000051', 30, NULL, 250000, N'Khách Hàng Mua Vé 20', 'buyer20@wuangevents.com', 'VE-STD-051-2', 'QR-STD-051-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000051', 30, NULL, 250000, N'Khách Hàng Mua Vé 20', 'buyer20@gmail.com', 'VE-STD-051-2', 'QR-STD-051-2', 0, NULL, NULL);
 
     -- Order 52
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000052', 'DH-DEMO-052', 'A0000000-0000-0000-0000-000000000024', 'E0000000-0000-0000-0000-000000000051', NULL, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', '0901234524', 1850000, 0, 1850000, 1, DATEADD(day, -7, GETUTCDATE()), 'TXN-VNP-052', 2, DATEADD(day, -7, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000052', 'DH-DEMO-052', 'A0000000-0000-0000-0000-000000000024', 'E0000000-0000-0000-0000-000000000051', NULL, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', '0901234524', 1850000, 0, 1850000, 1, DATEADD(day, -7, GETUTCDATE()), 'TXN-VNP-052', 2, DATEADD(day, -7, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000052', 101, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', 'VE-VIP-052-1', 'QR-VIP-052-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000052', 101, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', 'VE-VIP-052-1', 'QR-VIP-052-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000052', 101, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', 'VE-VIP-052-2', 'QR-VIP-052-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000052', 101, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', 'VE-VIP-052-2', 'QR-VIP-052-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000052', 102, NULL, 250000, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', 'VE-STD-052-3', 'QR-STD-052-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000052', 102, NULL, 250000, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', 'VE-STD-052-3', 'QR-STD-052-3', 0, NULL, NULL);
 
     -- Order 53
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000053', 'DH-DEMO-053', 'A0000000-0000-0000-0000-000000000028', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', '0901234528', 1850000, 0, 1850000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-053', 1, DATEADD(day, -6, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000053', 'DH-DEMO-053', 'A0000000-0000-0000-0000-000000000028', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', '0901234528', 1850000, 0, 1850000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-053', 1, DATEADD(day, -6, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000053', 29, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-VIP-053-1', 'QR-VIP-053-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000053', 29, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-VIP-053-1', 'QR-VIP-053-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000053', 29, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-VIP-053-2', 'QR-VIP-053-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000053', 29, NULL, 800000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-VIP-053-2', 'QR-VIP-053-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000053', 30, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-STD-053-3', 'QR-STD-053-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000053', 30, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-STD-053-3', 'QR-STD-053-3', 0, NULL, NULL);
 
     -- Order 54
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000054', 'DH-DEMO-054', 'A0000000-0000-0000-0000-000000000026', 'E0000000-0000-0000-0000-000000000026', NULL, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', '0901234526', 1850000, 0, 1850000, 1, DATEADD(day, -3, GETUTCDATE()), 'TXN-VNP-054', 1, DATEADD(day, -3, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000054', 'DH-DEMO-054', 'A0000000-0000-0000-0000-000000000026', 'E0000000-0000-0000-0000-000000000026', NULL, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', '0901234526', 1850000, 0, 1850000, 1, DATEADD(day, -3, GETUTCDATE()), 'TXN-VNP-054', 1, DATEADD(day, -3, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000054', 51, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', 'VE-VIP-054-1', 'QR-VIP-054-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000054', 51, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', 'VE-VIP-054-1', 'QR-VIP-054-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000054', 51, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', 'VE-VIP-054-2', 'QR-VIP-054-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000054', 51, NULL, 800000, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', 'VE-VIP-054-2', 'QR-VIP-054-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000054', 52, NULL, 250000, N'Khách Hàng Mua Vé 26', 'buyer26@wuangevents.com', 'VE-STD-054-3', 'QR-STD-054-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000054', 52, NULL, 250000, N'Khách Hàng Mua Vé 26', 'buyer26@gmail.com', 'VE-STD-054-3', 'QR-STD-054-3', 0, NULL, NULL);
 
     -- Order 55
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000055', 'DH-DEMO-055', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', 'E0000000-0000-0000-0000-000000000036', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', '0901234507', 500000, 0, 500000, 0, DATEADD(day, -6, GETUTCDATE()), 'NULL', 2, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000055', 'DH-DEMO-055', '3C416A14-C60B-48F9-9FA5-7CFE1FFCD5E7', 'E0000000-0000-0000-0000-000000000036', NULL, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', '0901234507', 500000, 0, 500000, 0, DATEADD(day, -6, GETUTCDATE()), 'NULL', 2, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000055', 72, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', 'VE-STD-055-1', 'QR-STD-055-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000055', 72, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', 'VE-STD-055-1', 'QR-STD-055-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000055', 72, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@wuangevents.com', 'VE-STD-055-2', 'QR-STD-055-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000055', 72, NULL, 250000, N'Khách Hàng Mua Vé 7', 'buyer7@gmail.com', 'VE-STD-055-2', 'QR-STD-055-2', 0, NULL, NULL);
 
     -- Order 56
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000056', 'DH-DEMO-056', 'A0000000-0000-0000-0000-000000000024', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', '0901234524', 800000, 0, 800000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-056', 1, DATEADD(day, -5, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000056', 'DH-DEMO-056', 'A0000000-0000-0000-0000-000000000024', 'E0000000-0000-0000-0000-000000000012', NULL, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', '0901234524', 800000, 0, 800000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-056', 1, DATEADD(day, -5, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000056', 23, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', 'VE-VIP-056-1', 'QR-VIP-056-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000056', 23, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', 'VE-VIP-056-1', 'QR-VIP-056-1', 0, NULL, NULL);
 
     -- Order 57
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000057', 'DH-DEMO-057', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000049', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', '0901234530', 500000, 0, 500000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-057', 2, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000057', 'DH-DEMO-057', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000049', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', '0901234530', 500000, 0, 500000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-057', 2, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000057', 98, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-STD-057-1', 'QR-STD-057-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000057', 98, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-STD-057-1', 'QR-STD-057-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000057', 98, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-STD-057-2', 'QR-STD-057-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000057', 98, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-STD-057-2', 'QR-STD-057-2', 0, NULL, NULL);
 
     -- Order 58
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000058', 'DH-DEMO-058', 'A0000000-0000-0000-0000-000000000032', 'E0000000-0000-0000-0000-000000000013', NULL, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', '0901234532', 1600000, 0, 1600000, 1, DATEADD(day, -1, GETUTCDATE()), 'TXN-VNP-058', 2, DATEADD(day, -1, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000058', 'DH-DEMO-058', 'A0000000-0000-0000-0000-000000000032', 'E0000000-0000-0000-0000-000000000013', NULL, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', '0901234532', 1600000, 0, 1600000, 1, DATEADD(day, -1, GETUTCDATE()), 'TXN-VNP-058', 2, DATEADD(day, -1, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000058', 25, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', 'VE-VIP-058-1', 'QR-VIP-058-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000058', 25, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', 'VE-VIP-058-1', 'QR-VIP-058-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000058', 25, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', 'VE-VIP-058-2', 'QR-VIP-058-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000058', 25, NULL, 800000, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', 'VE-VIP-058-2', 'QR-VIP-058-2', 0, NULL, NULL);
 
     -- Order 59
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000059', 'DH-DEMO-059', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', '0901234530', 250000, 0, 250000, 1, DATEADD(day, -13, GETUTCDATE()), 'TXN-VNP-059', 2, DATEADD(day, -13, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000059', 'DH-DEMO-059', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', '0901234530', 250000, 0, 250000, 1, DATEADD(day, -13, GETUTCDATE()), 'TXN-VNP-059', 2, DATEADD(day, -13, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000059', 100, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-STD-059-1', 'QR-STD-059-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000059', 100, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-STD-059-1', 'QR-STD-059-1', 0, NULL, NULL);
 
     -- Order 60
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000060', 'DH-DEMO-060', 'A0000000-0000-0000-0000-000000000036', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 36', 'buyer36@wuangevents.com', '0901234536', 800000, 0, 800000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-060', 1, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000060', 'DH-DEMO-060', 'A0000000-0000-0000-0000-000000000036', 'E0000000-0000-0000-0000-000000000050', NULL, N'Khách Hàng Mua Vé 36', 'buyer36@gmail.com', '0901234536', 800000, 0, 800000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-060', 1, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000060', 99, NULL, 800000, N'Khách Hàng Mua Vé 36', 'buyer36@wuangevents.com', 'VE-VIP-060-1', 'QR-VIP-060-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000060', 99, NULL, 800000, N'Khách Hàng Mua Vé 36', 'buyer36@gmail.com', 'VE-VIP-060-1', 'QR-VIP-060-1', 0, NULL, NULL);
 
     -- Order 61
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000061', 'DH-DEMO-061', 'A0000000-0000-0000-0000-000000000035', 'E0000000-0000-0000-0000-000000000020', NULL, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', '0901234535', 800000, 0, 800000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-061', 1, DATEADD(day, -10, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000061', 'DH-DEMO-061', 'A0000000-0000-0000-0000-000000000035', 'E0000000-0000-0000-0000-000000000020', NULL, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', '0901234535', 800000, 0, 800000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-061', 1, DATEADD(day, -10, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000061', 39, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@wuangevents.com', 'VE-VIP-061-1', 'QR-VIP-061-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000061', 39, NULL, 800000, N'Khách Hàng Mua Vé 35', 'buyer35@gmail.com', 'VE-VIP-061-1', 'QR-VIP-061-1', 0, NULL, NULL);
 
     -- Order 62
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000062', 'DH-DEMO-062', 'DB847C61-CC0B-41F5-9BEB-F6132B0E5BF2', 'E0000000-0000-0000-0000-000000000049', NULL, N'Khách Hàng Mua Vé 2', 'buyer2@wuangevents.com', '0901234502', 1850000, 0, 1850000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-062', 2, DATEADD(day, -4, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000062', 'DH-DEMO-062', 'DB847C61-CC0B-41F5-9BEB-F6132B0E5BF2', 'E0000000-0000-0000-0000-000000000049', NULL, N'Khách Hàng Mua Vé 2', 'buyer2@gmail.com', '0901234502', 1850000, 0, 1850000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-062', 2, DATEADD(day, -4, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000062', 97, NULL, 800000, N'Khách Hàng Mua Vé 2', 'buyer2@wuangevents.com', 'VE-VIP-062-1', 'QR-VIP-062-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000062', 97, NULL, 800000, N'Khách Hàng Mua Vé 2', 'buyer2@gmail.com', 'VE-VIP-062-1', 'QR-VIP-062-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000062', 97, NULL, 800000, N'Khách Hàng Mua Vé 2', 'buyer2@wuangevents.com', 'VE-VIP-062-2', 'QR-VIP-062-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000062', 97, NULL, 800000, N'Khách Hàng Mua Vé 2', 'buyer2@gmail.com', 'VE-VIP-062-2', 'QR-VIP-062-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000062', 98, NULL, 250000, N'Khách Hàng Mua Vé 2', 'buyer2@wuangevents.com', 'VE-STD-062-3', 'QR-STD-062-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000062', 98, NULL, 250000, N'Khách Hàng Mua Vé 2', 'buyer2@gmail.com', 'VE-STD-062-3', 'QR-STD-062-3', 0, NULL, NULL);
 
     -- Order 63
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000063', 'DH-DEMO-063', 'A0000000-0000-0000-0000-000000000028', 'E0000000-0000-0000-0000-000000000058', NULL, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', '0901234528', 750000, 0, 750000, 1, DATEADD(day, -19, GETUTCDATE()), 'TXN-VNP-063', 1, DATEADD(day, -19, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000063', 'DH-DEMO-063', 'A0000000-0000-0000-0000-000000000028', 'E0000000-0000-0000-0000-000000000058', NULL, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', '0901234528', 750000, 0, 750000, 1, DATEADD(day, -19, GETUTCDATE()), 'TXN-VNP-063', 1, DATEADD(day, -19, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000063', 116, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-STD-063-1', 'QR-STD-063-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000063', 116, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-STD-063-1', 'QR-STD-063-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000063', 116, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-STD-063-2', 'QR-STD-063-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000063', 116, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-STD-063-2', 'QR-STD-063-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000063', 116, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@wuangevents.com', 'VE-STD-063-3', 'QR-STD-063-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000063', 116, NULL, 250000, N'Khách Hàng Mua Vé 28', 'buyer28@gmail.com', 'VE-STD-063-3', 'QR-STD-063-3', 0, NULL, NULL);
 
     -- Order 64
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000064', 'DH-DEMO-064', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'E0000000-0000-0000-0000-000000000007', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', '0901234506', 1600000, 0, 1600000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-064', 1, DATEADD(day, -17, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000064', 'DH-DEMO-064', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'E0000000-0000-0000-0000-000000000007', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', '0901234506', 1600000, 0, 1600000, 1, DATEADD(day, -17, GETUTCDATE()), 'TXN-VNP-064', 1, DATEADD(day, -17, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000064', 13, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', 'VE-VIP-064-1', 'QR-VIP-064-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000064', 13, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', 'VE-VIP-064-1', 'QR-VIP-064-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000064', 13, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', 'VE-VIP-064-2', 'QR-VIP-064-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000064', 13, NULL, 800000, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', 'VE-VIP-064-2', 'QR-VIP-064-2', 0, NULL, NULL);
 
     -- Order 65
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000065', 'DH-DEMO-065', 'A0000000-0000-0000-0000-000000000017', 'E0000000-0000-0000-0000-000000000021', NULL, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', '0901234517', 1050000, 0, 1050000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-065', 2, DATEADD(day, -10, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000065', 'DH-DEMO-065', 'A0000000-0000-0000-0000-000000000017', 'E0000000-0000-0000-0000-000000000021', NULL, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', '0901234517', 1050000, 0, 1050000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-065', 2, DATEADD(day, -10, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000065', 41, NULL, 800000, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', 'VE-VIP-065-1', 'QR-VIP-065-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000065', 41, NULL, 800000, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', 'VE-VIP-065-1', 'QR-VIP-065-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000065', 42, NULL, 250000, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', 'VE-STD-065-2', 'QR-STD-065-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000065', 42, NULL, 250000, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', 'VE-STD-065-2', 'QR-STD-065-2', 0, NULL, NULL);
 
     -- Order 66
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000066', 'DH-DEMO-066', 'A0000000-0000-0000-0000-000000000032', 'D2C252F2-7FD4-4A02-86CB-3D9DE7415795', NULL, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', '0901234532', 500000, 0, 500000, 1, DATEADD(day, -2, GETUTCDATE()), 'TXN-VNP-066', 2, DATEADD(day, -2, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000066', 'DH-DEMO-066', 'A0000000-0000-0000-0000-000000000032', 'D2C252F2-7FD4-4A02-86CB-3D9DE7415795', NULL, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', '0901234532', 500000, 0, 500000, 1, DATEADD(day, -2, GETUTCDATE()), 'TXN-VNP-066', 2, DATEADD(day, -2, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000066', 6, NULL, 250000, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', 'VE-STD-066-1', 'QR-STD-066-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000066', 6, NULL, 250000, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', 'VE-STD-066-1', 'QR-STD-066-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000066', 6, NULL, 250000, N'Khách Hàng Mua Vé 32', 'buyer32@wuangevents.com', 'VE-STD-066-2', 'QR-STD-066-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000066', 6, NULL, 250000, N'Khách Hàng Mua Vé 32', 'buyer32@gmail.com', 'VE-STD-066-2', 'QR-STD-066-2', 0, NULL, NULL);
 
     -- Order 67
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000067', 'DH-DEMO-067', 'A0000000-0000-0000-0000-000000000011', 'E0000000-0000-0000-0000-000000000026', NULL, N'Khách Hàng Mua Vé 11', 'buyer11@wuangevents.com', '0901234511', 250000, 0, 250000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-067', 1, DATEADD(day, -4, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000067', 'DH-DEMO-067', 'A0000000-0000-0000-0000-000000000011', 'E0000000-0000-0000-0000-000000000026', NULL, N'Khách Hàng Mua Vé 11', 'buyer11@gmail.com', '0901234511', 250000, 0, 250000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-067', 1, DATEADD(day, -4, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000067', 52, NULL, 250000, N'Khách Hàng Mua Vé 11', 'buyer11@wuangevents.com', 'VE-STD-067-1', 'QR-STD-067-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000067', 52, NULL, 250000, N'Khách Hàng Mua Vé 11', 'buyer11@gmail.com', 'VE-STD-067-1', 'QR-STD-067-1', 0, NULL, NULL);
 
     -- Order 68
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000068', 'DH-DEMO-068', 'A0000000-0000-0000-0000-000000000023', 'E0000000-0000-0000-0000-000000000027', NULL, N'Khách Hàng Mua Vé 23', 'buyer23@wuangevents.com', '0901234523', 800000, 0, 800000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-068', 1, DATEADD(day, -6, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000068', 'DH-DEMO-068', 'A0000000-0000-0000-0000-000000000023', 'E0000000-0000-0000-0000-000000000027', NULL, N'Khách Hàng Mua Vé 23', 'buyer23@gmail.com', '0901234523', 800000, 0, 800000, 1, DATEADD(day, -6, GETUTCDATE()), 'TXN-VNP-068', 1, DATEADD(day, -6, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000068', 53, NULL, 800000, N'Khách Hàng Mua Vé 23', 'buyer23@wuangevents.com', 'VE-VIP-068-1', 'QR-VIP-068-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000068', 53, NULL, 800000, N'Khách Hàng Mua Vé 23', 'buyer23@gmail.com', 'VE-VIP-068-1', 'QR-VIP-068-1', 0, NULL, NULL);
 
     -- Order 69
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000069', 'DH-DEMO-069', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000011', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', '0901234530', 1050000, 0, 1050000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-069', 1, DATEADD(day, -10, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000069', 'DH-DEMO-069', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000011', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', '0901234530', 1050000, 0, 1050000, 1, DATEADD(day, -10, GETUTCDATE()), 'TXN-VNP-069', 1, DATEADD(day, -10, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000069', 21, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-VIP-069-1', 'QR-VIP-069-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000069', 21, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-VIP-069-1', 'QR-VIP-069-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000069', 22, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-STD-069-2', 'QR-STD-069-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000069', 22, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-STD-069-2', 'QR-STD-069-2', 0, NULL, NULL);
 
     -- Order 70
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000070', 'DH-DEMO-070', 'A0000000-0000-0000-0000-000000000033', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 33', 'buyer33@wuangevents.com', '0901234533', 750000, 0, 750000, 1, DATEADD(day, -9, GETUTCDATE()), 'TXN-VNP-070', 2, DATEADD(day, -9, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000070', 'DH-DEMO-070', 'A0000000-0000-0000-0000-000000000033', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 33', 'buyer33@gmail.com', '0901234533', 750000, 0, 750000, 1, DATEADD(day, -9, GETUTCDATE()), 'TXN-VNP-070', 2, DATEADD(day, -9, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000070', 104, NULL, 250000, N'Khách Hàng Mua Vé 33', 'buyer33@wuangevents.com', 'VE-STD-070-1', 'QR-STD-070-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000070', 104, NULL, 250000, N'Khách Hàng Mua Vé 33', 'buyer33@gmail.com', 'VE-STD-070-1', 'QR-STD-070-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000070', 104, NULL, 250000, N'Khách Hàng Mua Vé 33', 'buyer33@wuangevents.com', 'VE-STD-070-2', 'QR-STD-070-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000070', 104, NULL, 250000, N'Khách Hàng Mua Vé 33', 'buyer33@gmail.com', 'VE-STD-070-2', 'QR-STD-070-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000070', 104, NULL, 250000, N'Khách Hàng Mua Vé 33', 'buyer33@wuangevents.com', 'VE-STD-070-3', 'QR-STD-070-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000070', 104, NULL, 250000, N'Khách Hàng Mua Vé 33', 'buyer33@gmail.com', 'VE-STD-070-3', 'QR-STD-070-3', 0, NULL, NULL);
 
     -- Order 71
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000071', 'DH-DEMO-071', 'A0000000-0000-0000-0000-000000000024', 'E0000000-0000-0000-0000-000000000042', NULL, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', '0901234524', 800000, 0, 800000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-071', 1, DATEADD(day, -4, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000071', 'DH-DEMO-071', 'A0000000-0000-0000-0000-000000000024', 'E0000000-0000-0000-0000-000000000042', NULL, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', '0901234524', 800000, 0, 800000, 1, DATEADD(day, -4, GETUTCDATE()), 'TXN-VNP-071', 1, DATEADD(day, -4, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000071', 83, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@wuangevents.com', 'VE-VIP-071-1', 'QR-VIP-071-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000071', 83, NULL, 800000, N'Khách Hàng Mua Vé 24', 'buyer24@gmail.com', 'VE-VIP-071-1', 'QR-VIP-071-1', 0, NULL, NULL);
 
     -- Order 72
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000072', 'DH-DEMO-072', 'A0000000-0000-0000-0000-000000000017', 'E0000000-0000-0000-0000-000000000047', NULL, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', '0901234517', 800000, 0, 800000, 1, DATEADD(day, -12, GETUTCDATE()), 'TXN-VNP-072', 1, DATEADD(day, -12, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000072', 'DH-DEMO-072', 'A0000000-0000-0000-0000-000000000017', 'E0000000-0000-0000-0000-000000000047', NULL, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', '0901234517', 800000, 0, 800000, 1, DATEADD(day, -12, GETUTCDATE()), 'TXN-VNP-072', 1, DATEADD(day, -12, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000072', 93, NULL, 800000, N'Khách Hàng Mua Vé 17', 'buyer17@wuangevents.com', 'VE-VIP-072-1', 'QR-VIP-072-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000072', 93, NULL, 800000, N'Khách Hàng Mua Vé 17', 'buyer17@gmail.com', 'VE-VIP-072-1', 'QR-VIP-072-1', 0, NULL, NULL);
 
     -- Order 73
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000073', 'DH-DEMO-073', 'FE3E3726-2435-43B9-9688-308CA7D1F34A', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', '0901234504', 800000, 0, 800000, 1, DATEADD(day, -9, GETUTCDATE()), 'TXN-VNP-073', 1, DATEADD(day, -9, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000073', 'DH-DEMO-073', 'FE3E3726-2435-43B9-9688-308CA7D1F34A', 'E0000000-0000-0000-0000-000000000052', NULL, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', '0901234504', 800000, 0, 800000, 1, DATEADD(day, -9, GETUTCDATE()), 'TXN-VNP-073', 1, DATEADD(day, -9, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000073', 103, NULL, 800000, N'Khách Hàng Mua Vé 4', 'buyer4@wuangevents.com', 'VE-VIP-073-1', 'QR-VIP-073-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000073', 103, NULL, 800000, N'Khách Hàng Mua Vé 4', 'buyer4@gmail.com', 'VE-VIP-073-1', 'QR-VIP-073-1', 0, NULL, NULL);
 
     -- Order 74
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000074', 'DH-DEMO-074', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'E0000000-0000-0000-0000-000000000044', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', '0901234506', 500000, 0, 500000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-074', 1, DATEADD(day, -8, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000074', 'DH-DEMO-074', '42F528B2-7107-4672-B7FC-3D49A10F63F6', 'E0000000-0000-0000-0000-000000000044', NULL, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', '0901234506', 500000, 0, 500000, 1, DATEADD(day, -8, GETUTCDATE()), 'TXN-VNP-074', 1, DATEADD(day, -8, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000074', 88, NULL, 250000, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', 'VE-STD-074-1', 'QR-STD-074-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000074', 88, NULL, 250000, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', 'VE-STD-074-1', 'QR-STD-074-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000074', 88, NULL, 250000, N'Khách Hàng Mua Vé 6', 'buyer6@wuangevents.com', 'VE-STD-074-2', 'QR-STD-074-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000074', 88, NULL, 250000, N'Khách Hàng Mua Vé 6', 'buyer6@gmail.com', 'VE-STD-074-2', 'QR-STD-074-2', 0, NULL, NULL);
 
     -- Order 75
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000075', 'DH-DEMO-075', 'A0000000-0000-0000-0000-000000000029', 'E0000000-0000-0000-0000-000000000046', NULL, N'Khách Hàng Mua Vé 29', 'buyer29@wuangevents.com', '0901234529', 250000, 0, 250000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-075', 1, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000075', 'DH-DEMO-075', 'A0000000-0000-0000-0000-000000000029', 'E0000000-0000-0000-0000-000000000046', NULL, N'Khách Hàng Mua Vé 29', 'buyer29@gmail.com', '0901234529', 250000, 0, 250000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-075', 1, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000075', 92, NULL, 250000, N'Khách Hàng Mua Vé 29', 'buyer29@wuangevents.com', 'VE-STD-075-1', 'QR-STD-075-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000075', 92, NULL, 250000, N'Khách Hàng Mua Vé 29', 'buyer29@gmail.com', 'VE-STD-075-1', 'QR-STD-075-1', 0, NULL, NULL);
 
     -- Order 76
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000076', 'DH-DEMO-076', 'A0000000-0000-0000-0000-000000000037', 'E0000000-0000-0000-0000-000000000010', NULL, N'Khách Hàng Mua Vé 37', 'buyer37@wuangevents.com', '0901234537', 800000, 0, 800000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-076', 1, DATEADD(day, -18, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000076', 'DH-DEMO-076', 'A0000000-0000-0000-0000-000000000037', 'E0000000-0000-0000-0000-000000000010', NULL, N'Khách Hàng Mua Vé 37', 'buyer37@gmail.com', '0901234537', 800000, 0, 800000, 1, DATEADD(day, -18, GETUTCDATE()), 'TXN-VNP-076', 1, DATEADD(day, -18, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000076', 19, NULL, 800000, N'Khách Hàng Mua Vé 37', 'buyer37@wuangevents.com', 'VE-VIP-076-1', 'QR-VIP-076-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000076', 19, NULL, 800000, N'Khách Hàng Mua Vé 37', 'buyer37@gmail.com', 'VE-VIP-076-1', 'QR-VIP-076-1', 0, NULL, NULL);
 
     -- Order 77
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000077', 'DH-DEMO-077', 'A0000000-0000-0000-0000-000000000021', 'E0000000-0000-0000-0000-000000000023', NULL, N'Khách Hàng Mua Vé 21', 'buyer21@wuangevents.com', '0901234521', 800000, 0, 800000, 1, DATEADD(day, -7, GETUTCDATE()), 'TXN-VNP-077', 1, DATEADD(day, -7, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000077', 'DH-DEMO-077', 'A0000000-0000-0000-0000-000000000021', 'E0000000-0000-0000-0000-000000000023', NULL, N'Khách Hàng Mua Vé 21', 'buyer21@gmail.com', '0901234521', 800000, 0, 800000, 1, DATEADD(day, -7, GETUTCDATE()), 'TXN-VNP-077', 1, DATEADD(day, -7, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000077', 45, NULL, 800000, N'Khách Hàng Mua Vé 21', 'buyer21@wuangevents.com', 'VE-VIP-077-1', 'QR-VIP-077-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000077', 45, NULL, 800000, N'Khách Hàng Mua Vé 21', 'buyer21@gmail.com', 'VE-VIP-077-1', 'QR-VIP-077-1', 0, NULL, NULL);
 
     -- Order 78
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000078', 'DH-DEMO-078', 'A0000000-0000-0000-0000-000000000015', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', '0901234515', 1850000, 0, 1850000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-078', 2, DATEADD(day, -20, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000078', 'DH-DEMO-078', 'A0000000-0000-0000-0000-000000000015', '5BC842AD-6166-406A-AD93-EB3ECACFBF7E', NULL, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', '0901234515', 1850000, 0, 1850000, 1, DATEADD(day, -20, GETUTCDATE()), 'TXN-VNP-078', 2, DATEADD(day, -20, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000078', 7, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', 'VE-VIP-078-1', 'QR-VIP-078-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000078', 7, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', 'VE-VIP-078-1', 'QR-VIP-078-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000078', 7, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', 'VE-VIP-078-2', 'QR-VIP-078-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000078', 7, NULL, 800000, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', 'VE-VIP-078-2', 'QR-VIP-078-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000078', 8, NULL, 250000, N'Khách Hàng Mua Vé 15', 'buyer15@wuangevents.com', 'VE-STD-078-3', 'QR-STD-078-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000078', 8, NULL, 250000, N'Khách Hàng Mua Vé 15', 'buyer15@gmail.com', 'VE-STD-078-3', 'QR-STD-078-3', 0, NULL, NULL);
 
     -- Order 79
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000079', 'DH-DEMO-079', 'A0000000-0000-0000-0000-000000000031', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 31', 'buyer31@wuangevents.com', '0901234531', 1850000, 0, 1850000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-079', 1, DATEADD(day, -5, GETUTCDATE()));
+    VALUES ('D1000000-0000-0000-0000-000000000079', 'DH-DEMO-079', 'A0000000-0000-0000-0000-000000000031', 'E0000000-0000-0000-0000-000000000015', NULL, N'Khách Hàng Mua Vé 31', 'buyer31@gmail.com', '0901234531', 1850000, 0, 1850000, 1, DATEADD(day, -5, GETUTCDATE()), 'TXN-VNP-079', 1, DATEADD(day, -5, GETUTCDATE()));
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000079', 29, NULL, 800000, N'Khách Hàng Mua Vé 31', 'buyer31@wuangevents.com', 'VE-VIP-079-1', 'QR-VIP-079-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000079', 29, NULL, 800000, N'Khách Hàng Mua Vé 31', 'buyer31@gmail.com', 'VE-VIP-079-1', 'QR-VIP-079-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000079', 29, NULL, 800000, N'Khách Hàng Mua Vé 31', 'buyer31@wuangevents.com', 'VE-VIP-079-2', 'QR-VIP-079-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000079', 29, NULL, 800000, N'Khách Hàng Mua Vé 31', 'buyer31@gmail.com', 'VE-VIP-079-2', 'QR-VIP-079-2', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000079', 30, NULL, 250000, N'Khách Hàng Mua Vé 31', 'buyer31@wuangevents.com', 'VE-STD-079-3', 'QR-STD-079-3', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000079', 30, NULL, 250000, N'Khách Hàng Mua Vé 31', 'buyer31@gmail.com', 'VE-STD-079-3', 'QR-STD-079-3', 0, NULL, NULL);
 
     -- Order 80
     INSERT INTO [dbo].[DonHang] ([Id], [MaDonHang], [NguoiMuaId], [SuKienId], [MaGiamGiaId], [HoTenNguoiMua], [EmailNguoiMua], [SdtNguoiMua], [TongTienVe], [TienGiamGia], [TongThanhToan], [TrangThai], [NgayTao], [MaGiaoDich], [PhuongThucThanhToan], [NgayThanhToan])
-    VALUES ('D1000000-0000-0000-0000-000000000080', 'DH-DEMO-080', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000025', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', '0901234530', 1050000, 0, 1050000, 0, DATEADD(day, -1, GETUTCDATE()), 'NULL', 1, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000080', 'DH-DEMO-080', 'A0000000-0000-0000-0000-000000000030', 'E0000000-0000-0000-0000-000000000025', NULL, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', '0901234530', 1050000, 0, 1050000, 0, DATEADD(day, -1, GETUTCDATE()), 'NULL', 1, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000080', 49, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-VIP-080-1', 'QR-VIP-080-1', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000080', 49, NULL, 800000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-VIP-080-1', 'QR-VIP-080-1', 0, NULL, NULL);
 
     INSERT INTO [dbo].[ChiTietDonHang] ([DonHangId], [LoaiVeId], [ChoNgoiId], [GiaVe], [TenNguoiThamDu], [EmailNguoiThamDu], [MaVe], [MaQRCode], [TrangThaiCheckin], [NgayCheckin], [NguoiCheckinId])
-    VALUES ('D1000000-0000-0000-0000-000000000080', 50, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@wuangevents.com', 'VE-STD-080-2', 'QR-STD-080-2', 0, NULL, NULL);
+    VALUES ('D1000000-0000-0000-0000-000000000080', 50, NULL, 250000, N'Khách Hàng Mua Vé 30', 'buyer30@gmail.com', 'VE-STD-080-2', 'QR-STD-080-2', 0, NULL, NULL);
 
 
     -- === DEMO POLISH: sự kiện Việt Nam với ảnh chụp thật được lưu local để demo ổn định. ===
@@ -2554,72 +2554,72 @@ BEGIN TRY
     DECLARE @DemoUserNames TABLE (Email varchar(256) PRIMARY KEY, HoTen nvarchar(100));
     INSERT INTO @DemoUserNames (Email, HoTen)
     VALUES
-        ('admin@wuangevents.com', N'Nguyễn Vĩnh Quang'),
-        ('organizer1@wuangevents.com', N'Wuang Events Production'),
-        ('organizer2@wuangevents.com', N'Saigon Live Entertainment'),
-        ('organizer3@wuangevents.com', N'Storm Music Vietnam'),
-        ('organizer4@wuangevents.com', N'Sunset Creative Studio'),
-        ('organizer5@wuangevents.com', N'Nhịp Trẻ Thăng Long'),
-        ('organizer6@wuangevents.com', N'Vietnam Classical Arts'),
-        ('organizer7@wuangevents.com', N'Lotus Stage Company'),
-        ('organizer8@wuangevents.com', N'Heritage Show Vietnam'),
-        ('organizer9@wuangevents.com', N'Urban Culture Hub'),
-        ('organizer10@wuangevents.com', N'Future Connect Events'),
-        ('buyer1@wuangevents.com', N'Nguyễn Minh Anh'),
-        ('buyer2@wuangevents.com', N'Trần Gia Hân'),
-        ('buyer3@wuangevents.com', N'Lê Quốc Bảo'),
-        ('buyer4@wuangevents.com', N'Phạm Khánh Linh'),
-        ('buyer5@wuangevents.com', N'Hoàng Đức Minh'),
-        ('buyer6@wuangevents.com', N'Võ Ngọc Mai'),
-        ('buyer7@wuangevents.com', N'Đặng Tuấn Kiệt'),
-        ('buyer8@wuangevents.com', N'Bùi Thanh Hà'),
-        ('buyer9@wuangevents.com', N'Đỗ Hải Nam'),
-        ('buyer10@wuangevents.com', N'Nguyễn Yến Nhi'),
-        ('buyer11@wuangevents.com', N'Trần Minh Khang'),
-        ('buyer12@wuangevents.com', N'Lê Bảo Ngọc'),
-        ('buyer13@wuangevents.com', N'Phạm Nhật Long'),
-        ('buyer14@wuangevents.com', N'Hoàng Thu Trang'),
-        ('buyer15@wuangevents.com', N'Võ Anh Tú'),
-        ('buyer16@wuangevents.com', N'Đặng Mỹ Duyên'),
-        ('buyer17@wuangevents.com', N'Bùi Quốc Huy'),
-        ('buyer18@wuangevents.com', N'Đỗ Thảo Vy'),
-        ('buyer19@wuangevents.com', N'Nguyễn Gia Bảo'),
-        ('buyer20@wuangevents.com', N'Trần Phương Anh'),
-        ('buyer21@wuangevents.com', N'Lê Minh Quân'),
-        ('buyer22@wuangevents.com', N'Phạm Ngọc Hân'),
-        ('buyer23@wuangevents.com', N'Hoàng Công Thành'),
-        ('buyer24@wuangevents.com', N'Võ Khánh An'),
-        ('buyer25@wuangevents.com', N'Đặng Quang Vinh'),
-        ('buyer26@wuangevents.com', N'Bùi Hà My'),
-        ('buyer27@wuangevents.com', N'Đỗ Đức Anh'),
-        ('buyer28@wuangevents.com', N'Nguyễn Tú Uyên'),
-        ('buyer29@wuangevents.com', N'Trần Hoàng Phúc'),
-        ('buyer30@wuangevents.com', N'Lê Mai Chi'),
-        ('buyer31@wuangevents.com', N'Phạm Tuấn Anh'),
-        ('buyer32@wuangevents.com', N'Hoàng Bảo Trâm'),
-        ('buyer33@wuangevents.com', N'Võ Minh Trí'),
-        ('buyer34@wuangevents.com', N'Đặng Thanh Tâm'),
-        ('buyer35@wuangevents.com', N'Bùi Gia Khiêm'),
-        ('buyer36@wuangevents.com', N'Đỗ Ngọc Diệp'),
-        ('buyer37@wuangevents.com', N'Nguyễn Khôi Nguyên'),
-        ('buyer38@wuangevents.com', N'Trần Hải Yến'),
-        ('buyer39@wuangevents.com', N'Lê Thành Đạt'),
-        ('buyer40@wuangevents.com', N'Phạm Quỳnh Anh'),
-        ('staff1@wuangevents.com', N'Trần Hoàng Nam'),
-        ('staff2@wuangevents.com', N'Lê Minh Tâm'),
-        ('staff3@wuangevents.com', N'Phạm Quốc Hưng'),
-        ('staff4@wuangevents.com', N'Nguyễn Thu Hà'),
-        ('staff5@wuangevents.com', N'Võ Thanh Sơn'),
-        ('staff6@wuangevents.com', N'Đặng Bảo Châu'),
-        ('staff7@wuangevents.com', N'Bùi Anh Khoa'),
-        ('staff8@wuangevents.com', N'Đỗ Mỹ Linh'),
-        ('staff9@wuangevents.com', N'Hoàng Gia Khánh'),
-        ('staff10@wuangevents.com', N'Nguyễn Ngọc Lan'),
-        ('staff11@wuangevents.com', N'Trần Đức Thịnh'),
-        ('staff12@wuangevents.com', N'Lê Phương Thảo'),
-        ('staff13@wuangevents.com', N'Phạm Minh Nhật'),
-        ('staff14@wuangevents.com', N'Võ Hải Yến'),
-        ('staff15@wuangevents.com', N'Đặng Quốc Trung');
+        ('admin@gmail.com', N'Nguyễn Vĩnh Quang'),
+        ('organizer1@gmail.com', N'Wuang Events Production'),
+        ('organizer2@gmail.com', N'Saigon Live Entertainment'),
+        ('organizer3@gmail.com', N'Storm Music Vietnam'),
+        ('organizer4@gmail.com', N'Sunset Creative Studio'),
+        ('organizer5@gmail.com', N'Nhịp Trẻ Thăng Long'),
+        ('organizer6@gmail.com', N'Vietnam Classical Arts'),
+        ('organizer7@gmail.com', N'Lotus Stage Company'),
+        ('organizer8@gmail.com', N'Heritage Show Vietnam'),
+        ('organizer9@gmail.com', N'Urban Culture Hub'),
+        ('organizer10@gmail.com', N'Future Connect Events'),
+        ('battlegrounds2004@gmail.com', N'Nguyễn Minh Anh'),
+        ('buyer2@gmail.com', N'Trần Gia Hân'),
+        ('buyer3@gmail.com', N'Lê Quốc Bảo'),
+        ('buyer4@gmail.com', N'Phạm Khánh Linh'),
+        ('buyer5@gmail.com', N'Hoàng Đức Minh'),
+        ('buyer6@gmail.com', N'Võ Ngọc Mai'),
+        ('buyer7@gmail.com', N'Đặng Tuấn Kiệt'),
+        ('buyer8@gmail.com', N'Bùi Thanh Hà'),
+        ('buyer9@gmail.com', N'Đỗ Hải Nam'),
+        ('buyer10@gmail.com', N'Nguyễn Yến Nhi'),
+        ('buyer11@gmail.com', N'Trần Minh Khang'),
+        ('buyer12@gmail.com', N'Lê Bảo Ngọc'),
+        ('buyer13@gmail.com', N'Phạm Nhật Long'),
+        ('buyer14@gmail.com', N'Hoàng Thu Trang'),
+        ('buyer15@gmail.com', N'Võ Anh Tú'),
+        ('buyer16@gmail.com', N'Đặng Mỹ Duyên'),
+        ('buyer17@gmail.com', N'Bùi Quốc Huy'),
+        ('buyer18@gmail.com', N'Đỗ Thảo Vy'),
+        ('buyer19@gmail.com', N'Nguyễn Gia Bảo'),
+        ('buyer20@gmail.com', N'Trần Phương Anh'),
+        ('buyer21@gmail.com', N'Lê Minh Quân'),
+        ('buyer22@gmail.com', N'Phạm Ngọc Hân'),
+        ('buyer23@gmail.com', N'Hoàng Công Thành'),
+        ('buyer24@gmail.com', N'Võ Khánh An'),
+        ('buyer25@gmail.com', N'Đặng Quang Vinh'),
+        ('buyer26@gmail.com', N'Bùi Hà My'),
+        ('buyer27@gmail.com', N'Đỗ Đức Anh'),
+        ('buyer28@gmail.com', N'Nguyễn Tú Uyên'),
+        ('buyer29@gmail.com', N'Trần Hoàng Phúc'),
+        ('buyer30@gmail.com', N'Lê Mai Chi'),
+        ('buyer31@gmail.com', N'Phạm Tuấn Anh'),
+        ('buyer32@gmail.com', N'Hoàng Bảo Trâm'),
+        ('buyer33@gmail.com', N'Võ Minh Trí'),
+        ('buyer34@gmail.com', N'Đặng Thanh Tâm'),
+        ('buyer35@gmail.com', N'Bùi Gia Khiêm'),
+        ('buyer36@gmail.com', N'Đỗ Ngọc Diệp'),
+        ('buyer37@gmail.com', N'Nguyễn Khôi Nguyên'),
+        ('buyer38@gmail.com', N'Trần Hải Yến'),
+        ('buyer39@gmail.com', N'Lê Thành Đạt'),
+        ('buyer40@gmail.com', N'Phạm Quỳnh Anh'),
+        ('staff1@gmail.com', N'Trần Hoàng Nam'),
+        ('staff2@gmail.com', N'Lê Minh Tâm'),
+        ('staff3@gmail.com', N'Phạm Quốc Hưng'),
+        ('staff4@gmail.com', N'Nguyễn Thu Hà'),
+        ('staff5@gmail.com', N'Võ Thanh Sơn'),
+        ('staff6@gmail.com', N'Đặng Bảo Châu'),
+        ('staff7@gmail.com', N'Bùi Anh Khoa'),
+        ('staff8@gmail.com', N'Đỗ Mỹ Linh'),
+        ('staff9@gmail.com', N'Hoàng Gia Khánh'),
+        ('staff10@gmail.com', N'Nguyễn Ngọc Lan'),
+        ('staff11@gmail.com', N'Trần Đức Thịnh'),
+        ('staff12@gmail.com', N'Lê Phương Thảo'),
+        ('staff13@gmail.com', N'Phạm Minh Nhật'),
+        ('staff14@gmail.com', N'Võ Hải Yến'),
+        ('staff15@gmail.com', N'Đặng Quốc Trung');
 
     UPDATE nd
     SET nd.HoTen = names.HoTen
@@ -2740,13 +2740,13 @@ BEGIN TRY
          NgayTao, MaGiaoDich, PhuongThucThanhToan, NgayThanhToan)
     VALUES
         ('D2000000-0000-0000-0000-000000000081', 'DH-DEMO-CHO-01', @DemoBuyerId, @DemoEventId,
-         N'Nguyễn Minh Anh', 'buyer1@wuangevents.com', '0901234501', 150000, 0, 150000, 0,
+         N'Nguyễn Minh Anh', 'battlegrounds2004@gmail.com', '0901234501', 150000, 0, 150000, 0,
          GETUTCDATE(), NULL, 2, NULL),
         ('D2000000-0000-0000-0000-000000000082', 'DH-DEMO-HUY-01', @DemoBuyerId, @DemoEventId,
-         N'Nguyễn Minh Anh', 'buyer1@wuangevents.com', '0901234501', 150000, 0, 150000, 2,
+         N'Nguyễn Minh Anh', 'battlegrounds2004@gmail.com', '0901234501', 150000, 0, 150000, 2,
          DATEADD(day, -1, GETUTCDATE()), NULL, 3, NULL),
         ('D2000000-0000-0000-0000-000000000084', 'DH-DEMO-HETHAN-01', @DemoBuyerId, @DemoEventId,
-         N'Nguyễn Minh Anh', 'buyer1@wuangevents.com', '0901234501', 150000, 0, 150000, 4,
+         N'Nguyễn Minh Anh', 'battlegrounds2004@gmail.com', '0901234501', 150000, 0, 150000, 4,
          DATEADD(day, -2, GETUTCDATE()), NULL, 2, NULL);
 
     INSERT INTO dbo.ChiTietDonHang
@@ -2754,11 +2754,11 @@ BEGIN TRY
          MaVe, MaQRCode, TrangThaiCheckin, NgayCheckin, NguoiCheckinId)
     VALUES
         ('D2000000-0000-0000-0000-000000000081', @DemoLoaiVeId, @DemoChoNgoiId, 150000,
-         N'Nguyễn Minh Anh', 'buyer1@wuangevents.com', NULL, NULL, 0, NULL, NULL),
+         N'Nguyễn Minh Anh', 'battlegrounds2004@gmail.com', NULL, NULL, 0, NULL, NULL),
         ('D2000000-0000-0000-0000-000000000082', @DemoLoaiVeId, NULL, 150000,
-         N'Nguyễn Minh Anh', 'buyer1@wuangevents.com', NULL, NULL, 2, NULL, NULL),
+         N'Nguyễn Minh Anh', 'battlegrounds2004@gmail.com', NULL, NULL, 2, NULL, NULL),
         ('D2000000-0000-0000-0000-000000000084', @DemoLoaiVeId, NULL, 150000,
-         N'Nguyễn Minh Anh', 'buyer1@wuangevents.com', NULL, NULL, 2, NULL, NULL);
+         N'Nguyễn Minh Anh', 'battlegrounds2004@gmail.com', NULL, NULL, 2, NULL, NULL);
 
     UPDATE dbo.ChoNgoi SET TrangThai = 1 WHERE Id = @DemoChoNgoiId;
 
@@ -2866,7 +2866,7 @@ BEGIN TRY
              NgayTao, MaGiaoDich, PhuongThucThanhToan, NgayThanhToan)
         VALUES
             (@FreeOrderId, 'WE-FREE-DEMO', @FreeBuyerId, @FreeEventId,
-             N'Nguyễn Minh Anh', 'buyer1@wuangevents.com', '0901234501',
+             N'Nguyễn Minh Anh', 'battlegrounds2004@gmail.com', '0901234501',
              0, 0, 0, 1, DATEADD(hour, -2, GETUTCDATE()), 'FREE-DEMO', 1, DATEADD(hour, -2, GETUTCDATE()));
 
         INSERT INTO dbo.ChiTietDonHang
@@ -2874,7 +2874,7 @@ BEGIN TRY
              MaVe, MaQRCode, TrangThaiCheckin, NgayCheckin, NguoiCheckinId)
         VALUES
             (@FreeOrderId, @FreeTicketTypeId, NULL, 0, N'Nguyễn Minh Anh',
-             'buyer1@wuangevents.com', 'VE-FREE-DEMO-001', 'QR-FREE-DEMO-001', 0, NULL, NULL);
+             'battlegrounds2004@gmail.com', 'VE-FREE-DEMO-001', 'QR-FREE-DEMO-001', 0, NULL, NULL);
     END;
 
     -- Không thể có vé đã check-in trước giờ bắt đầu. Giữ lại lịch sử check-in của sự kiện đã diễn ra.
