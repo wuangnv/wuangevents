@@ -14,24 +14,54 @@
 </head>
 <body class="portal-body">
     @await Html.PartialAsync("_UiNotifications")
-    <div class="portal-shell">
+    <div class="portal-shell" id="portalShell">
         <aside class="admin-sidebar">
-            <a class="admin-brand" asp-controller="Admin" asp-action="Index"><span class="brand-mark"><i class="fas fa-bolt"></i></span><span>Wuang<strong>Admin</strong></span></a>
+            <a class="admin-brand" asp-controller="Admin" asp-action="Index" title="WuangAdmin">
+                <span class="brand-mark"><i class="fas fa-bolt"></i></span>
+                <span>Wuang<strong>Admin</strong></span>
+            </a>
             <nav class="admin-nav">
                 <span class="nav-label">Quản lý</span>
-                <a class="admin-nav-item" asp-controller="Admin" asp-action="Index" data-path="/admin/index"><i class="fas fa-chart-line"></i><span>Thống kê hệ thống</span></a>
-                <a class="admin-nav-item" asp-controller="Admin" asp-action="NguoiDung" data-path="/admin/nguoidung"><i class="fas fa-users"></i><span>Quản lý người dùng</span></a>
-                <a class="admin-nav-item" asp-controller="Admin" asp-action="DuyetBTCList" data-path="/admin/duyetbtclist"><i class="fas fa-handshake"></i><span>Phê duyệt ban tổ chức</span></a>
-                <a class="admin-nav-item" asp-controller="Admin" asp-action="SuKien" data-path="/admin/sukien"><i class="fas fa-calendar-check"></i><span>Phê duyệt sự kiện</span></a>
-                <a class="admin-nav-item" asp-controller="Admin" asp-action="DanhMuc" data-path="/admin/danhmuc"><i class="fas fa-layer-group"></i><span>Quản lý danh mục</span></a>
-                <a class="admin-nav-item" asp-controller="Admin" asp-action="DonHang" data-path="/admin/donhang"><i class="fas fa-receipt"></i><span>Giám sát giao dịch</span></a>
+                <a class="admin-nav-item" asp-controller="Admin" asp-action="Index" data-path="/admin/index" title="Thống kê hệ thống">
+                    <i class="fas fa-chart-line"></i><span>Thống kê hệ thống</span>
+                </a>
+                <a class="admin-nav-item" asp-controller="Admin" asp-action="NguoiDung" data-path="/admin/nguoidung" title="Quản lý người dùng">
+                    <i class="fas fa-users"></i><span>Quản lý người dùng</span>
+                </a>
+                <a class="admin-nav-item" asp-controller="Admin" asp-action="DuyetBTCList" data-path="/admin/duyetbtclist" title="Phê duyệt ban tổ chức">
+                    <i class="fas fa-handshake"></i><span>Phê duyệt ban tổ chức</span>
+                </a>
+                <a class="admin-nav-item" asp-controller="Admin" asp-action="SuKien" data-path="/admin/sukien" title="Phê duyệt sự kiện">
+                    <i class="fas fa-calendar-check"></i><span>Phê duyệt sự kiện</span>
+                </a>
+                <a class="admin-nav-item" asp-controller="Admin" asp-action="DanhMuc" data-path="/admin/danhmuc" title="Quản lý danh mục">
+                    <i class="fas fa-layer-group"></i><span>Quản lý danh mục</span>
+                </a>
+                <a class="admin-nav-item" asp-controller="Admin" asp-action="DonHang" data-path="/admin/donhang" title="Giám sát giao dịch">
+                    <i class="fas fa-receipt"></i><span>Giám sát giao dịch</span>
+                </a>
 
                 <span class="nav-label">Hệ thống</span>
-                <form method="post" asp-controller="Account" asp-action="DangXuat"><button type="submit" class="admin-nav-item border-0 w-100 text-start"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></button></form>
+                <form method="post" asp-controller="Account" asp-action="DangXuat">
+                    <button type="submit" class="admin-nav-item border-0 w-100 text-start" title="Đăng xuất">
+                        <i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span>
+                    </button>
+                </form>
             </nav>
         </aside>
         <div class="admin-main">
-            <header class="admin-header"><div><strong>Trang quản trị</strong></div><div class="account-chip"><i class="fas fa-user-shield"></i><span>@User.Identity?.Name</span></div></header>
+            <header class="admin-header">
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" title="Thu gọn / Mở rộng menu">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <strong>Trang quản trị</strong>
+                </div>
+                <div class="account-chip">
+                    <i class="fas fa-user-shield"></i>
+                    <span>@User.Identity?.Name</span>
+                </div>
+            </header>
             <main class="admin-content-body">
                 @RenderBody()
             </main>
@@ -42,6 +72,23 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+        // Khôi phục trạng thái thu gọn sidebar
+        (function() {
+            const shell = document.getElementById('portalShell');
+            if (localStorage.getItem('portal_sidebar_collapsed') === 'true') {
+                shell?.classList.add('sidebar-collapsed');
+            }
+        })();
+
+        // Xử lý toggle sidebar
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            const shell = document.getElementById('portalShell');
+            if (shell) {
+                shell.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('portal_sidebar_collapsed', shell.classList.contains('sidebar-collapsed'));
+            }
+        });
+
         const adminPath = window.location.pathname.toLowerCase();
         document.querySelectorAll('.admin-nav-item[data-path]').forEach(item => {
             if (adminPath.startsWith(item.dataset.path)) item.classList.add('active');

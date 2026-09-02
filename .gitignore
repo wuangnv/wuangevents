@@ -21,10 +21,17 @@ appsettings.*.local.json
 *.tmp
 *.temp
 *.cache
+.cache/
 *.pyc
 __pycache__/
+*.ndjson
 TestResults/
 coverage/
+publish-audit/
+work_tmp/
+design-atlas/
+deepdive-build/
+wuangevents-command-center-build/
 src/WuangEvents.Web/wwwroot/uploads/*
 !src/WuangEvents.Web/wwwroot/uploads/banners/
 src/WuangEvents.Web/wwwroot/uploads/banners/*
@@ -44,3 +51,4 @@ desktop.ini
 # OS files
 Thumbs.db
 .DS_Store
+

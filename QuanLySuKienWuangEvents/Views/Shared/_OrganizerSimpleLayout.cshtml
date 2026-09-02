@@ -50,49 +50,67 @@
             border-left: 3px solid #a855f7;
         }
     </style>
-    <div class="portal-shell">
+    <div class="portal-shell" id="portalShell">
         <aside class="org-sidebar">
-            <a class="org-brand" href="/Organizer/Index"><span class="brand-mark"><i class="fas fa-calendar-days"></i></span><span>Wuang<strong>Organizer</strong></span></a>
+            <a class="org-brand" href="/Organizer/Index" title="WuangOrganizer">
+                <span class="brand-mark"><i class="fas fa-calendar-days"></i></span>
+                <span>Wuang<strong>Organizer</strong></span>
+            </a>
             <nav class="org-nav">
                 @if (ViewBag.ActiveEventId != null)
                 {
-                    <a class="btn btn-sm btn-outline-light mb-3 text-start w-100 py-2 fw-semibold" href="/Organizer/SuKien" style="border-radius: 8px;">
-                        <i class="fas fa-arrow-left me-1"></i> Đổi sự kiện khác
+                    <a class="btn btn-sm btn-outline-light mb-3 text-start w-100 py-2 fw-semibold" href="/Organizer/SuKien" style="border-radius: 8px;" title="Đổi sự kiện khác">
+                        <i class="fas fa-arrow-left me-1"></i> <span>Đổi sự kiện khác</span>
                     </a>
                     
-                    <div class="active-event-card">
+                    <div class="active-event-card" title="Đang quản lý: @ViewBag.ActiveEventName">
                         <div class="card-label">Đang quản lý</div>
-                        <div class="card-name text-truncate" title="@ViewBag.ActiveEventName">@ViewBag.ActiveEventName</div>
+                        <div class="card-name text-truncate">@ViewBag.ActiveEventName</div>
                     </div>
                     
                     <span class="nav-label">Tính năng sự kiện</span>
-                    <a class="org-nav-item" href="/Organizer/ChiTietSuKien/@ViewBag.ActiveEventId"><i class="fas fa-info-circle"></i><span>Thông tin chung</span></a>
-                    <a class="org-nav-item" href="/Organizer/ChinhSuaSuKien/@ViewBag.ActiveEventId"><i class="fas fa-pen"></i><span>Sửa thông tin</span></a>
-                    <a class="org-nav-item" href="/Organizer/LoaiVe?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-ticket-simple"></i><span>Cấu hình loại vé</span></a>
-                    <a class="org-nav-item" href="/Organizer/SoDoChoNgoi?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-chair"></i><span>Sơ đồ chỗ ngồi</span></a>
-                    <a class="org-nav-item" href="/Organizer/MaGiamGia?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-tags"></i><span>Mã giảm giá</span></a>
-                    <a class="org-nav-item" href="/Organizer/QuanLyStaff?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-user-check"></i><span>Phân công soát vé</span></a>
-                    <a class="org-nav-item" href="/Organizer/DonHang?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-receipt"></i><span>Đơn hàng đặt vé</span></a>
-                    <a class="org-nav-item" href="/Organizer/KhachThamDu?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-users"></i><span>Khách tham dự</span></a>
-                    <a class="org-nav-item" href="/Organizer/BaoCao?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-chart-line"></i><span>Báo cáo doanh thu</span></a>
-                    <a class="org-nav-item" href="/Organizer/CheckIn?suKienId=@ViewBag.ActiveEventId"><i class="fas fa-qrcode"></i><span>Cổng soát vé check-in</span></a>
+                    <a class="org-nav-item" href="/Organizer/ChiTietSuKien/@ViewBag.ActiveEventId" title="Thông tin chung"><i class="fas fa-info-circle"></i><span>Thông tin chung</span></a>
+                    <a class="org-nav-item" href="/Organizer/ChinhSuaSuKien/@ViewBag.ActiveEventId" title="Sửa thông tin"><i class="fas fa-pen"></i><span>Sửa thông tin</span></a>
+                    <a class="org-nav-item" href="/Organizer/LoaiVe?suKienId=@ViewBag.ActiveEventId" title="Cấu hình loại vé"><i class="fas fa-ticket-simple"></i><span>Cấu hình loại vé</span></a>
+                    <a class="org-nav-item" href="/Organizer/SoDoChoNgoi?suKienId=@ViewBag.ActiveEventId" title="Sơ đồ chỗ ngồi"><i class="fas fa-chair"></i><span>Sơ đồ chỗ ngồi</span></a>
+                    <a class="org-nav-item" href="/Organizer/MaGiamGia?suKienId=@ViewBag.ActiveEventId" title="Mã giảm giá"><i class="fas fa-tags"></i><span>Mã giảm giá</span></a>
+                    <a class="org-nav-item" href="/Organizer/QuanLyStaff?suKienId=@ViewBag.ActiveEventId" title="Phân công soát vé"><i class="fas fa-user-check"></i><span>Phân công soát vé</span></a>
+                    <a class="org-nav-item" href="/Organizer/DonHang?suKienId=@ViewBag.ActiveEventId" title="Đơn hàng đặt vé"><i class="fas fa-receipt"></i><span>Đơn hàng đặt vé</span></a>
+                    <a class="org-nav-item" href="/Organizer/KhachThamDu?suKienId=@ViewBag.ActiveEventId" title="Khách tham dự"><i class="fas fa-users"></i><span>Khách tham dự</span></a>
+                    <a class="org-nav-item" href="/Organizer/BaoCao?suKienId=@ViewBag.ActiveEventId" title="Báo cáo doanh thu"><i class="fas fa-chart-line"></i><span>Báo cáo doanh thu</span></a>
+                    <a class="org-nav-item" href="/Organizer/CheckIn?suKienId=@ViewBag.ActiveEventId" title="Cổng soát vé check-in"><i class="fas fa-qrcode"></i><span>Cổng soát vé check-in</span></a>
                 }
                 else
                 {
                     <span class="nav-label">Quản lý</span>
-                    <a class="org-nav-item" href="/Organizer/Index"><i class="fas fa-chart-simple"></i><span>Thống kê hoạt động</span></a>
-                    <a class="org-nav-item" href="/Organizer/SuKien"><i class="fas fa-calendar-days"></i><span>Sự kiện của tôi</span></a>
-                    <a class="org-nav-item" href="/Organizer/NhanVienStaff"><i class="fas fa-user-gear"></i><span>Quản lý nhân sự soát vé</span></a>
+                    <a class="org-nav-item" href="/Organizer/Index" title="Thống kê hoạt động"><i class="fas fa-chart-simple"></i><span>Thống kê hoạt động</span></a>
+                    <a class="org-nav-item" href="/Organizer/SuKien" title="Sự kiện của tôi"><i class="fas fa-calendar-days"></i><span>Sự kiện của tôi</span></a>
+                    <a class="org-nav-item" href="/Organizer/NhanVienStaff" title="Quản lý nhân sự soát vé"><i class="fas fa-user-gear"></i><span>Quản lý nhân sự soát vé</span></a>
                 }
 
                 <span class="nav-label">Tài khoản</span>
-                <a class="org-nav-item" href="/Account/HoSo"><i class="fas fa-user"></i><span>Hồ sơ cá nhân</span></a>
-                <a class="org-nav-item" href="/"><i class="fas fa-house"></i><span>Trang chủ</span></a>
-                <form method="post" asp-controller="Account" asp-action="DangXuat"><button type="submit" class="org-nav-item border-0 w-100 text-start"><i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span></button></form>
+                <a class="org-nav-item" href="/Account/HoSo" title="Hồ sơ cá nhân"><i class="fas fa-user"></i><span>Hồ sơ cá nhân</span></a>
+                <a class="org-nav-item" href="/" title="Trang chủ"><i class="fas fa-house"></i><span>Trang chủ</span></a>
+                <form method="post" asp-controller="Account" asp-action="DangXuat">
+                    <button type="submit" class="org-nav-item border-0 w-100 text-start" title="Đăng xuất">
+                        <i class="fas fa-right-from-bracket"></i><span>Đăng xuất</span>
+                    </button>
+                </form>
             </nav>
         </aside>
         <div class="org-main">
-            <header class="org-header"><div><strong>Trang ban tổ chức</strong></div><div class="account-chip"><i class="fas fa-user"></i><span>@User.Identity?.Name</span></div></header>
+            <header class="org-header">
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" title="Thu gọn / Mở rộng menu">
+                        <i class="fas fa-bars-staggered"></i>
+                    </button>
+                    <strong>Trang ban tổ chức</strong>
+                </div>
+                <div class="account-chip">
+                    <i class="fas fa-user"></i>
+                    <span>@User.Identity?.Name</span>
+                </div>
+            </header>
             <main class="org-content-body">
                 @RenderBody()
             </main>
@@ -103,6 +121,23 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
+        // Khôi phục trạng thái thu gọn sidebar
+        (function() {
+            const shell = document.getElementById('portalShell');
+            if (localStorage.getItem('portal_sidebar_collapsed') === 'true') {
+                shell?.classList.add('sidebar-collapsed');
+            }
+        })();
+
+        // Xử lý toggle sidebar
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            const shell = document.getElementById('portalShell');
+            if (shell) {
+                shell.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('portal_sidebar_collapsed', shell.classList.contains('sidebar-collapsed'));
+            }
+        });
+
         const orgPath = window.location.pathname.toLowerCase();
         const urlParams = new URLSearchParams(window.location.search);
         
@@ -110,9 +145,7 @@
             const itemUrl = new URL(item.href, window.location.origin);
             const itemPath = itemUrl.pathname.toLowerCase();
             
-            // Check if pathname matches
             if (orgPath === itemPath) {
-                // If the link has suKienId parameter, make sure it matches the current request suKienId parameter
                 if (itemUrl.searchParams.has('suKienId')) {
                     if (urlParams.get('suKienId') === itemUrl.searchParams.get('suKienId')) {
                         item.classList.add('active');
@@ -121,7 +154,6 @@
                     item.classList.add('active');
                 }
             } else if (orgPath.startsWith(itemPath) && itemPath !== '/organizer' && itemPath !== '/') {
-                // Handle routes like /Organizer/ChiTietSuKien/guid or /Organizer/ChinhSuaSuKien/guid
                 if (!itemUrl.searchParams.has('suKienId')) {
                     item.classList.add('active');
                 }
